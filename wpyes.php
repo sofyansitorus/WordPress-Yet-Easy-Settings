@@ -3,7 +3,7 @@
 /**
  * Wpyes class.
  *
- * WordPress Yet Easy Settings class ias PHP class for easy to build wordpress admin settings page
+ * WordPress Yet Easy Settings class is PHP class for easy to build wordpress admin settings page
  *
  * @since      0.0.1
  * @package    Wpyes
