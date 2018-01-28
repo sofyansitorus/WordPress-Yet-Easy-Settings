@@ -1,190 +1,194 @@
 <?php
 /**
+ * The plugin bootstrap file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://github.com/sofyansitorus
+ * @since             1.0.0
+ * @package           Wpyes
+ *
  * Plugin Name:       Wpyes Example
- * Plugin URI:        http://www.sofyansitorus.com/wpyes/
+ * Plugin URI:        https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings
  * Description:       This is sample for how to use WordPress-Yet-Easy-Settings in a plugin.
  * Version:           1.0.0
  * Author:            Sofyan Sitorus
- * Author URI:        http://www.sofyansitorus.com
+ * Author URI:        https://github.com/sofyansitorus
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       wpyes
  * Domain Path:       /languages
  */
 
-class Wpyes_Example {
+/**
+ * Load plugin textdomain.
+ *
+ * @since 1.0.0
+ */
+function wpyes_example_load_textdomain() {
+	load_plugin_textdomain( 'wpyes_example', false, basename( dirname( __FILE__ ) ) . '/languages' );
+}
+add_action( 'plugins_loaded', 'wpyes_example_load_textdomain' );
 
-	/**
-	 * The ID of this plugin.
-	 */
-	private $plugin_slug;
+// Include the dependencies.
+if ( ! class_exists( 'Wpyes' ) ) {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpyes.php';
+}
 
+if ( ! function_exists( 'wpyes_example_init' ) ) {
 	/**
-	 * Initialize the class and set its properties.
+	 * Initialize the plugin.
 	 *
-	 * @since    1.0.0
-	 * @param      string $plugin_slug       The name of this plugin.
+	 * @since  1.0.0
+	 * @return void
 	 */
-	public function __construct( $plugin_slug ) {
+	function wpyes_example_init() {
 
-		$this->plugin_slug = $plugin_slug;
-		$this->load_dependencies();
-		$this->build_settings();
-
-	}
-
-	/**
-	 * Include the dependencies files
-	 */
-	private function load_dependencies() {
-		  /**
-		 * Include the wpyes setting class file
-		 */
-		 require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpyes.php';
-	}
-
-	/**
-	 * Get all the settings tabs
-	 *
-	 * @return array settings sections
-	 */
-	private function get_settings_tabs() {
-		$tabs = array(
+		$setting_tabs = array(
+			array(
+				'id'       => 'miscellaneous_settings',
+				'priority' => 20,
+				'label'    => __( 'Miscellaneous', 'wpyes_example' ),
+			),
 			array(
 				'id' => 'email_settings',
 			),
 		);
-		return $tabs;
-	}
 
-	/**
-	 * Get all the settings sections
-	 *
-	 * @return array settings sections
-	 */
-	private function get_settings_sections() {
-		$sections = array(
+		$sections_of_email_tab = array(
 			array(
 				'tab'   => 'email_settings',
 				'id'    => 'email_settings_sender',
-				'title' => __( 'Email Sender Options', $this->plugin_slug ),
+				'title' => __( 'Email Sender Options', 'wpyes_example' ),
 			),
 			array(
 				'tab'   => 'email_settings',
 				'id'    => 'email_settings_smtp',
-				'title' => __( 'SMTP Server Options', $this->plugin_slug ),
+				'title' => __( 'SMTP Server Options', 'wpyes_example' ),
 			),
 			array(
 				'tab'   => 'email_settings',
 				'id'    => 'email_settings_imap',
-				'title' => __( 'IMAP Server Options', $this->plugin_slug ),
+				'title' => __( 'IMAP Server Options', 'wpyes_example' ),
 			),
 		);
-		return $sections;
-	}
 
-	/**
-	 * Get all the settings fields
-	 *
-	 * @return array settings fields
-	 */
-	private function get_settings_fields() {
-		$fields = array(
+		$sections_of_miscellaneous_tab = array(
+			array(
+				'tab'   => 'miscellaneous_settings',
+				'id'    => 'email_settings_senderx',
+				'title' => __( 'Email Sender Options', 'wpyes_example' ),
+			),
+			array(
+				'tab'   => 'miscellaneous_settings',
+				'id'    => 'email_settings_smtpx',
+				'title' => __( 'SMTP Server Options', 'wpyes_example' ),
+			),
+			array(
+				'tab'   => 'miscellaneous_settings',
+				'id'    => 'email_settings_imapx',
+				'title' => __( 'IMAP Server Options', 'wpyes_example' ),
+			),
+		);
+
+		$fields_of_email_tab = array(
 			array(
 				'section'  => 'email_settings_sender',
 				'id'       => 'email_from_name',
-				'label'    => __( '"From" Name', $this->plugin_slug ),
+				'label'    => __( '"From" Name', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 10,
 			),
 			array(
 				'section'  => 'email_settings_sender',
 				'id'       => 'email_from_address',
-				'label'    => __( '"From" Email Address', $this->plugin_slug ),
+				'label'    => __( '"From" Email Address', 'wpyes_example' ),
 				'type'     => 'email',
 				'priority' => 20,
 			),
 			array(
 				'section'  => 'email_settings_smtp',
 				'id'       => 'smtp_server',
-				'label'    => __( 'SMTP Server', $this->plugin_slug ),
+				'label'    => __( 'SMTP Server', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 10,
 			),
 			array(
 				'section'  => 'email_settings_smtp',
 				'id'       => 'smtp_username',
-				'label'    => __( 'SMTP Username', $this->plugin_slug ),
+				'label'    => __( 'SMTP Username', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 20,
 			),
 			array(
 				'section'  => 'email_settings_smtp',
 				'id'       => 'smtp_password',
-				'label'    => __( 'SMTP Password', $this->plugin_slug ),
+				'label'    => __( 'SMTP Password', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 30,
 			),
 			array(
 				'section'  => 'email_settings_smtp',
 				'id'       => 'smtp_port',
-				'label'    => __( 'SMTP Port', $this->plugin_slug ),
+				'label'    => __( 'SMTP Port', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 40,
 			),
 			array(
 				'section'  => 'email_settings_imap',
 				'id'       => 'imap_server',
-				'label'    => __( 'IMAP Server', $this->plugin_slug ),
+				'label'    => __( 'IMAP Server', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 10,
 			),
 			array(
 				'section'  => 'email_settings_imap',
 				'id'       => 'imap_username',
-				'label'    => __( 'IMAP Username', $this->plugin_slug ),
+				'label'    => __( 'IMAP Username', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 20,
 			),
 			array(
 				'section'  => 'email_settings_imap',
 				'id'       => 'imap_password',
-				'label'    => __( 'IMAP Password', $this->plugin_slug ),
+				'label'    => __( 'IMAP Password', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 30,
 			),
 			array(
 				'section'  => 'email_settings_imap',
 				'id'       => 'imap_port',
-				'label'    => __( 'IMAP Port', $this->plugin_slug ),
+				'label'    => __( 'IMAP Port', 'wpyes_example' ),
 				'type'     => 'text',
 				'priority' => 40,
 			),
 		);
-		return $fields;
-	}
 
-	private function build_settings() {
+		$settings = new Wpyes( 'wpyes_example' ); // Initialize the Wpyes class.
 
-		$settings = new Wpyes( $this->plugin_name ); // Initialize the Wpyes class
+		$settings->add_tabs( $setting_tabs ); // Set the settings tabs.
 
-		$settings->add_tabs( $this->get_settings_tabs() ); // Set the settings tabs
+		$settings->add_sections( $sections_of_email_tab ); // Set the settings sections.
 
-		$settings->add_sections( $this->get_settings_sections() ); // Set the settings sections
+		$settings->add_sections( $sections_of_miscellaneous_tab ); // Set the settings sections.
 
-		$settings->add_fields( $this->get_settings_fields() ); // Set the settings fields
+		$settings->add_fields( $fields_of_email_tab ); // Set the settings fields.
 
-		// Set the admin page for the settings
+		// Set the admin page for the settings.
 		$settings->set_admin_page(
 			array(
-				'page_title' => 'Wpyes Settings Example',
-				'menu_title' => 'Wpyes Settings',
+				'page_title' => __( 'Wpyes Settings Example', 'wpyes_example' ),
+				'menu_title' => __( 'Wpyes Settings', 'wpyes_example' ),
 			)
 		);
 
-		$settings->init(); // Run the Wpyes class
+		$settings->init(); // Run the Wpyes class.
+
 	}
 
-}
+	wpyes_example_init();
 
-new Wpyes_Example( 'wpyes_example' );
+}// End if().
