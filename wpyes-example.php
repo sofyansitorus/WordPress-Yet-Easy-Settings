@@ -40,7 +40,7 @@ class Wpyes_Example {
 		  /**
 		 * Include the wpyes setting class file
 		 */
-		 require_once plugin_dir_path( __FILE__ ) . 'wpyes.php';
+		 require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpyes.php';
 	}
 
 	/**
