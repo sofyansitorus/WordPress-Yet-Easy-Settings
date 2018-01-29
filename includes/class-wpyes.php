@@ -1,10 +1,9 @@
 <?php
 /**
- * The file core settings class
+ * Core file for Wpyes Class.
  *
  * @link       https://github.com/sofyansitorus
  * @since      0.0.1
- *
  * @package    Wpyes
  */
 
@@ -21,7 +20,7 @@
 class Wpyes {
 
 	/**
-	 * Settings menu_slug.
+	 * Admin menu slug.
 	 *
 	 * @since 0.0.1
 	 * @var string
@@ -29,7 +28,7 @@ class Wpyes {
 	private $menu_slug;
 
 	/**
-	 * Settings menu_slug.
+	 * Admin menu arguments.
 	 *
 	 * @since 0.0.1
 	 * @var array
@@ -40,20 +39,20 @@ class Wpyes {
 	 * Setting field prefix.
 	 *
 	 * @since 0.0.1
-	 * @var boolean
+	 * @var bool
 	 */
 	private $setting_prefix;
 
 	/**
-	 * Settings data array.
+	 * Settings data.
 	 *
 	 * @since 0.0.1
 	 * @var array
 	 */
-	private $settings = array();
+	private $settings_data = array();
 
 	/**
-	 * Settings tabs array.
+	 * Settings tabs.
 	 *
 	 * @since 0.0.1
 	 * @var array
@@ -61,7 +60,7 @@ class Wpyes {
 	private $settings_tabs = array();
 
 	/**
-	 * Settings sections array.
+	 * Settings sections.
 	 *
 	 * @since 0.0.1
 	 * @var array
@@ -69,7 +68,7 @@ class Wpyes {
 	private $settings_sections = array();
 
 	/**
-	 * Settings fields array.
+	 * Settings fields.
 	 *
 	 * @since 0.0.1
 	 * @var array
@@ -104,20 +103,23 @@ class Wpyes {
 	 * Constructor
 	 *
 	 * @since 0.0.1
-	 * @param string $menu_slug Admin page menu slug.
-	 * @param array  $menu_args { Optional. Array of properties for the new field object. Default empty array.
-	 *  @type string          $method             Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page, add_theme_page, add_plugins_page
-	 *                                            add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page, add_pages_page, add_comments_page, add_submenu_page
+	 * @param string $menu_slug        The slug name to refer to this menu (should be unique).
+	 * @param array  $menu_args        { Optional. Array of properties for the new field object. Default empty array.
+	 *  @type string          $method             Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page,
+	 *                                            add_theme_page, add_plugins_page, add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page,
+	 *                                            add_pages_page, add_comments_page, add_submenu_page
 	 *                                            Default 'add_menu_page'.
-	 *  @type string          $capability         The capability required for this menu to be displayed to the user. Default 'manage_options'.
-	 *  @type string          $page_title         The text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
-	 *  @type string          $menu_title         The text to be used for the menu. Default $menu_slug property.
-	 *  @type callable        $callback           The function to be called to output the content for this page. Default Wpyes::render_form.
-	 *  @type string          $icon_url           The URL to the icon to be used for this menu. Default empty.
-	 *  @type integer         $position           The position in the menu order this one should appear. Default null.
-	 *  @type string          $parent_slug       The slug name for the parent menu. Required if $method add_submenu_page is used. Default empty.
+	 *  @type string          $capability         Capability required for this menu to be displayed to the user. Default 'manage_options'.
+	 *  @type string          $page_title         Text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
+	 *  @type string          $menu_title         Text to be used for the menu. Default $menu_slug property.
+	 *  @type callable        $callback           Function to be called to output the content for this page. Default Wpyes::render_form.
+	 *  @type string          $icon_url           URL to the icon to be used for this menu. Used when $method is 'add_menu_page'. Default empty.
+	 *  @type integer         $position           Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
+	 *  @type string          $parent_slug        Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
 	 * }
-	 * @param string $setting_prefix Setting field prefix. Default empty.
+	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
+	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'field_example_1'
+	 *                                 is get_option('wpyes_field_example_1'). Default empty.
 	 */
 	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
 
@@ -125,19 +127,36 @@ class Wpyes {
 		$this->menu_slug = sanitize_key( $menu_slug );
 
 		// Set the menu arguments property.
-		$this->menu_args = wp_parse_args(
+		$menu_args = wp_parse_args(
 			$menu_args,
 			array(
 				'method'      => 'add_menu_page',
 				'capability'  => 'manage_options',
-				'page_title'  => $this->humanize_slug( $this->menu_slug ),
-				'menu_title'  => $this->humanize_slug( $this->menu_slug ),
-				'callback'    => array( $this, 'render_form' ),
+				'page_title'  => '',
+				'menu_title'  => '',
+				'callback'    => '',
 				'icon_url'    => '',
 				'position'    => null,
 				'parent_slug' => '',
 			)
 		);
+
+		// Set page_title if empty and not false.
+		if ( empty( $menu_args['page_title'] ) && ! is_bool( $menu_args['page_title'] ) ) {
+			$menu_args['page_title'] = $this->humanize_slug( $this->menu_slug );
+		}
+
+		// Set menu_title if empty and not false.
+		if ( empty( $menu_args['menu_title'] ) && ! is_bool( $menu_args['menu_title'] ) ) {
+			$menu_args['menu_title'] = $this->humanize_slug( $this->menu_slug );
+		}
+
+		// Set menu_title if empty and not false.
+		if ( empty( $menu_args['callback'] ) || ! is_callable( $menu_args['callback'] ) ) {
+			$menu_args['callback'] = array( $this, 'render_form' );
+		}
+
+		$this->menu_args = $menu_args;
 
 		// Set the menu arguments property.
 		$this->setting_prefix = $setting_prefix;
@@ -147,11 +166,11 @@ class Wpyes {
 	 * Normalize settings tab property.
 	 *
 	 * @since 0.0.1
-	 * @param array $args { Optional. Array of properties for the new tab object. Default empty array.
+	 * @param array $args { Optional. Array of properties for the new tab object.
 	 *  @type string          $id              ID for the setting tab. Default empty.
 	 *  @type string          $label           Label for the setting tab. Default empty.
 	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
-	 *  @type integer         $priority        Setting tab position priority. Default 10.
+	 *  @type integer         $position        Setting tab position. Higher will displayed last. Default 10.
 	 * }
 	 * @return array Normalized setting tab property.
 	 */
@@ -162,11 +181,12 @@ class Wpyes {
 				'id'       => '',
 				'label'    => '',
 				'sections' => array(),
-				'priority' => 10,
+				'position' => 10,
 			)
 		);
 
-		if ( empty( $args['label'] ) ) {
+		// Create label if empty and not false.
+		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
 			$args['label'] = $this->humanize_slug( $args['id'] );
 		}
 
@@ -174,13 +194,13 @@ class Wpyes {
 	}
 
 	/**
-	 * Add settings tabs in bulk.
+	 * Register settings tabs in bulk.
 	 *
 	 * @since 0.0.1
-	 * @param array $tabs Setting tabs data in bulk.
+	 * @param array $tabs Indexed array of settings tab property.
 	 */
 	public function add_tabs( $tabs ) {
-		if ( is_array( $tabs ) ) {
+		if ( $tabs && is_array( $tabs ) ) {
 			foreach ( $tabs as $tab ) {
 				$this->add_tab( $tab );
 			}
@@ -188,41 +208,45 @@ class Wpyes {
 	}
 
 	/**
-	 * Add settings tab individually.
+	 * Register settings tab.
 	 *
 	 * @since 0.0.1
-	 * @param array $tab Setting tab property.
+	 * @param array $args { Optional. Array of properties for the new tab object.
+	 *  @type string          $id              ID for the setting tab. Default empty.
+	 *  @type string          $label           Label for the setting tab. Default empty.
+	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
+	 *  @type integer         $position        Setting tab position. Higher will displayed last. Default 10.
+	 * }
 	 */
-	public function add_tab( $tab ) {
-		$tab = $this->normalize_tab( $tab );
-		if ( ! empty( $tab['id'] ) ) {
-			$this->recent_tab      = $tab['id'];
-			$this->settings_tabs[] = $tab;
+	public function add_tab( $args ) {
+		$args = $this->normalize_tab( $args );
+		if ( ! empty( $args['id'] ) ) {
+			$this->recent_tab      = $args['id'];
+			$this->settings_tabs[] = $args;
 		}
 	}
 
 	/**
-	 * Get settings tabs registered.
+	 * Get settings tabs.
 	 *
 	 * @since 0.0.1
-	 * @return array All setting tabs registered.
+	 * @return array All registered setting tabs.
 	 */
 	private function get_tabs() {
 		$settings_tabs = $this->settings_tabs;
-		uasort( $settings_tabs, array( $this, 'sort_by_priority' ) );
+		uasort( $settings_tabs, array( $this, 'sort_by_position' ) );
 		return apply_filters( $this->menu_slug . '_settings_tabs', $settings_tabs );
 	}
 
 	/**
-	 * Render the settings tab
+	 * Render settings tab.
 	 *
 	 * @since 0.0.1
-	 * @param array  $tab Setting tab data.
-	 * @param string $tab_key Setting tab id.
+	 * @param array $tab Setting tab property.
 	 */
-	public function render_tab( $tab, $tab_key ) {
-		foreach ( $tab['sections'] as $section_key => $section ) {
-			do_settings_sections( $this->menu_slug . '_' . $tab_key . '_' . $section_key );
+	public function render_tab( $tab ) {
+		foreach ( $tab['sections'] as $section_id => $section ) {
+			do_settings_sections( $this->get_section_unique_id( $section ) );
 		}
 	}
 
@@ -230,41 +254,45 @@ class Wpyes {
 	 * Normalize settings section property.
 	 *
 	 * @since 0.0.1
-	 * @param array $args { Optional. Array of properties for the new section object. Default empty array.
+	 * @param array $args { Optional. Array of properties for the new section object.
 	 *  @type string          $id              ID for the setting section. Default empty.
 	 *  @type string          $label           Label for the setting section. Default empty.
 	 *  @type callable        $callback        A callback function that render the setting section.
 	 *  @type array           $fields          Setting fields that linked directly to the section. Default array().
-	 *  @type integer         $priority        Setting section position priority. Default 10.
+	 *  @type integer         $position        Setting section position. Higher will displayed last. Default 10.
 	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
 	 * }
 	 * @return array Normalized setting section property.
 	 */
 	private function normalize_section( $args ) {
-		$defaults = array(
-			'id'       => '',
-			'title'    => '',
-			'callback' => null,
-			'fields'   => array(),
-			'priority' => 10,
-			'tab'      => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+		$args = wp_parse_args(
+			$args,
+			array(
+				'id'       => '',
+				'title'    => '',
+				'callback' => null,
+				'fields'   => array(),
+				'position' => 10,
+				'tab'      => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+			)
 		);
 
+		// Create title if empty and not false.
 		if ( empty( $args['title'] ) && ! is_bool( $args['title'] ) ) {
 			$args['title'] = $this->humanize_slug( $args['id'] );
 		}
 
-		return wp_parse_args( $args, $defaults );
+		return $args;
 	}
 
 	/**
-	 * Add settings sections in bulk.
+	 * Register settings sections in bulk.
 	 *
 	 * @since 0.0.1
-	 * @param array $sections Setting sections data in bulk.
+	 * @param array $sections Indexed array of settings section property.
 	 */
 	public function add_sections( $sections ) {
-		if ( is_array( $sections ) ) {
+		if ( $sections && is_array( $sections ) ) {
 			foreach ( $sections as $section ) {
 				$this->add_section( $section );
 			}
@@ -272,40 +300,62 @@ class Wpyes {
 	}
 
 	/**
-	 * Add settings section individually.
+	 * Register settings section.
 	 *
 	 * @since 0.0.1
-	 * @param array $section Setting section property.
+	 * @param array $args { Optional. Array of properties for the new section object.
+	 *  @type string          $id              ID for the setting section. Default empty.
+	 *  @type string          $label           Label for the setting section. Default empty.
+	 *  @type callable        $callback        A callback function that render the setting section.
+	 *  @type array           $fields          Setting fields that linked directly to the section. Default array().
+	 *  @type integer         $position        Setting section position. Higher will displayed last. Default 10.
+	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
+	 * }
 	 */
-	public function add_section( $section ) {
-		$section = $this->normalize_section( $section );
-		if ( ! empty( $section['id'] ) ) {
-			$this->recent_section      = $section['id'];
-			$this->settings_sections[] = $section;
+	public function add_section( $args ) {
+		$args = $this->normalize_section( $args );
+		if ( ! empty( $args['id'] ) ) {
+			$this->recent_section      = $args['id'];
+			$this->settings_sections[] = $args;
 		}
 	}
 
 	/**
-	 * Get all settings sections registered.
+	 * Get settings sections.
 	 *
 	 * @since 0.0.1
-	 * @return array All settings sections registered.
+	 * @return array All registered settings sections.
 	 */
 	private function get_sections() {
 		$settings_sections = $this->settings_sections;
-		uasort( $settings_sections, array( $this, 'sort_by_priority' ) );
+		uasort( $settings_sections, array( $this, 'sort_by_position' ) );
 		return apply_filters( $this->menu_slug . '_settings_sections', $settings_sections );
+	}
+
+	/**
+	 * Get settings section unique ID.
+	 *
+	 * @since 0.0.1
+	 * @param array $section Setting section property.
+	 * @return string Unique ID of section object.
+	 */
+	private function get_section_unique_id( $section ) {
+		return $this->menu_slug . '_' . $section['tab'] . '_' . $section['id'];
 	}
 
 	/**
 	 * Normalize setting field properties
 	 *
 	 * @since 0.0.1
-	 * @param array $args { Optional. Array of properties for the new field object. Default empty array.
-	 *  @type string|callable $type               Type for the setting field or callable to render the setting field. Default 'text'.
+	 * @param array $args { Optional. Array of properties for the new field object.
+	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
+	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
+	 *                                            Default 'text'.
+	 *  @type string          $data_type          The type of data associated with this setting. Valid values are 'string', 'boolean', 'integer', and 'number'.
+	 *                                            Default 'string'.
 	 *  @type string          $id                 ID for the setting field. Default empty.
 	 *  @type string          $label              Label for the setting field. Default empty.
-	 *  @type string          $desc               Description for the setting field. Default empty.
+	 *  @type string          $description        Description for the setting field. Default empty.
 	 *  @type callable        $callback_before    Callback function that will be called before the setting field rendered. Default empty.
 	 *  @type callable        $callback_after     Callback function that will be called after the setting field rendered. Default empty.
 	 *  @type callable        $sanitize_callback  Callback function to sanitize setting field value. Default null.
@@ -313,69 +363,109 @@ class Wpyes {
 	 *  @type string          $default            Default value for the setting field. Default empty.
 	 *  @type array           $options            Setting field input options, a key value pair used for setting field type select, radio, checkbox. Default array().
 	 *  @type array           $attrs              Setting field input attributes. Default array().
-	 *  @type integer         $priority           Setting field position priority. Default 10.
+	 *  @type integer         $position           Setting field position. Highr will displayed last. Default 10.
+	 *  @type bool            $required           Set the setting field is required. Default false.
+	 *  @type bool            $show_in_rest       Whether data associated with this setting should be included in the REST API. Default false.
 	 * }
 	 */
 	private function normalize_field( $args ) {
 
-		$defaults = array(
-			'type'              => 'text',
-			'id'                => '',
-			'label'             => '',
-			'desc'              => '',
-			'callback_before'   => '',
-			'callback_after'    => '',
-			'sanitize_callback' => null,
-			'default'           => '',
-			'options'           => array(),
-			'attrs'             => array(),
-			'priority'          => 10,
-			'section'           => ! is_null( $this->recent_section ) ? $this->recent_section : '',
-			'tab'               => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+		$args = wp_parse_args(
+			$args,
+			array(
+				'type'              => 'text',
+				'data_type'         => 'string',
+				'id'                => '',
+				'label'             => '',
+				'description'       => '',
+				'callback_before'   => '',
+				'callback_after'    => '',
+				'sanitize_callback' => null,
+				'default'           => '',
+				'options'           => array(),
+				'attrs'             => array(),
+				'position'          => 10,
+				'section'           => ! is_null( $this->recent_section ) ? $this->recent_section : '',
+				'tab'               => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+				'required'          => false,
+				'show_in_rest'      => false,
+			)
 		);
 
+		// Set label if empty and not false.
 		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
 			$args['label'] = $this->humanize_slug( $args['id'] );
 		}
 
-		return wp_parse_args( $args, $defaults );
+		// Set data_type to 'integer' if empty and type is 'number'.
+		if ( empty( $args['data_type'] ) && 'number' === ( $args['type'] ) ) {
+			$args['data_type'] = 'integer';
+		}
+
+		// Set data_type to 'number' if empty and type is 'decimal'.
+		if ( empty( $args['data_type'] ) && 'decimal' === ( $args['type'] ) ) {
+			$args['data_type'] = 'number';
+		}
+
+		return $args;
 	}
 
 	/**
-	 * Add settings fields.
+	 * Register settings fields in bulk.
 	 *
 	 * @since 0.0.1
-	 * @param array $fields Add setting fields in bulk.
+	 * @param array $fields Indexed array of settings field property.
 	 */
 	public function add_fields( $fields ) {
-		if ( is_array( $fields ) ) {
+		if ( $fields && is_array( $fields ) ) {
 			foreach ( $fields as $field ) {
 				$this->add_field( $field );
 			}
 		}
-
-		return $this->get_fields();
 	}
 
 	/**
-	 * Add settings field individually.
+	 * Register settings field.
 	 *
 	 * @since 0.0.1
-	 * @param array $field Setting field property.
+	 * @param array $args { Optional. Array of properties for the new field object.
+	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
+	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
+	 *                                            Default 'text'.
+	 *  @type string          $data_type          The type of data associated with this setting. Valid values are 'string', 'boolean', 'integer', and 'number'.
+	 *                                            Default 'string'.
+	 *  @type string          $id                 ID for the setting field. Default empty.
+	 *  @type string          $label              Label for the setting field. Default empty.
+	 *  @type string          $description        Description for the setting field. Default empty.
+	 *  @type callable        $callback_before    Callback function that will be called before the setting field rendered. Default empty.
+	 *  @type callable        $callback_after     Callback function that will be called after the setting field rendered. Default empty.
+	 *  @type callable        $sanitize_callback  Callback function to sanitize setting field value. Default null.
+	 *  @type string          $section            Section ID for the setting field. Default empty.
+	 *  @type string          $default            Default value for the setting field. Default empty.
+	 *  @type array           $options            Setting field input options, a key value pair used for setting field type select, radio, checkbox. Default array().
+	 *  @type array           $attrs              Setting field input attributes. Default array().
+	 *  @type integer         $position           Setting field position. Highr will displayed last. Default 10.
+	 *  @type bool            $required           Set the setting field is required. Default false.
+	 *  @type bool            $show_in_rest       Whether data associated with this setting should be included in the REST API. Default false.
+	 * }
 	 */
-	public function add_field( $field ) {
-		$this->settings_fields[] = $this->normalize_field( $field );
+	public function add_field( $args ) {
+		$args = $this->normalize_field( $args );
+		if ( ! empty( $args['id'] ) ) {
+			$this->recent_field      = $args['id'];
+			$this->settings_fields[] = $args;
+		}
 	}
 
 	/**
-	 * Get all settings fields registered.
+	 * Get settings fields.
 	 *
 	 * @since 0.0.1
-	 * @return array  All settings fields registered.
+	 * @return array  All registered settings fields.
 	 */
 	private function get_fields() {
 		$settings_fields = $this->settings_fields;
-		uasort( $settings_fields, array( $this, 'sort_by_priority' ) );
+		uasort( $settings_fields, array( $this, 'sort_by_position' ) );
 		return apply_filters( $this->menu_slug . '_settings_fields', $settings_fields );
 	}
 
@@ -386,7 +476,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function get_field_id( $field ) {
-		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['section'] . '_' . $field['id'] : $field['section'] . '_' . $field['id'];
+		return implode( '_', array( $field['tab'], $field['section'], $field['id'] ) );
 	}
 
 	/**
@@ -410,37 +500,67 @@ class Wpyes {
 	}
 
 	/**
+	 * Get settings field label from DB.
+	 *
+	 * @since 0.0.1
+	 * @param string $field_id Setting field name.
+	 */
+	private function get_field_label( $field_id ) {
+		$field = isset( $this->settings_fields[ $field_id ] ) ? $this->settings_fields[ $field_id ] : array();
+		if ( isset( $field['label'] ) ) {
+			return $field['label'];
+		}
+		return $this->humanize_slug( $field_id );
+	}
+
+	/**
+	 * Get settings field by option name.
+	 *
+	 * @since 0.0.1
+	 * @param string $option_name Option name.
+	 */
+	private function get_field( $option_name ) {
+		return isset( $this->settings_fields[ $option_name ] ) ? $this->settings_fields[ $option_name ] : array();
+	}
+
+	/**
 	 * Get settings field attributes.
 	 *
 	 * @since 0.0.1
 	 * @param array $field Setting field property.
 	 */
-	private function render_field_attrs( $field ) {
+	private function field_attrs( $field ) {
 		switch ( $field['type'] ) {
 			case 'text':
 			case 'url':
 			case 'number':
 			case 'password':
 			case 'email':
-				if ( isset( $field['attrs']['class'] ) ) {
-					$field['attrs']['class'] .= ' regular-text';
-				} else {
+				if ( ! isset( $field['attrs']['class'] ) ) {
 					$field['attrs']['class'] = 'regular-text';
+				}
+				if ( false === strpos( $field['attrs']['class'], 'regular-text' ) ) {
+					$field['attrs']['class'] .= ' regular-text';
 				}
 				break;
 			case 'file':
-				if ( isset( $field['attrs']['class'] ) ) {
-					$field['attrs']['class'] .= ' regular-text';
-				} else {
+				if ( ! isset( $field['attrs']['class'] ) ) {
 					$field['attrs']['class'] = 'regular-text';
+				}
+				if ( false === strpos( $field['attrs']['class'], 'regular-text' ) ) {
+					$field['attrs']['class'] .= ' regular-text';
 				}
 				$field['attrs']['readonly'] = 'readonly';
 				break;
 			case 'color':
-				if ( isset( $field['attrs']['class'] ) ) {
-					$field['attrs']['class'] .= ' regular-text wp-color-picker-field';
-				} else {
-					$field['attrs']['class'] = 'regular-text wp-color-picker-field';
+				if ( ! isset( $field['attrs']['class'] ) ) {
+					$field['attrs']['class'] = 'regular-text wpyes-color-picker';
+				}
+				if ( false === strpos( $field['attrs']['class'], 'regular-text' ) ) {
+					$field['attrs']['class'] .= ' regular-text';
+				}
+				if ( false === strpos( $field['attrs']['class'], 'wpyes-color-picker' ) ) {
+					$field['attrs']['class'] .= ' wpyes-color-picker';
 				}
 				break;
 			case 'textarea':
@@ -451,16 +571,31 @@ class Wpyes {
 				if ( ! isset( $field['attrs']['cols'] ) ) {
 					$field['attrs']['cols'] = '50';
 				}
-
 				break;
 		}
 
+		if ( ! isset( $field['attrs']['class'] ) ) {
+			$field['attrs']['class'] = 'wpyes-field';
+		}
+
+		if ( false === strpos( $field['attrs']['class'], 'wpyes-field' ) ) {
+			$field['attrs']['class'] .= ' wpyes-field';
+		}
+
+		if ( is_string( $field['type'] ) ) {
+			if ( false === strpos( $field['attrs']['class'], 'wpyes-field-' . $field['type'] ) ) {
+				$field['attrs']['class'] .= ' wpyes-field-' . $field['type'];
+			}
+		}
+
+		// Remove core field attributes.
 		unset( $field['attrs']['id'] );
 		unset( $field['attrs']['name'] );
 		unset( $field['attrs']['value'] );
 		unset( $field['attrs']['type'] );
 		unset( $field['attrs']['checked'] );
 		unset( $field['attrs']['selected'] );
+		unset( $field['attrs']['multiple'] );
 
 		foreach ( $field['attrs'] as $key => $value ) {
 			echo esc_html( $key ) . '="' . esc_attr( $value ) . '" ';
@@ -478,7 +613,7 @@ class Wpyes {
 			call_user_func( $field['callback_before'], $field, $this );
 		}
 
-		if ( is_string( $field['type'] ) && method_exists( $this, 'render_field_' . $field['type'] ) ) {
+		if ( is_string( $field['type'] ) && is_callable( array( $this, 'render_field_' . $field['type'] ) ) ) {
 			call_user_func( array( $this, 'render_field_' . $field['type'] ), $field );
 		}
 
@@ -504,9 +639,9 @@ class Wpyes {
 		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
 		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
 		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
-		<?php $this->render_field_attrs( $field ); ?> />
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php $this->field_attrs( $field ); ?> />
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -532,6 +667,18 @@ class Wpyes {
 	}
 
 	/**
+	 * Render the setting field for decimal.
+	 *
+	 * @since 0.0.1
+	 * @param array $field Setting field property.
+	 */
+	private function render_field_decimal( $field ) {
+		$field['type']          = 'number';
+		$field['attrs']['step'] = 'any';
+		$this->render_field_text( $field );
+	}
+
+	/**
 	 * Render the setting field for password.
 	 *
 	 * @since 0.0.1
@@ -548,6 +695,16 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_email( $field ) {
+		$this->render_field_text( $field );
+	}
+
+	/**
+	 * Render the setting field for color.
+	 *
+	 * @since 0.0.1
+	 * @param array $field Setting field property.
+	 */
+	public function render_field_color( $field ) {
 		$this->render_field_text( $field );
 	}
 
@@ -569,8 +726,8 @@ class Wpyes {
 				name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
 				value="on" 
 				<?php checked( $this->get_field_value( $field ), 'on' ); ?>
-				<?php $this->render_field_attrs( $field ); ?> />
-				<?php echo esc_html( $field['desc'] ); ?>
+				<?php $this->field_attrs( $field ); ?> />
+				<?php echo esc_html( $field['description'] ); ?>
 			</label>
 		</fieldset>
 		<?php
@@ -595,13 +752,13 @@ class Wpyes {
 					name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" 
 					value="<?php echo esc_attr( $option_value ); ?>" 
 					<?php checked( in_array( $option_value, $value, true ), true ); ?>
-					<?php $this->render_field_attrs( $field ); ?> />
+					<?php $this->field_attrs( $field ); ?> />
 					<?php echo esc_html( $option_label ); ?>
 				</label>
 			<?php endforeach; ?>
 		</fieldset>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -625,13 +782,13 @@ class Wpyes {
 					name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
 					value="<?php echo esc_attr( $option_value ); ?>" 
 					<?php checked( $value, $option_value ); ?>
-					<?php $this->render_field_attrs( $field ); ?> />
+					<?php $this->field_attrs( $field ); ?> />
 					<?php echo esc_html( $option_label ); ?>
 				</label>
 			<?php endforeach; ?>
 		</fieldset>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -645,13 +802,33 @@ class Wpyes {
 	public function render_field_select( $field ) {
 		$value = $this->get_field_value( $field );
 		?>
-		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" <?php $this->render_field_attrs( $field ); ?>>
+		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" <?php $this->field_attrs( $field ); ?>>
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
 				<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( $value, $option_value ); ?>><?php echo esc_attr( $option_label ); ?></option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render the setting field for multiselect.
+	 *
+	 * @since 0.0.1
+	 * @param array $field Setting field property.
+	 */
+	public function render_field_multiselect( $field ) {
+		$value = $this->get_field_value( $field );
+		?>
+		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" multiple <?php $this->field_attrs( $field ); ?>>
+			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
+				<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( in_array( $option_value, $value, true ), true ); ?>><?php echo esc_attr( $option_label ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -667,10 +844,10 @@ class Wpyes {
 		<textarea 
 		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
 		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-		<?php $this->render_field_attrs( $field ); ?>
+		<?php $this->field_attrs( $field ); ?>
 		><?php echo esc_textarea( $this->get_field_value( $field ) ); ?></textarea>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -695,11 +872,11 @@ class Wpyes {
 
 		$width = isset( $field['width'] ) ? $field['width'] : '500px';
 		?>
-		<div style="max-width:<?php echo esc_attr( $width ); ?>;" <?php $this->render_field_attrs( $field ); ?>>
+		<div style="max-width:<?php echo esc_attr( $width ); ?>;" <?php $this->field_attrs( $field ); ?>>
 		<?php wp_editor( $this->get_field_value( $field ), $this->get_field_name( $field ), $editor_settings ); ?>
 		</div>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
@@ -717,33 +894,81 @@ class Wpyes {
 		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
 		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
 		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
-		<?php $this->render_field_attrs( $field ); ?> />
-		<button type="button" class="button button-browse-file"><span class="dashicons dashicons-upload"></span></button>
-		<button type="button" class="button button-remove-file"><span class="dashicons dashicons-trash"></span></button>
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
+		<?php $this->field_attrs( $field ); ?> />
+		<button type="button" class="button wpyes-browse-media"><span class="dashicons dashicons-upload"></span></button>
+		<button type="button" class="button wpyes-remove-media"><span class="dashicons dashicons-trash"></span></button>
+		<?php if ( ! empty( $field['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
 		<?php
 	}
 
 	/**
-	 * Render the setting field for color.
+	 * Validate setting field.
 	 *
 	 * @since 0.0.1
-	 * @param array $field Setting field property.
+	 *
+	 * @param string $value          The sanitized option value.
+	 * @param string $option         The option name.
+	 * @param string $original_value The original value passed to the function.
+	 *
+	 * @throws Exception Throw an exception if the field validation not passed.
 	 */
-	public function render_field_color( $field ) {
-		?>
-		<input 
-		type="text" 
-		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
-		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
-		<?php $this->render_field_attrs( $field ); ?> />
-		<?php if ( ! empty( $field['desc'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['desc'] ); ?></p>
-		<?php endif; ?>
-		<?php
+	public function validate_field( $value, $option, $original_value ) {
+		try {
+			$field = $this->get_field( $option );
+
+			if ( empty( $field ) ) {
+				return $value;
+			}
+
+			// Validate if field is required.
+			if ( $field['required'] && ! is_numeric( $value ) && empty( $value ) ) {
+				throw new Exception( __( 'Value can not be empty.', 'wpyes' ) );
+			}
+
+			// Validate by field type.
+			switch ( $field['type'] ) {
+
+				case 'email':
+					if ( ! is_email( $value ) ) {
+						throw new Exception( __( 'Value must be a valid email address.', 'wpyes' ) );
+					}
+					break;
+
+				case 'url':
+					if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
+						throw new Exception( __( 'Value must be a valid URL.', 'wpyes' ) );
+					}
+					break;
+
+				case 'number':
+					if ( $value > intval( $value ) || $value < intval( $value ) ) {
+						throw new Exception( __( 'Value must be an integer.', 'wpyes' ) );
+					}
+					$value = intval( $value );
+					break;
+
+				case 'decimal':
+					if ( ! is_numeric( $value ) ) {
+							throw new Exception( __( 'Value must be a number.', 'wpyes' ) );
+					}
+					break;
+			}
+		} catch ( Exception $e ) {
+
+			$label = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
+
+			add_settings_error(
+				$option,
+				$this->get_field_id( $field ),
+				sprintf( '%1$s: %2$s', $label, $e->getMessage() ),
+				'error'
+			);
+
+		}
+
+		return $value;
 	}
 
 	/**
@@ -753,11 +978,11 @@ class Wpyes {
 	 * @return array All settings data array.
 	 */
 	private function get_settings() {
-		return apply_filters( $this->menu_slug . '_settings', $this->settings );
+		return apply_filters( $this->menu_slug . '_settings', $this->settings_data );
 	}
 
 	/**
-	 * Initialize and build the settings sections and fileds
+	 * Initialize and build the settings tabs, sections and fileds.
 	 */
 	public function init() {
 
@@ -775,50 +1000,83 @@ class Wpyes {
 			$tabs = $this->get_tabs();
 		}
 
+		$this->settings_tabs = array();
 		foreach ( $tabs as $tab ) {
 			$settings[ $tab['id'] ] = $tab;
+
+			// Rebuild settings_tabs data for later use.
+			$this->settings_tabs[ $tab['id'] ] = $tab;
 		}
 
+		$this->settings_sections = array();
 		foreach ( $sections as $section ) {
+			if ( ! isset( $section['tab'] ) && $this->recent_tab ) {
+				$section['tab'] = $this->recent_tab;
+			}
 			if ( ! isset( $section['tab'] ) ) {
 				continue;
 			}
 			$settings[ $section['tab'] ]['sections'][ $section['id'] ] = $section;
+
+			// Rebuild settings_sections data for later use.
+			$this->settings_sections[ $this->get_section_unique_id( $section ) ] = $section;
 		}
 
+		$this->settings_fields = array();
 		foreach ( $fields as $field_key => $field ) {
+			if ( ! isset( $field['tab'] ) && $this->recent_tab ) {
+				$field['tab'] = $this->recent_tab;
+			}
+			if ( ! isset( $field['section'] ) && $this->recent_section ) {
+				$field['section'] = $this->recent_section;
+			}
 			if ( ! isset( $field['tab'] ) || ! isset( $field['section'] ) ) {
 				continue;
 			}
 			$settings[ $field['tab'] ]['sections'][ $field['section'] ]['fields'][ $field['id'] ] = $field;
+
+			// Rebuild settings_fields data for later use.
+			$this->settings_fields[ $this->get_field_name( $field ) ] = $field;
 		}
 
-		$this->settings = $settings;
+		$this->settings_data = $settings;
+
+		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
+
+		add_action( 'admin_menu', array( $this, 'admin_menu' ), 10 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
 		add_action( 'admin_print_footer_scripts', array( $this, 'admin_footer_js' ) );
 
-		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
-
-		add_action( 'admin_menu', array( $this, 'admin_menu' ), 10 );
 	}
 
 	/**
 	 * Registers the settings sections and fileds to WordPress
+	 *
+	 * This function is hooked into admin_init.
 	 */
 	public function register_settings() {
 		$settings = $this->get_settings();
 		foreach ( $settings as $tab_key => $tab ) {
 			foreach ( $tab['sections'] as $section_key => $section ) {
-				$section_unique_id = $this->menu_slug . '_' . $tab_key . '_' . $section_key;
+				$section_unique_id = $this->get_section_unique_id( $section );
 				add_settings_section( $section_unique_id, $section['title'], $section['callback'], $section_unique_id );
 				foreach ( $section['fields'] as $field_key => $field ) {
-					add_settings_field( $this->get_field_name( $field ), $field['label'], array( $this, 'render_field' ), $section_unique_id, $section_unique_id, $field );
-					register_setting( $this->menu_slug, $this->get_field_name( $field ), $field['sanitize_callback'] );
+					$option_name = $this->get_field_name( $field );
+					add_settings_field( $option_name, $field['label'], array( $this, 'render_field' ), $section_unique_id, $section_unique_id, $field );
+					$register_setting_args = array(
+						'type'              => $field['data_type'],
+						'group'             => $this->menu_slug,
+						'description'       => $field['description'],
+						'sanitize_callback' => $field['sanitize_callback'],
+						'show_in_rest'      => $field['show_in_rest'],
+					);
+					register_setting( $this->menu_slug, $option_name, $register_setting_args );
+					add_filter( "sanitize_option_{$option_name}", array( $this, 'validate_field' ), 10, 3 );
 				}
 			}
-			add_action( $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ), 10, 2 );
+			add_action( $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ) );
 		}
 	}
 
@@ -829,31 +1087,67 @@ class Wpyes {
 	 */
 	public function admin_menu() {
 
-		switch ( $this->menu_args['method'] ) {
+		$allowed = array(
+			'add_menu_page',
+			'add_management_page',
+			'add_options_page',
+			'add_theme_page',
+			'add_plugins_page',
+			'add_users_page',
+			'add_dashboard_page',
+			'add_posts_page',
+			'add_media_page',
+			'add_links_page',
+			'add_pages_page',
+			'add_comments_page',
+			'add_submenu_page',
+		);
+
+		$args = $this->menu_args;
+
+		if ( ! in_array( $args['method'], $allowed, true ) ) {
+			$args['method'] = 'add_menu_page';
+		}
+
+		switch ( $args['method'] ) {
 			case 'add_submenu_page':
-				if ( ! empty( $this->menu_args['parent_slug'] ) ) {
-					call_user_func(
-						$this->menu_args['method'],
-						$this->menu_args['parent_slug'],
-						$this->menu_args['page_title'],
-						$this->menu_args['menu_title'],
-						$this->menu_args['capability'],
-						$this->menu_slug,
-						$this->menu_args['callback']
-					);
+				if ( empty( $args['parent_slug'] ) ) {
+					$args['parent_slug'] = 'options-general.php';
 				}
+
+				call_user_func(
+					$args['method'],
+					$args['parent_slug'],
+					$args['page_title'],
+					$args['menu_title'],
+					$args['capability'],
+					$this->menu_slug,
+					$args['callback']
+				);
+
+				break;
+
+			case 'add_menu_page':
+				call_user_func(
+					$args['method'],
+					$args['page_title'],
+					$args['menu_title'],
+					$args['capability'],
+					$this->menu_slug,
+					$args['callback'],
+					$args['icon_url'],
+					$args['position']
+				);
 				break;
 
 			default:
 				call_user_func(
-					$this->menu_args['method'],
-					$this->menu_args['page_title'],
-					$this->menu_args['menu_title'],
-					$this->menu_args['capability'],
+					$args['method'],
+					$args['page_title'],
+					$args['menu_title'],
+					$args['capability'],
 					$this->menu_slug,
-					$this->menu_args['callback'],
-					$this->menu_args['icon_url'],
-					$this->menu_args['position']
+					$args['callback']
 				);
 				break;
 		}
@@ -863,27 +1157,34 @@ class Wpyes {
 	 * Render the settings form.
 	 */
 	public function render_form() {
-
 		$settings = $this->get_settings();
 		?>
-		<div class="wrap">
-			<h1><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
-			<h2 class="nav-tab-wrapper">
-			<?php foreach ( $settings as $tab_key => $tab ) : ?>
-			<a href="#<?php echo esc_attr( $tab_key ); ?>" class="nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
-			<?php endforeach; ?>
-			</h2>
-			<form method="post" action="options.php">
+		<div class="wrap wpyes-wrap">
+			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
+				<h1><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+			<?php endif; ?>
+			<?php settings_errors(); ?>
+			<?php if ( 0 < count( $settings ) ) : ?>
 				<div class="metabox-holder">
+					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
+						<?php foreach ( $settings as $tab_key => $tab ) : ?>
+						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wpyes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
+						<?php endforeach; ?>
+					</h2>
+				</div>
+				<div class"clear"></div>
+			<?php endif; ?>
+			<form method="post" action="options.php">
+				<div class="wpyes-tab-wrapper metabox-holder">
 					<?php foreach ( $settings as $tab_key => $tab ) : ?>
-						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="group">
-							<?php do_action( $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab, $tab_key ); ?>
-							<?php do_action( $this->menu_slug . '_setting_tab_' . $tab_key, $tab, $tab_key ); ?>
-							<?php do_action( $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab, $tab_key ); ?>
+						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wpyes-tab-group">
+							<?php do_action( $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab ); ?>
+							<?php do_action( $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
+							<?php do_action( $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab ); ?>
 						</div>
 					<?php endforeach; ?>
 				</div>
-				<div style="padding-left: 10px">
+				<div class="wpyes-button-wrapper">
 					<?php settings_fields( $this->menu_slug ); ?>
 					<?php submit_button(); ?>
 				</div>
@@ -893,97 +1194,9 @@ class Wpyes {
 	}
 
 	/**
-	 * Print scripts needed to initiate Color Picker & Tab element.
-	 *
-	 * @since 0.0.1
-	 */
-	public function admin_footer_js() {
-		$screen = get_current_screen();
-		if ( ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
-			return;
-		}
-		?>
-		<script>
-			(function($) {
-				$(document).ready(function($) {
-					//Initiate Color Picker
-					$('.wp-color-picker-field').wpColorPicker();
-
-					// Switches option sections
-					$('.group').hide();
-					var activetab = '';
-					if (typeof(localStorage) != 'undefined') {
-						activetab = localStorage.getItem("activetab");
-					}
-					if (activetab != '' && $(activetab).length) {
-						$(activetab).fadeIn();
-					} else {
-						$('.group:first').fadeIn();
-					}
-					$('.group .collapsed').each(function() {
-						$(this).find('input:checked').parent().parent().parent().nextAll().each(
-							function() {
-								if ($(this).hasClass('last')) {
-									$(this).removeClass('hidden');
-									return false;
-								}
-								$(this).filter('.hidden').removeClass('hidden');
-							});
-					});
-
-					if (activetab != '' && $(activetab + '-tab').length) {
-						$(activetab + '-tab').addClass('nav-tab-active');
-					} else {
-						$('.nav-tab-wrapper a:first').addClass('nav-tab-active');
-					}
-					$('.nav-tab-wrapper a').click(function(e) {
-						e.preventDefault();
-						$('.nav-tab-wrapper a').removeClass('nav-tab-active');
-						$(this).addClass('nav-tab-active').blur();
-						var clicked_group = $(this).attr('href');
-						if (typeof(localStorage) != 'undefined') {
-							localStorage.setItem("activetab", $(this).attr('href'));
-						}
-						$('.group').hide();
-						$(clicked_group).fadeIn();
-					});
-
-					// Media file browser.
-					$('.button-browse-file').on('click', function(e) {
-						e.preventDefault();
-
-						var self = $(this);
-
-						// Create the media frame.
-						var file_frame = wp.media.frames.file_frame = wp.media({
-							multiple: false
-						});
-
-						file_frame.on('select', function() {
-							attachment = file_frame.state().get('selection').first().toJSON();
-							self.closest('td').find('input[type="text"]').val(attachment.url);
-						});
-
-						// Finally, open the modal
-						file_frame.open();
-					});
-
-					// Remove file from input.
-					$('.button-remove-file').on('click', function(e) {
-						e.preventDefault();
-						$(this).closest('td').find('input[type="text"]').val('');
-					});
-				});
-			})(jQuery);
-		</script>
-		<?php
-
-		// Do custom action hook to print scripts needed.
-		do_action( $this->menu_slug . '_admin_footer_js', $screen, $this );
-	}
-
-	/**
 	 * Enqueue scripts and styles for the setting page.
+	 *
+	 * This function is hooked into admin_enqueue_scripts.
 	 *
 	 * @since    0.0.1
 	 * @param string $hook Current admin page slug loaded.
@@ -1003,16 +1216,137 @@ class Wpyes {
 	}
 
 	/**
-	 * Sort array by priority
+	 * Print scripts needed to initiate Color Picker & Tab element.
+	 *
+	 * This function is hooked into admin_print_footer_scripts.
+	 *
+	 * @since 0.0.1
+	 */
+	public function admin_footer_js() {
+
+		$screen = get_current_screen();
+
+		if ( ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
+			return;
+		}
+		?>
+		<script>
+			(function($) {
+				"use strict";
+
+				$(document).ready(function($) {
+
+					// Initiate color picker.
+					$(".wpyes-color-picker").wpColorPicker();
+
+					// Initiate tabs.
+					$(".wpyes-tab-group").hide();
+
+					var activetab = "";
+
+					if (typeof localStorage != "undefined") {
+						activetab = localStorage.getItem("activetab");
+					}
+
+					if (activetab != "" && $(activetab).length) {
+						$(activetab).fadeIn();
+					} else {
+						$(".wpyes-tab-group:first").fadeIn();
+					}
+
+					if (activetab != "" && $(activetab + "-tab").length) {
+						$(activetab + "-tab").addClass("nav-tab-active");
+					} else {
+						$(".wpyes-nav-tab-wrapper a:first").addClass("nav-tab-active");
+					}
+
+					$(".wpyes-nav-tab-wrapper a").click(function(e) {
+						e.preventDefault();
+
+						$(".wpyes-nav-tab-wrapper a").removeClass("nav-tab-active");
+
+						$(this)
+							.addClass("nav-tab-active")
+							.blur();
+
+						var clicked_group = $(this).attr("href");
+
+						if (typeof localStorage != "undefined") {
+							localStorage.setItem("activetab", $(this).attr("href"));
+						}
+
+						$(".wpyes-tab-group").hide();
+
+						$(clicked_group).fadeIn();
+					});
+
+					// Media file browser.
+					$(".wpyes-browse-media").on("click", function(e) {
+						e.preventDefault();
+
+						var self = $(this);
+
+						// Create the media frame.
+						var file_frame = (wp.media.frames.file_frame = wp.media({
+							multiple: false
+						}));
+
+						file_frame.on("select", function() {
+
+							attachment = file_frame
+								.state()
+								.get("selection")
+								.first()
+								.toJSON();
+
+							self
+								.closest("td")
+								.find('input[type="text"]')
+								.val(attachment.url);
+
+						});
+
+						// Finally, open the modal
+						file_frame.open();
+					});
+
+					// Remove file from input.
+					$(".wpyes-remove-media").on("click", function(e) {
+						e.preventDefault();
+
+						$(this)
+							.closest("td")
+							.find('input[type="text"]')
+							.val("");
+					});
+
+					$('.error.settings-error').each(function(index, elem){
+						var elem_id = $(elem).attr('id').replace('setting-error-', '');
+						var elem_tab = $('#' + elem_id).closest('.wpyes-tab-group');
+						if(elem_tab.length){
+							$('a.wpyes-nav-tab[href*=#' + elem_tab.attr('id') + ']').trigger('click');
+						}
+					});
+				});
+			})(jQuery);
+		</script>
+		<?php
+
+		// Do custom action hook to print scripts needed.
+		do_action( $this->menu_slug . '_admin_footer_js', $screen, $this );
+	}
+
+	/**
+	 * Sort array by position
 	 *
 	 * @since    0.0.1
 	 * @param array $a First index of the array.
 	 * @param array $b Compared array.
 	 * @return integer
 	 */
-	private function sort_by_priority( $a, $b ) {
-		$a = isset( $a['priority'] ) ? (int) $a['priority'] : 10;
-		$b = isset( $b['priority'] ) ? (int) $b['priority'] : 10;
+	private function sort_by_position( $a, $b ) {
+		$a = isset( $a['position'] ) ? (int) $a['position'] : 10;
+		$b = isset( $b['position'] ) ? (int) $b['position'] : 10;
 
 		if ( $a === $b ) {
 			return 0;
@@ -1026,7 +1360,7 @@ class Wpyes {
 	 *
 	 * @since 0.0.1
 	 * @param string $slug Slug string that will be humanized.
-	 * @return string
+	 * @return string Humanized text.
 	 */
 	private function humanize_slug( $slug ) {
 
