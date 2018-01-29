@@ -21,20 +21,28 @@
 class Wpyes {
 
 	/**
-	 * Settings prefix.
+	 * Settings menu_slug.
 	 *
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $prefix;
+	private $menu_slug;
 
 	/**
-	 * Auto prefix setting state.
+	 * Settings menu_slug.
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
+	private $menu_args;
+
+	/**
+	 * Setting field prefix.
 	 *
 	 * @since 0.0.1
 	 * @var boolean
 	 */
-	private $auto_prefix;
+	private $setting_prefix;
 
 	/**
 	 * Settings data array.
@@ -69,46 +77,70 @@ class Wpyes {
 	private $settings_fields = array();
 
 	/**
-	 * Settings menu page
+	 * Recent tab id registered.
 	 *
 	 * @since 0.0.1
-	 * @var array
+	 * @var string
 	 */
-	private $admin_menus = array();
+	private $recent_tab;
+
+	/**
+	 * Recent section id registered.
+	 *
+	 * @since 0.0.1
+	 * @var string
+	 */
+	private $recent_section;
+
+	/**
+	 * Recent field id registered.
+	 *
+	 * @since 0.0.1
+	 * @var string
+	 */
+	private $recent_field;
 
 	/**
 	 * Constructor
 	 *
 	 * @since 0.0.1
-	 * @param string  $prefix Setting prefix parameter.
-	 * @param boolean $auto_prefix If true, the setting field key will be prepended with prefix parameter. Default true.
+	 * @param string $menu_slug Admin page menu slug.
+	 * @param array  $menu_args { Optional. Array of properties for the new field object. Default empty array.
+	 *  @type string          $method             Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page, add_theme_page, add_plugins_page
+	 *                                            add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page, add_pages_page, add_comments_page, add_submenu_page
+	 *                                            Default 'add_menu_page'.
+	 *  @type string          $capability         The capability required for this menu to be displayed to the user. Default 'manage_options'.
+	 *  @type string          $page_title         The text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
+	 *  @type string          $menu_title         The text to be used for the menu. Default $menu_slug property.
+	 *  @type callable        $callback           The function to be called to output the content for this page. Default Wpyes::render_form.
+	 *  @type string          $icon_url           The URL to the icon to be used for this menu. Default empty.
+	 *  @type integer         $position           The position in the menu order this one should appear. Default null.
+	 *  @type string          $parent_slug       The slug name for the parent menu. Required if $method add_submenu_page is used. Default empty.
+	 * }
+	 * @param string $setting_prefix Setting field prefix. Default empty.
 	 */
-	public function __construct( $prefix, $auto_prefix = true ) {
-		$this->prefix      = $prefix;
-		$this->auto_prefix = $auto_prefix;
-	}
+	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
 
-	/**
-	 * Get settings tabs, sections and fields as associative array array
-	 *
-	 * @since 0.0.1
-	 * @param string $menu_slug Current menu page loaded.
-	 * @return array All settings data array.
-	 */
-	private function get_settings( $menu_slug = null ) {
+		// Set the menu slug property.
+		$this->menu_slug = sanitize_key( $menu_slug );
 
-		if ( $menu_slug && is_string( $menu_slug ) ) {
-			$settings = array();
-			foreach ( $this->settings as $tab_key => $tab ) {
-				if ( $tab['menu_slug'] === $menu_slug || ( empty( $tab['menu_slug'] ) && $menu_slug === $this->prefix ) ) {
-					$settings[ $tab_key ] = $tab;
-				}
-			}
-			return apply_filters( 'wpyes_settings_' . $menu_slug, $settings );
-		}
+		// Set the menu arguments property.
+		$this->menu_args = wp_parse_args(
+			$menu_args,
+			array(
+				'method'      => 'add_menu_page',
+				'capability'  => 'manage_options',
+				'page_title'  => $this->humanize_slug( $this->menu_slug ),
+				'menu_title'  => $this->humanize_slug( $this->menu_slug ),
+				'callback'    => array( $this, 'render_form' ),
+				'icon_url'    => '',
+				'position'    => null,
+				'parent_slug' => '',
+			)
+		);
 
-		return apply_filters( 'wpyes_settings', $this->settings );
-
+		// Set the menu arguments property.
+		$this->setting_prefix = $setting_prefix;
 	}
 
 	/**
@@ -120,19 +152,17 @@ class Wpyes {
 	 *  @type string          $label           Label for the setting tab. Default empty.
 	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
 	 *  @type integer         $priority        Setting tab position priority. Default 10.
-	 *  @type string          $menu_slug       Menu slug that will be used to show the tab. Default empty.
 	 * }
 	 * @return array Normalized setting tab property.
 	 */
 	private function normalize_tab( $args ) {
-
 		$args = wp_parse_args(
-			$args, array(
-				'id'        => '',
-				'label'     => '',
-				'sections'  => array(),
-				'priority'  => 10,
-				'menu_slug' => '',
+			$args,
+			array(
+				'id'       => '',
+				'label'    => '',
+				'sections' => array(),
+				'priority' => 10,
 			)
 		);
 
@@ -164,11 +194,10 @@ class Wpyes {
 	 * @param array $tab Setting tab property.
 	 */
 	public function add_tab( $tab ) {
-
 		$tab = $this->normalize_tab( $tab );
-
 		if ( ! empty( $tab['id'] ) ) {
-			$this->settings_tabs[ $tab['id'] ] = $tab;
+			$this->recent_tab      = $tab['id'];
+			$this->settings_tabs[] = $tab;
 		}
 	}
 
@@ -181,7 +210,7 @@ class Wpyes {
 	private function get_tabs() {
 		$settings_tabs = $this->settings_tabs;
 		uasort( $settings_tabs, array( $this, 'sort_by_priority' ) );
-		return apply_filters( 'wpyes_settings_tabs', $settings_tabs );
+		return apply_filters( $this->menu_slug . '_settings_tabs', $settings_tabs );
 	}
 
 	/**
@@ -193,7 +222,7 @@ class Wpyes {
 	 */
 	public function render_tab( $tab, $tab_key ) {
 		foreach ( $tab['sections'] as $section_key => $section ) {
-			do_settings_sections( $tab_key . '_' . $section_key );
+			do_settings_sections( $this->menu_slug . '_' . $tab_key . '_' . $section_key );
 		}
 	}
 
@@ -206,8 +235,8 @@ class Wpyes {
 	 *  @type string          $label           Label for the setting section. Default empty.
 	 *  @type callable        $callback        A callback function that render the setting section.
 	 *  @type array           $fields          Setting fields that linked directly to the section. Default array().
-	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
 	 *  @type integer         $priority        Setting section position priority. Default 10.
+	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
 	 * }
 	 * @return array Normalized setting section property.
 	 */
@@ -217,9 +246,13 @@ class Wpyes {
 			'title'    => '',
 			'callback' => null,
 			'fields'   => array(),
-			'tab'      => '',
 			'priority' => 10,
+			'tab'      => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
 		);
+
+		if ( empty( $args['title'] ) && ! is_bool( $args['title'] ) ) {
+			$args['title'] = $this->humanize_slug( $args['id'] );
+		}
 
 		return wp_parse_args( $args, $defaults );
 	}
@@ -245,13 +278,11 @@ class Wpyes {
 	 * @param array $section Setting section property.
 	 */
 	public function add_section( $section ) {
-
 		$section = $this->normalize_section( $section );
-
 		if ( ! empty( $section['id'] ) ) {
-			$this->settings_sections[ $section['id'] ] = $section;
+			$this->recent_section      = $section['id'];
+			$this->settings_sections[] = $section;
 		}
-
 	}
 
 	/**
@@ -263,7 +294,7 @@ class Wpyes {
 	private function get_sections() {
 		$settings_sections = $this->settings_sections;
 		uasort( $settings_sections, array( $this, 'sort_by_priority' ) );
-		return apply_filters( 'wpyes_settings_sections', $settings_sections );
+		return apply_filters( $this->menu_slug . '_settings_sections', $settings_sections );
 	}
 
 	/**
@@ -295,15 +326,19 @@ class Wpyes {
 			'callback_before'   => '',
 			'callback_after'    => '',
 			'sanitize_callback' => null,
-			'section'           => '',
 			'default'           => '',
 			'options'           => array(),
 			'attrs'             => array(),
 			'priority'          => 10,
+			'section'           => ! is_null( $this->recent_section ) ? $this->recent_section : '',
+			'tab'               => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
 		);
 
-		return wp_parse_args( $args, $defaults );
+		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
+			$args['label'] = $this->humanize_slug( $args['id'] );
+		}
 
+		return wp_parse_args( $args, $defaults );
 	}
 
 	/**
@@ -313,7 +348,6 @@ class Wpyes {
 	 * @param array $fields Add setting fields in bulk.
 	 */
 	public function add_fields( $fields ) {
-
 		if ( is_array( $fields ) ) {
 			foreach ( $fields as $field ) {
 				$this->add_field( $field );
@@ -330,14 +364,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	public function add_field( $field ) {
-
-		$field = $this->normalize_field( $field );
-
-		if ( ! empty( $field['id'] ) ) {
-			$this->settings_fields[ $field['id'] ] = $field;
-		}
-
-		return $this->get_fields();
+		$this->settings_fields[] = $this->normalize_field( $field );
 	}
 
 	/**
@@ -349,7 +376,7 @@ class Wpyes {
 	private function get_fields() {
 		$settings_fields = $this->settings_fields;
 		uasort( $settings_fields, array( $this, 'sort_by_priority' ) );
-		return apply_filters( 'wpyes_settings_fields', $settings_fields );
+		return apply_filters( $this->menu_slug . '_settings_fields', $settings_fields );
 	}
 
 	/**
@@ -359,10 +386,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function get_field_id( $field ) {
-
-		$field_id = $field['section'] . '_' . $field['id'];
-
-		return $this->auto_prefix ? $this->prefix . '_' . $field_id : $field_id;
+		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['section'] . '_' . $field['id'] : $field['section'] . '_' . $field['id'];
 	}
 
 	/**
@@ -372,7 +396,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function get_field_name( $field ) {
-		return $this->auto_prefix ? $this->prefix . '_' . $field['id'] : $field['id'];
+		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['id'] : $field['id'];
 	}
 
 	/**
@@ -392,7 +416,6 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function render_field_attrs( $field ) {
-
 		switch ( $field['type'] ) {
 			case 'text':
 			case 'url':
@@ -451,7 +474,6 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	public function render_field( $field ) {
-
 		if ( ! empty( $field['callback_before'] ) && is_callable( $field['callback_before'] ) ) {
 			call_user_func( $field['callback_before'], $field, $this );
 		}
@@ -467,7 +489,6 @@ class Wpyes {
 		if ( ! empty( $field['callback_after'] ) && is_callable( $field['callback_after'] ) ) {
 			call_user_func( $field['callback_after'], $field, $this );
 		}
-
 	}
 
 	/**
@@ -661,7 +682,6 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_wysiwyg( $field ) {
-
 		$editor_settings = array(
 			'teeny'         => true,
 			'media_buttons' => false,
@@ -727,27 +747,53 @@ class Wpyes {
 	}
 
 	/**
+	 * Get settings tabs, sections and fields as associative array array
+	 *
+	 * @since 0.0.1
+	 * @return array All settings data array.
+	 */
+	private function get_settings() {
+		return apply_filters( $this->menu_slug . '_settings', $this->settings );
+	}
+
+	/**
 	 * Initialize and build the settings sections and fileds
 	 */
 	public function init() {
 
+		$settings = array();
 		$tabs     = $this->get_tabs();
 		$sections = $this->get_sections();
 		$fields   = $this->get_fields();
 
+		if ( empty( $tabs ) ) {
+			$this->add_tab(
+				array(
+					'id' => $this->menu_slug,
+				)
+			);
+			$tabs = $this->get_tabs();
+		}
+
+		foreach ( $tabs as $tab ) {
+			$settings[ $tab['id'] ] = $tab;
+		}
+
+		foreach ( $sections as $section ) {
+			if ( ! isset( $section['tab'] ) ) {
+				continue;
+			}
+			$settings[ $section['tab'] ]['sections'][ $section['id'] ] = $section;
+		}
+
 		foreach ( $fields as $field_key => $field ) {
-			if ( isset( $field['section'] ) && isset( $sections[ $field['section'] ] ) ) {
-				$sections[ $field['section'] ]['fields'][ $field_key ] = $field;
+			if ( ! isset( $field['tab'] ) || ! isset( $field['section'] ) ) {
+				continue;
 			}
+			$settings[ $field['tab'] ]['sections'][ $field['section'] ]['fields'][ $field['id'] ] = $field;
 		}
 
-		foreach ( $sections as $section_key => $section ) {
-			if ( isset( $section['tab'] ) && isset( $tabs[ $section['tab'] ] ) ) {
-				$tabs[ $section['tab'] ]['sections'][ $section_key ] = $section;
-			}
-		}
-
-		$this->settings = $tabs;
+		$this->settings = $settings;
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
@@ -762,55 +808,18 @@ class Wpyes {
 	 * Registers the settings sections and fileds to WordPress
 	 */
 	public function register_settings() {
-
 		$settings = $this->get_settings();
-
 		foreach ( $settings as $tab_key => $tab ) {
 			foreach ( $tab['sections'] as $section_key => $section ) {
-				add_settings_section( $section_key, $section['title'], $section['callback'], $tab_key . '_' . $section_key );
+				$section_unique_id = $this->menu_slug . '_' . $tab_key . '_' . $section_key;
+				add_settings_section( $section_unique_id, $section['title'], $section['callback'], $section_unique_id );
 				foreach ( $section['fields'] as $field_key => $field ) {
-					add_settings_field( $this->get_field_name( $field ), $field['label'], array( $this, 'render_field' ), $tab_key . '_' . $section_key, $section_key, $field );
-					register_setting( $this->prefix, $this->get_field_name( $field ), $field['sanitize_callback'] );
+					add_settings_field( $this->get_field_name( $field ), $field['label'], array( $this, 'render_field' ), $section_unique_id, $section_unique_id, $field );
+					register_setting( $this->menu_slug, $this->get_field_name( $field ), $field['sanitize_callback'] );
 				}
 			}
-			add_action( 'wpyes_setting_tab_' . $tab_key, array( $this, 'render_tab' ), 10, 2 );
+			add_action( $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ), 10, 2 );
 		}
-
-	}
-
-	/**
-	 * Register new custom admin menu page.
-	 *
-	 * @since 0.0.1
-	 * @param array $args { Optional. Array of properties for the new admin menu object. Default empty array.
-	 *  @type string    $method       Method that used to register the menu to WP Admin. Default 'add_menu_page'.
-	 *  @type string    $page_title   The text to be displayed in the title tags of the page. Default is prefix defined in constructor.
-	 *  @type string    $menu_title   The text to be used for the menu. Default is prefix defined in constructor.
-	 *  @type string    $capability   The capability required for this menu to be displayed to the user. Default "manage_options".
-	 *  @type string    $menu_slug    Admin menu slug. Default is prefix defined in constructor.
-	 *  @type callable  $callback     Callback to render the setting form. Default Wpyes::render_form.
-	 *  @type string    $icon_url     URL for admin menu icon. Default empty.
-	 *  @type integer   $position     Admin menu priority posisition. Default null.
-	 *  @type string    $parent_slug  Parent menu slug if the $method defined is "add_submenu_page". Default empty.
-	 * }
-	 */
-	public function register_admin_menu( $args = array() ) {
-
-		$menu = wp_parse_args(
-			$args, array(
-				'method'      => 'add_menu_page',
-				'capability'  => 'manage_options',
-				'menu_slug'   => $this->prefix,
-				'menu_title'  => $this->humanize_slug( $this->prefix ),
-				'page_title'  => $this->humanize_slug( $this->prefix ),
-				'callback'    => array( $this, 'render_form' ),
-				'icon_url'    => '',
-				'position'    => null,
-				'parent_slug' => '',
-			)
-		);
-
-		$this->admin_menus[ $menu['menu_slug'] ] = $menu;
 	}
 
 	/**
@@ -820,54 +829,34 @@ class Wpyes {
 	 */
 	public function admin_menu() {
 
-		// Register default admin menu if there is no custom menu registered yet.
-		if ( empty( $this->admin_menus ) ) {
-			$this->register_admin_menu(
-				array(
-					'menu_slug' => $this->prefix,
-				)
-			);
-		}
-
-		foreach ( $this->admin_menus as $key => $admin_menu ) {
-			switch ( $admin_menu['method'] ) {
-				case 'add_submenu_page':
-					if ( ! empty( $admin_menu['parent_slug'] ) ) {
-						call_user_func(
-							$admin_menu['method'],
-							$admin_menu['parent_slug'],
-							$admin_menu['page_title'],
-							$admin_menu['menu_title'],
-							$admin_menu['capability'],
-							$admin_menu['menu_slug'],
-							$admin_menu['callback']
-						);
-					}
-					break;
-
-				default:
+		switch ( $this->menu_args['method'] ) {
+			case 'add_submenu_page':
+				if ( ! empty( $this->menu_args['parent_slug'] ) ) {
 					call_user_func(
-						$admin_menu['method'],
-						$admin_menu['page_title'],
-						$admin_menu['menu_title'],
-						$admin_menu['capability'],
-						$admin_menu['menu_slug'],
-						$admin_menu['callback'],
-						$admin_menu['icon_url'],
-						$admin_menu['position']
+						$this->menu_args['method'],
+						$this->menu_args['parent_slug'],
+						$this->menu_args['page_title'],
+						$this->menu_args['menu_title'],
+						$this->menu_args['capability'],
+						$this->menu_slug,
+						$this->menu_args['callback']
 					);
-					break;
-			}
+				}
+				break;
+
+			default:
+				call_user_func(
+					$this->menu_args['method'],
+					$this->menu_args['page_title'],
+					$this->menu_args['menu_title'],
+					$this->menu_args['capability'],
+					$this->menu_slug,
+					$this->menu_args['callback'],
+					$this->menu_args['icon_url'],
+					$this->menu_args['position']
+				);
+				break;
 		}
-
-	}
-
-	/**
-	 * Get current menu page displayed.
-	 */
-	private function current_admin_menu() {
-		$page = isset( $_GET['page'] ) ? $_GET['page'] : $this->prefix;
-		return isset( $this->admin_menus[ $page ] ) ? $this->admin_menus[ $page ] : false;
 	}
 
 	/**
@@ -875,40 +864,27 @@ class Wpyes {
 	 */
 	public function render_form() {
 
-		$admin_menu = $this->current_admin_menu();
-
-		if ( ! $admin_menu ) {
-			return;
-		}
-
-		$settings = $this->get_settings( $admin_menu['menu_slug'] );
-
+		$settings = $this->get_settings();
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html( $admin_menu['page_title'] ); ?></h1>
+			<h1><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
 			<h2 class="nav-tab-wrapper">
-			<?php
-			foreach ( $settings as $tab_key => $tab ) :
-			?>
+			<?php foreach ( $settings as $tab_key => $tab ) : ?>
 			<a href="#<?php echo esc_attr( $tab_key ); ?>" class="nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
-			<?php
-			endforeach;
-			?>
+			<?php endforeach; ?>
 			</h2>
 			<form method="post" action="options.php">
 				<div class="metabox-holder">
-					<?php foreach ( $settings as $tab_key => $tab ) { ?>
-						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="group" style="display: none;">
-							<?php
-							do_action( 'wpyes_setting_tab_before_' . $tab_key, $tab, $tab_key );
-							do_action( 'wpyes_setting_tab_' . $tab_key, $tab, $tab_key );
-							do_action( 'wpyes_setting_tab_after_' . $tab_key, $tab, $tab_key );
-							?>
+					<?php foreach ( $settings as $tab_key => $tab ) : ?>
+						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="group">
+							<?php do_action( $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab, $tab_key ); ?>
+							<?php do_action( $this->menu_slug . '_setting_tab_' . $tab_key, $tab, $tab_key ); ?>
+							<?php do_action( $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab, $tab_key ); ?>
 						</div>
-					<?php } ?>
+					<?php endforeach; ?>
 				</div>
 				<div style="padding-left: 10px">
-					<?php settings_fields( $this->prefix ); ?>
+					<?php settings_fields( $this->menu_slug ); ?>
 					<?php submit_button(); ?>
 				</div>
 			</form>
@@ -917,25 +893,13 @@ class Wpyes {
 	}
 
 	/**
-	 * Prints scripts needed to u]initiate Color Picker & Tab element.
+	 * Print scripts needed to initiate Color Picker & Tab element.
 	 *
 	 * @since 0.0.1
 	 */
 	public function admin_footer_js() {
 		$screen = get_current_screen();
-
-		$slug_match = false;
-
-		$menu_slugs = array_keys( $this->admin_menus );
-
-		foreach ( $menu_slugs as $menu_slug ) {
-			if ( strpos( $screen->base, '_' . $menu_slug ) ) {
-				$slug_match = $menu_slug;
-				break;
-			}
-		}
-
-		if ( ! $slug_match ) {
+		if ( ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
 			return;
 		}
 		?>
@@ -1013,6 +977,9 @@ class Wpyes {
 			})(jQuery);
 		</script>
 		<?php
+
+		// Do custom action hook to print scripts needed.
+		do_action( $this->menu_slug . '_admin_footer_js', $screen, $this );
 	}
 
 	/**
@@ -1023,18 +990,7 @@ class Wpyes {
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 
-		$slug_match = false;
-
-		$menu_slugs = array_keys( $this->admin_menus );
-
-		foreach ( $menu_slugs as $menu_slug ) {
-			if ( strpos( $hook, '_' . $menu_slug ) ) {
-				$slug_match = $menu_slug;
-				break;
-			}
-		}
-
-		if ( ! $slug_match ) {
+		if ( ! strpos( $hook, '_' . $this->menu_slug ) ) {
 			return;
 		}
 
@@ -1043,7 +999,7 @@ class Wpyes {
 		wp_enqueue_media();
 
 		// Do custom action hook to enqueue custom script and styles.
-		do_action( 'wpyes_admin_enqueue_scripts', $slug_match, $hook );
+		do_action( $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
 	}
 
 	/**
@@ -1055,16 +1011,14 @@ class Wpyes {
 	 * @return integer
 	 */
 	private function sort_by_priority( $a, $b ) {
-
 		$a = isset( $a['priority'] ) ? (int) $a['priority'] : 10;
 		$b = isset( $b['priority'] ) ? (int) $b['priority'] : 10;
 
 		if ( $a === $b ) {
-			return 1;
+			return 0;
 		}
 
-		return ( $a < $b ) ? -1 : 2;
-
+		return ( $a < $b ) ? -1 : 1;
 	}
 
 	/**
@@ -1072,15 +1026,9 @@ class Wpyes {
 	 *
 	 * @since 0.0.1
 	 * @param string $slug Slug string that will be humanized.
-	 * @param string $prefix Prefix that will be removed.
 	 * @return string
 	 */
-	private function humanize_slug( $slug, $prefix = null ) {
-
-		// Remove autoprefixed string.
-		if ( ! empty( $prefix ) ) {
-			$slug = preg_replace( '/^' . $prefix . '_/', '', $slug );
-		}
+	private function humanize_slug( $slug ) {
 
 		// Split slug by dash and underscore as array.
 		$words = preg_split( '/(_|-)/', $slug );
@@ -1091,7 +1039,7 @@ class Wpyes {
 		}
 
 		// Define ignored words.
-		$ignores = apply_filters( 'wpyes_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
+		$ignores = apply_filters( $this->menu_slug . '_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
 
 		foreach ( $words as $index => $word ) {
 
