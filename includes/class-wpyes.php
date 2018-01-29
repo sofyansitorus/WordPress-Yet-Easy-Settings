@@ -105,17 +105,18 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @param string $menu_slug        The slug name to refer to this menu (should be unique).
 	 * @param array  $menu_args        { Optional. Array of properties for the new field object. Default empty array.
-	 *  @type string          $method             Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page,
-	 *                                            add_theme_page, add_plugins_page, add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page,
-	 *                                            add_pages_page, add_comments_page, add_submenu_page
-	 *                                            Default 'add_menu_page'.
-	 *  @type string          $capability         Capability required for this menu to be displayed to the user. Default 'manage_options'.
-	 *  @type string          $page_title         Text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
-	 *  @type string          $menu_title         Text to be used for the menu. Default $menu_slug property.
-	 *  @type callable        $callback           Function to be called to output the content for this page. Default Wpyes::render_form.
-	 *  @type string          $icon_url           URL to the icon to be used for this menu. Used when $method is 'add_menu_page'. Default empty.
-	 *  @type integer         $position           Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
-	 *  @type string          $parent_slug        Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
+	 *  @type string     $method               Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page,
+	 *                                         add_theme_page, add_plugins_page, add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page,
+	 *                                         add_pages_page, add_comments_page, add_submenu_page. Default 'add_menu_page'.
+	 *  @type string     $capability           Capability required for this menu to be displayed to the user. Default 'manage_options'.
+	 *  @type string     $page_title           Text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
+	 *  @type string     $menu_title           Text to be used for the menu. Default $menu_slug property.
+	 *  @type callable   $callback             Function to be called to output the content for this page. Default Wpyes::render_form.
+	 *  @type string     $icon_url             URL to the icon to be used for this menu. Used when $method is 'add_menu_page'. Default empty.
+	 *  @type integer    $position             Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
+	 *  @type string     $parent_slug          Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
+	 *  @type string     $action_button_url    Page action button URL will be place beside of the setting page title. Default empty.
+	 *  @type string     $action_button_text   Page action button text will be place beside of the setting page title'. Default empty.
 	 * }
 	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
 	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'field_example_1'
@@ -130,14 +131,16 @@ class Wpyes {
 		$menu_args = wp_parse_args(
 			$menu_args,
 			array(
-				'method'      => 'add_menu_page',
-				'capability'  => 'manage_options',
-				'page_title'  => '',
-				'menu_title'  => '',
-				'callback'    => '',
-				'icon_url'    => '',
-				'position'    => null,
-				'parent_slug' => '',
+				'method'             => 'add_menu_page',
+				'capability'         => 'manage_options',
+				'page_title'         => '',
+				'menu_title'         => '',
+				'callback'           => '',
+				'icon_url'           => '',
+				'position'           => null,
+				'parent_slug'        => '',
+				'action_button_url'  => '',
+				'action_button_text' => '',
 			)
 		);
 
@@ -1161,7 +1164,11 @@ class Wpyes {
 		?>
 		<div class="wrap wpyes-wrap">
 			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
-				<h1><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+				<h1 class="<?php echo ( $this->menu_args['action_button_url'] && $this->menu_args['action_button_text'] ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+				<?php if ( ! empty( $this->menu_args['action_button_url'] ) && ! empty( $this->menu_args['action_button_text'] ) ) : ?>
+					<a href="<?php echo esc_url( $this->menu_args['action_button_url'] ); ?>" class="page-title-action"><?php echo esc_html( $this->menu_args['action_button_text'] ); ?></a>
+					<hr class="wp-header-end">
+				<?php endif; ?>
 			<?php endif; ?>
 			<?php settings_errors(); ?>
 			<?php if ( 0 < count( $settings ) ) : ?>
