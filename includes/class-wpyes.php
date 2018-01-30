@@ -1418,15 +1418,6 @@ class Wpyes {
 							.val("");
 					});
 
-					$('.error.settings-error').each(function(index, elem){
-						var tabShowed = false;
-						var elemId = $(elem).attr('id').replace('setting-error-', '');
-						var eleTab = $('#' + elemId).closest('.wpyes-tab-group');
-						if(eleTab.length && !tabShowed){
-							$('a.wpyes-nav-tab[href*=#' + eleTab.attr('id') + ']').trigger('click');
-							tabShowed = true;
-						}
-					});
 				});
 
 			})(jQuery);
