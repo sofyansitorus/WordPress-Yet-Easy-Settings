@@ -1001,7 +1001,6 @@ class Wpyes {
 				case 'tab':
 					$this->recent_tab = $data['id'];
 
-					// $settings[ $data['id'] ] = $data;
 					array_push( $tabs, $data );
 
 					break;
@@ -1012,7 +1011,6 @@ class Wpyes {
 
 					$this->recent_section = $data['id'];
 
-					// $settings[ $data['tab'] ]['sections'][ $data['id'] ] = $data;
 					array_push( $sections, $data );
 
 					break;
@@ -1026,15 +1024,23 @@ class Wpyes {
 
 					$this->recent_field = $data['id'];
 
-					// $settings[ $data['tab'] ]['sections'][ $data['section'] ]['fields'][ $data['id'] ] = $data;
 					array_push( $fields, $data );
 
 					break;
 			}
 		}
 
+		if ( empty( $tabs ) || empty( $sections ) || empty( $sections ) ) {
+			return;
+		}
+
+		// Sort tabs to settings data by positin property.
 		uasort( $tabs, array( $this, 'sort_by_position' ) );
+
+		// Sort tabs to settings data by positin property.
 		uasort( $sections, array( $this, 'sort_by_position' ) );
+
+		// Sort tabs to settings data by positin property.
 		uasort( $fields, array( $this, 'sort_by_position' ) );
 
 		// Asiggn tabs to settings data.
@@ -1061,7 +1067,7 @@ class Wpyes {
 		// Set settings data with populated data.
 		$this->settings = $settings;
 
-		// Set settings data is populated state.
+		// Set settings data state is populated.
 		$this->settings_populated = true;
 	}
 
@@ -1071,6 +1077,10 @@ class Wpyes {
 	public function init() {
 
 		$this->populate_settings();
+
+		if ( ! $this->settings_populated ) {
+			return;
+		}
 
 		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
 
