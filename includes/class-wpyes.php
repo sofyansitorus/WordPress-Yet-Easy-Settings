@@ -36,12 +36,12 @@ class Wpyes {
 	private $menu_args;
 
 	/**
-	 * Setting prefix.
+	 * Setting setting_prefix.
 	 *
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $prefix;
+	private $setting_prefix;
 
 	/**
 	 * Settings data.
@@ -148,11 +148,11 @@ class Wpyes {
 	 *  @type integer    $position             Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
 	 *  @type string     $parent_slug          Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
 	 * }
-	 * @param string $prefix           Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
-	 *                                 prepended when getting option value. Example: If $prefix = 'wpyes', to get option value for setting id 'field_example_1'
-	 *                                 is get_option('wpyes_field_example_1'). Default empty.
+	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the $setting_prefix would be
+	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'example_1'
+	 *                                 is get_option('wpyes_example_1'). Default empty.
 	 */
-	public function __construct( $menu_slug, $menu_args = array(), $prefix = '' ) {
+	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
 
 		// Set the menu slug property.
 		$this->menu_slug = sanitize_key( $menu_slug );
@@ -190,7 +190,7 @@ class Wpyes {
 		$this->menu_args = $menu_args;
 
 		// Set the menu arguments property.
-		$this->prefix = trim( $prefix, '_' );
+		$this->setting_prefix = trim( $setting_prefix, '_' );
 	}
 
 	/**
@@ -527,7 +527,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function get_field_name( $field ) {
-		return $this->prefix ? $this->prefix . '_' . $field['id'] : $field['id'];
+		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['id'] : $field['id'];
 	}
 
 	/**
