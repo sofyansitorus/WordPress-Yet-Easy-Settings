@@ -1338,9 +1338,12 @@ class Wpyes {
 		?>
 		<script>
 			(function($) {
+
 				"use strict";
 
 				$(document).ready(function($) {
+
+					var menuSlug = "<?php echo $this->menu_slug; ?>";
 
 					// Initiate color picker.
 					$(".wpyes-color-picker").wpColorPicker();
@@ -1348,20 +1351,20 @@ class Wpyes {
 					// Initiate tabs.
 					$(".wpyes-tab-group").hide();
 
-					var activetab = "";
+					var activeTab = "";
 
 					if (typeof localStorage != "undefined") {
-						activetab = localStorage.getItem("activetab");
+						activeTab = localStorage.getItem("wpyes-active-tab-" + menuSlug);
 					}
 
-					if (activetab != "" && $(activetab).length) {
-						$(activetab).fadeIn();
+					if (activeTab != "" && $(activeTab).length) {
+						$(activeTab).fadeIn();
 					} else {
 						$(".wpyes-tab-group:first").fadeIn();
 					}
 
-					if (activetab != "" && $(activetab + "-tab").length) {
-						$(activetab + "-tab").addClass("nav-tab-active");
+					if (activeTab != "" && $(activeTab + "-tab").length) {
+						$(activeTab + "-tab").addClass("nav-tab-active");
 					} else {
 						$(".wpyes-nav-tab-wrapper a:first").addClass("nav-tab-active");
 					}
@@ -1371,19 +1374,15 @@ class Wpyes {
 
 						$(".wpyes-nav-tab-wrapper a").removeClass("nav-tab-active");
 
-						$(this)
-							.addClass("nav-tab-active")
-							.blur();
-
-						var clicked_group = $(this).attr("href");
+						$(this).addClass("nav-tab-active").blur();
 
 						if (typeof localStorage != "undefined") {
-							localStorage.setItem("activetab", $(this).attr("href"));
+							localStorage.setItem("wpyes-active-tab-" + menuSlug, $(this).attr("href"));
 						}
 
 						$(".wpyes-tab-group").hide();
 
-						$(clicked_group).fadeIn();
+						$($(this).attr("href")).fadeIn();
 					});
 
 					// Media file browser.
@@ -1393,27 +1392,20 @@ class Wpyes {
 						var self = $(this);
 
 						// Create the media frame.
-						var file_frame = (wp.media.frames.file_frame = wp.media({
+						var mediaModal = (wp.media.frames.file_frame = wp.media({
 							multiple: false
 						}));
 
-						file_frame.on("select", function() {
+						mediaModal.on("select", function() {
 
-							attachment = file_frame
-								.state()
-								.get("selection")
-								.first()
-								.toJSON();
+							var attachment = mediaModal.state().get("selection").first().toJSON();
 
-							self
-								.closest("td")
-								.find('input[type="text"]')
-								.val(attachment.url);
+							self.closest("td").find('input[type="text"]').val(attachment.url);
 
 						});
 
 						// Finally, open the modal
-						file_frame.open();
+						mediaModal.open();
 					});
 
 					// Remove file from input.
@@ -1427,13 +1419,16 @@ class Wpyes {
 					});
 
 					$('.error.settings-error').each(function(index, elem){
-						var elem_id = $(elem).attr('id').replace('setting-error-', '');
-						var elem_tab = $('#' + elem_id).closest('.wpyes-tab-group');
-						if(elem_tab.length){
-							$('a.wpyes-nav-tab[href*=#' + elem_tab.attr('id') + ']').trigger('click');
+						var tabShowed = false;
+						var elemId = $(elem).attr('id').replace('setting-error-', '');
+						var eleTab = $('#' + elemId).closest('.wpyes-tab-group');
+						if(eleTab.length && !tabShowed){
+							$('a.wpyes-nav-tab[href*=#' + eleTab.attr('id') + ']').trigger('click');
+							tabShowed = true;
 						}
 					});
 				});
+
 			})(jQuery);
 		</script>
 		<?php
