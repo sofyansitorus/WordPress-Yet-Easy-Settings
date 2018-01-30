@@ -367,7 +367,12 @@ if ( ! function_exists( 'wpyes_example_submenu' ) ) {
 	 * @return void
 	 */
 	function wpyes_example_submenu() {
-		$settings = new Wpyes( 'wpyes_example_submenu', array( 'method' => 'add_submenu_page' ) ); // Initialize the Wpyes class.
+		$settings = new Wpyes(
+			'wpyes_example_submenu', array(
+				'method'      => 'add_submenu_page',
+				'parent_slug' => 'wpyes_example_simple',
+			)
+		); // Initialize the Wpyes class.
 
 		$settings->add_tab(
 			array(
@@ -493,6 +498,3 @@ if ( ! function_exists( 'wpyes_example_all_fields' ) ) {
 
 	wpyes_example_all_fields();
 }// End if().
-
-
-
