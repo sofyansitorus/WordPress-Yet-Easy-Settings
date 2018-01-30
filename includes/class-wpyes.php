@@ -36,12 +36,12 @@ class Wpyes {
 	private $menu_args;
 
 	/**
-	 * Setting field prefix.
+	 * Setting prefix.
 	 *
 	 * @since 0.0.1
-	 * @var bool
+	 * @var string
 	 */
-	private $setting_prefix;
+	private $prefix;
 
 	/**
 	 * Settings data.
@@ -49,7 +49,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var array
 	 */
-	private $settings_data = array();
+	private $settings = array();
 
 	/**
 	 * Settings tabs.
@@ -57,7 +57,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var array
 	 */
-	private $settings_tabs = array();
+	private $tabs = array();
 
 	/**
 	 * Settings sections.
@@ -65,7 +65,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var array
 	 */
-	private $settings_sections = array();
+	private $sections = array();
 
 	/**
 	 * Settings fields.
@@ -73,7 +73,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var array
 	 */
-	private $settings_fields = array();
+	private $fields = array();
 
 	/**
 	 * Recent tab id registered.
@@ -102,7 +102,7 @@ class Wpyes {
 	/**
 	 * Admin screen help_tabs.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @var array
 	 */
 	private $help_tabs = array();
@@ -110,7 +110,7 @@ class Wpyes {
 	/**
 	 * Admin screen action button text.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @var string
 	 */
 	private $action_button_text;
@@ -118,7 +118,7 @@ class Wpyes {
 	/**
 	 * Admin screen action button URL.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @var string
 	 */
 	private $action_button_url;
@@ -126,7 +126,7 @@ class Wpyes {
 	/**
 	 * Errors data.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @var array
 	 */
 	private $errors = array();
@@ -148,11 +148,11 @@ class Wpyes {
 	 *  @type integer    $position             Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
 	 *  @type string     $parent_slug          Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
 	 * }
-	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
-	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'field_example_1'
+	 * @param string $prefix           Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
+	 *                                 prepended when getting option value. Example: If $prefix = 'wpyes', to get option value for setting id 'field_example_1'
 	 *                                 is get_option('wpyes_field_example_1'). Default empty.
 	 */
-	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
+	public function __construct( $menu_slug, $menu_args = array(), $prefix = '' ) {
 
 		// Set the menu slug property.
 		$this->menu_slug = sanitize_key( $menu_slug );
@@ -190,7 +190,7 @@ class Wpyes {
 		$this->menu_args = $menu_args;
 
 		// Set the menu arguments property.
-		$this->setting_prefix = $setting_prefix;
+		$this->prefix = trim( $prefix, '_' );
 	}
 
 	/**
@@ -252,8 +252,8 @@ class Wpyes {
 	public function add_tab( $args ) {
 		$args = $this->normalize_tab( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_tab      = $args['id'];
-			$this->settings_tabs[] = $args;
+			$this->recent_tab = $args['id'];
+			$this->tabs[]     = $args;
 		}
 	}
 
@@ -264,9 +264,8 @@ class Wpyes {
 	 * @return array All registered setting tabs.
 	 */
 	private function get_tabs() {
-		$settings_tabs = $this->settings_tabs;
-		uasort( $settings_tabs, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_tabs', $settings_tabs );
+		uasort( $this->tabs, array( $this, 'sort_by_position' ) );
+		return apply_filters( $this->menu_slug . '_settings_tabs', $this->tabs );
 	}
 
 	/**
@@ -304,13 +303,18 @@ class Wpyes {
 				'callback' => null,
 				'fields'   => array(),
 				'position' => 10,
-				'tab'      => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+				'tab'      => '',
 			)
 		);
 
 		// Create title if empty and not false.
 		if ( empty( $args['title'] ) && ! is_bool( $args['title'] ) ) {
 			$args['title'] = $this->humanize_slug( $args['id'] );
+		}
+
+		// Assign recent tab id if not available in the $args.
+		if ( empty( $args['tab'] ) && ! empty( $this->recent_tab ) ) {
+			$args['tab'] = $this->recent_tab;
 		}
 
 		return $args;
@@ -346,8 +350,8 @@ class Wpyes {
 	public function add_section( $args ) {
 		$args = $this->normalize_section( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_section      = $args['id'];
-			$this->settings_sections[] = $args;
+			$this->recent_section = $args['id'];
+			$this->sections[]     = $args;
 		}
 	}
 
@@ -358,9 +362,8 @@ class Wpyes {
 	 * @return array All registered settings sections.
 	 */
 	private function get_sections() {
-		$settings_sections = $this->settings_sections;
-		uasort( $settings_sections, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_sections', $settings_sections );
+		uasort( $this->sections, array( $this, 'sort_by_position' ) );
+		return apply_filters( $this->menu_slug . '_settings_sections', $this->sections );
 	}
 
 	/**
@@ -390,11 +393,12 @@ class Wpyes {
 	 *  @type callable        $callback_before    Callback function that will be called before the setting field rendered. Default empty.
 	 *  @type callable        $callback_after     Callback function that will be called after the setting field rendered. Default empty.
 	 *  @type callable        $sanitize_callback  Callback function to sanitize setting field value. Default null.
-	 *  @type string          $section            Section ID for the setting field. Default empty.
 	 *  @type string          $default            Default value for the setting field. Default empty.
 	 *  @type array           $options            Setting field input options, a key value pair used for setting field type select, radio, checkbox. Default array().
 	 *  @type array           $attrs              Setting field input attributes. Default array().
-	 *  @type integer         $position           Setting field position. Highr will displayed last. Default 10.
+	 *  @type integer         $position           Setting field position. Higher will displayed last. Default 10.
+	 *  @type string          $tab                Tab ID for the setting field. Default empty.
+	 *  @type string          $section            Section ID for the setting field. Default empty.
 	 *  @type bool            $required           Set the setting field is required. Default false.
 	 *  @type bool            $show_in_rest       Whether data associated with this setting should be included in the REST API. Default false.
 	 * }
@@ -416,8 +420,8 @@ class Wpyes {
 				'options'           => array(),
 				'attrs'             => array(),
 				'position'          => 10,
-				'section'           => ! is_null( $this->recent_section ) ? $this->recent_section : '',
-				'tab'               => ! is_null( $this->recent_tab ) ? $this->recent_tab : '',
+				'tab'               => '',
+				'section'           => '',
 				'required'          => false,
 				'show_in_rest'      => false,
 			)
@@ -436,6 +440,16 @@ class Wpyes {
 		// Set data_type to 'number' if empty and type is 'decimal'.
 		if ( empty( $args['data_type'] ) && 'decimal' === ( $args['type'] ) ) {
 			$args['data_type'] = 'number';
+		}
+
+		// Assign recent tab id if not available in the $args.
+		if ( empty( $args['tab'] ) && ! empty( $this->recent_tab ) ) {
+			$args['tab'] = $this->recent_tab;
+		}
+
+		// Assign recent section id if not available in the $args.
+		if ( empty( $args['section'] ) && ! empty( $this->recent_section ) ) {
+			$args['section'] = $this->recent_section;
 		}
 
 		return $args;
@@ -475,7 +489,7 @@ class Wpyes {
 	 *  @type string          $default            Default value for the setting field. Default empty.
 	 *  @type array           $options            Setting field input options, a key value pair used for setting field type select, radio, checkbox. Default array().
 	 *  @type array           $attrs              Setting field input attributes. Default array().
-	 *  @type integer         $position           Setting field position. Highr will displayed last. Default 10.
+	 *  @type integer         $position           Setting field position. Higher will displayed last. Default 10.
 	 *  @type bool            $required           Set the setting field is required. Default false.
 	 *  @type bool            $show_in_rest       Whether data associated with this setting should be included in the REST API. Default false.
 	 * }
@@ -483,8 +497,8 @@ class Wpyes {
 	public function add_field( $args ) {
 		$args = $this->normalize_field( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_field      = $args['id'];
-			$this->settings_fields[] = $args;
+			$this->recent_field = $args['id'];
+			$this->fields[]     = $args;
 		}
 	}
 
@@ -495,9 +509,8 @@ class Wpyes {
 	 * @return array  All registered settings fields.
 	 */
 	private function get_fields() {
-		$settings_fields = $this->settings_fields;
-		uasort( $settings_fields, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_fields', $settings_fields );
+		uasort( $this->fields, array( $this, 'sort_by_position' ) );
+		return apply_filters( $this->menu_slug . '_settings_fields', $this->fields );
 	}
 
 	/**
@@ -517,7 +530,7 @@ class Wpyes {
 	 * @param array $field Setting field property.
 	 */
 	private function get_field_name( $field ) {
-		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['id'] : $field['id'];
+		return $this->prefix ? $this->prefix . '_' . $field['id'] : $field['id'];
 	}
 
 	/**
@@ -537,7 +550,7 @@ class Wpyes {
 	 * @param string $field_id Setting field name.
 	 */
 	private function get_field_label( $field_id ) {
-		$field = isset( $this->settings_fields[ $field_id ] ) ? $this->settings_fields[ $field_id ] : array();
+		$field = isset( $this->fields[ $field_id ] ) ? $this->fields[ $field_id ] : array();
 		if ( isset( $field['label'] ) ) {
 			return $field['label'];
 		}
@@ -551,7 +564,7 @@ class Wpyes {
 	 * @param string $option_name Option name.
 	 */
 	private function get_field( $option_name ) {
-		return isset( $this->settings_fields[ $option_name ] ) ? $this->settings_fields[ $option_name ] : array();
+		return isset( $this->fields[ $option_name ] ) ? $this->fields[ $option_name ] : array();
 	}
 
 	/**
@@ -619,7 +632,7 @@ class Wpyes {
 			}
 		}
 
-		// Remove core field attributes.
+		// Remove core field attributes to avoid conflict.
 		unset( $field['attrs']['id'] );
 		unset( $field['attrs']['name'] );
 		unset( $field['attrs']['value'] );
@@ -747,7 +760,7 @@ class Wpyes {
 	 */
 	public function render_field_checkbox( $field ) {
 		?>
-		<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" value="off" />
+		<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" value="0" />
 		<fieldset>
 			<legend class="screen-reader-text"><span><?php echo esc_html( $field['label'] ); ?></span></legend>
 			<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>">
@@ -755,8 +768,8 @@ class Wpyes {
 				type="checkbox" 
 				id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
 				name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-				value="on" 
-				<?php checked( $this->get_field_value( $field ), 'on' ); ?>
+				value="1" 
+				<?php checked( $this->get_field_value( $field ), '1' ); ?>
 				<?php $this->field_attrs( $field ); ?> />
 				<?php echo esc_html( $field['description'] ); ?>
 			</label>
@@ -772,11 +785,8 @@ class Wpyes {
 	 */
 	public function render_field_multicheckbox( $field ) {
 		$value = $this->get_field_value( $field );
-		if ( empty( $value ) ) {
+		if ( empty( $value ) || ! is_array( $value ) ) {
 			$value = array();
-		}
-		if ( ! is_array( $value ) ) {
-			$value = array( $value );
 		}
 		?>
 		<fieldset>
@@ -858,11 +868,8 @@ class Wpyes {
 	 */
 	public function render_field_multiselect( $field ) {
 		$value = $this->get_field_value( $field );
-		if ( empty( $value ) ) {
+		if ( empty( $value ) || ! is_array( $value ) ) {
 			$value = array();
-		}
-		if ( ! is_array( $value ) ) {
-			$value = array( $value );
 		}
 		?>
 		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" multiple <?php $this->field_attrs( $field ); ?>>
@@ -999,6 +1006,8 @@ class Wpyes {
 					break;
 			}
 		} catch ( Exception $e ) {
+
+			// Check if same error already exists.
 			if ( ! isset( $this->errors[ $option ] ) ) {
 				$label     = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
 				$error_msg = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
@@ -1022,13 +1031,13 @@ class Wpyes {
 	 * @return array All settings data array.
 	 */
 	private function get_settings() {
-		return apply_filters( $this->menu_slug . '_settings', $this->settings_data );
+		return apply_filters( $this->menu_slug . '_settings', $this->settings );
 	}
 
 	/**
-	 * Initialize and build the settings tabs, sections and fileds.
+	 * Populate settings data.
 	 */
-	public function init() {
+	private function populate_settings() {
 
 		$settings = array();
 		$tabs     = $this->get_tabs();
@@ -1044,15 +1053,17 @@ class Wpyes {
 			$tabs = $this->get_tabs();
 		}
 
-		$this->settings_tabs = array();
+		// Reset tabs data for rebuild.
+		$this->tabs = array();
 		foreach ( $tabs as $tab ) {
 			$settings[ $tab['id'] ] = $tab;
 
-			// Rebuild settings_tabs data for later use.
-			$this->settings_tabs[ $tab['id'] ] = $tab;
+			// Rebuild tabs data for later use.
+			$this->tabs[ $tab['id'] ] = $tab;
 		}
 
-		$this->settings_sections = array();
+		// Reset sections data for rebuild.
+		$this->sections = array();
 		foreach ( $sections as $section ) {
 			if ( ! isset( $section['tab'] ) && $this->recent_tab ) {
 				$section['tab'] = $this->recent_tab;
@@ -1062,11 +1073,12 @@ class Wpyes {
 			}
 			$settings[ $section['tab'] ]['sections'][ $section['id'] ] = $section;
 
-			// Rebuild settings_sections data for later use.
-			$this->settings_sections[ $this->get_section_unique_id( $section ) ] = $section;
+			// Rebuild sections data for later use.
+			$this->sections[ $this->get_section_unique_id( $section ) ] = $section;
 		}
 
-		$this->settings_fields = array();
+		// Reset fields data for rebuild.
+		$this->fields = array();
 		foreach ( $fields as $field_key => $field ) {
 			if ( ! isset( $field['tab'] ) && $this->recent_tab ) {
 				$field['tab'] = $this->recent_tab;
@@ -1079,11 +1091,20 @@ class Wpyes {
 			}
 			$settings[ $field['tab'] ]['sections'][ $field['section'] ]['fields'][ $field['id'] ] = $field;
 
-			// Rebuild settings_fields data for later use.
-			$this->settings_fields[ $this->get_field_name( $field ) ] = $field;
+			// Rebuild fields data for later use.
+			$this->fields[ $this->get_field_name( $field ) ] = $field;
 		}
 
-		$this->settings_data = $settings;
+		$this->settings = $settings;
+
+	}
+
+	/**
+	 * Initialize and build the settings tabs, sections and fileds.
+	 */
+	public function init() {
+
+		$this->populate_settings();
 
 		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
 
@@ -1202,7 +1223,7 @@ class Wpyes {
 	/**
 	 * Add help tab items.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @param array $help_tabs Indexed array of properties for the new tab object.
 	 */
 	public function add_help_tabs( $help_tabs ) {
@@ -1220,7 +1241,7 @@ class Wpyes {
 	/**
 	 * Add help tab item.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @param array $help_tab { Array of properties for the help tab object.
 	 *  @type string            $id              ID for the setting tab. Default empty.
 	 *  @type string            $title           Label for the setting tab. Default empty.
@@ -1242,7 +1263,7 @@ class Wpyes {
 	 *
 	 * This function is hooked into "load-{$this->menu_slug}" action.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 */
 	public function register_help_tabs() {
 		if ( ! $this->help_tabs ) {
@@ -1250,7 +1271,9 @@ class Wpyes {
 		}
 
 		$screen = get_current_screen();
-
+		if ( ! $screen ) {
+			return;
+		}
 		foreach ( $this->help_tabs as $help_tab ) {
 			$screen->add_help_tab( $help_tab );
 		}
@@ -1259,14 +1282,14 @@ class Wpyes {
 	/**
 	 * Add admin action button.
 	 *
-	 * @since 1.0.0
+	 * @since 0.0.1
 	 * @param string $text   Page action button text will be place beside of the setting page title'. Default empty.
 	 * @param string $url    Page action button URL will be place beside of the setting page title. Default empty.
 	 * @return void
 	 */
 	public function add_action_button( $text, $url ) {
 
-		// Validate action_button text and url.
+		// Validate action button text and url.
 		if ( empty( $text ) || empty( $url ) || ! is_string( $text ) || ! is_string( $url ) ) {
 			return;
 		}
@@ -1289,7 +1312,7 @@ class Wpyes {
 					<hr class="wp-header-end">
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php settings_errors( '', false, false ); ?>
+			<?php settings_errors(); ?>
 			<?php if ( 1 < count( $settings ) ) : ?>
 				<div class="metabox-holder">
 					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
@@ -1352,7 +1375,7 @@ class Wpyes {
 
 		$screen = get_current_screen();
 
-		if ( ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
+		if ( ! isset( $screen->base ) || ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
 			return;
 		}
 		?>
