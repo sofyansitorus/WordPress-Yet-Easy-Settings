@@ -124,6 +124,14 @@ class Wpyes {
 	private $action_button_url;
 
 	/**
+	 * Errors data.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
+	private $errors = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @since 0.0.1
@@ -764,6 +772,12 @@ class Wpyes {
 	 */
 	public function render_field_multicheckbox( $field ) {
 		$value = $this->get_field_value( $field );
+		if ( empty( $value ) ) {
+			$value = array();
+		}
+		if ( ! is_array( $value ) ) {
+			$value = array( $value );
+		}
 		?>
 		<fieldset>
 			<legend class="screen-reader-text"><span><?php echo esc_html( $field['label'] ); ?></span></legend>
@@ -844,6 +858,12 @@ class Wpyes {
 	 */
 	public function render_field_multiselect( $field ) {
 		$value = $this->get_field_value( $field );
+		if ( empty( $value ) ) {
+			$value = array();
+		}
+		if ( ! is_array( $value ) ) {
+			$value = array( $value );
+		}
 		?>
 		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" multiple <?php $this->field_attrs( $field ); ?>>
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
@@ -979,16 +999,17 @@ class Wpyes {
 					break;
 			}
 		} catch ( Exception $e ) {
-
-			$label = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
-
-			add_settings_error(
-				$option,
-				$this->get_field_id( $field ),
-				sprintf( '%1$s: %2$s', $label, $e->getMessage() ),
-				'error'
-			);
-
+			if ( ! isset( $this->errors[ $option ] ) ) {
+				$label     = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
+				$error_msg = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
+				add_settings_error(
+					$option,
+					$this->get_field_id( $field ),
+					$error_msg,
+					'error'
+				);
+				$this->errors[ $option ] = $error_msg;
+			}
 		}
 
 		return $value;
@@ -1147,7 +1168,6 @@ class Wpyes {
 					$this->menu_slug,
 					$args['callback']
 				);
-
 				break;
 
 			case 'add_menu_page':
@@ -1269,7 +1289,7 @@ class Wpyes {
 					<hr class="wp-header-end">
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php settings_errors(); ?>
+			<?php settings_errors( '', false, false ); ?>
 			<?php if ( 1 < count( $settings ) ) : ?>
 				<div class="metabox-holder">
 					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
