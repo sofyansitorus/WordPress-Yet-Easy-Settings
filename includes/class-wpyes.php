@@ -52,28 +52,12 @@ class Wpyes {
 	private $settings = array();
 
 	/**
-	 * Settings tabs.
+	 * Settings is populated.
 	 *
 	 * @since 0.0.1
-	 * @var array
+	 * @var string
 	 */
-	private $tabs = array();
-
-	/**
-	 * Settings sections.
-	 *
-	 * @since 0.0.1
-	 * @var array
-	 */
-	private $sections = array();
-
-	/**
-	 * Settings fields.
-	 *
-	 * @since 0.0.1
-	 * @var array
-	 */
-	private $fields = array();
+	private $settings_populated = false;
 
 	/**
 	 * Recent tab id registered.
@@ -113,7 +97,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $action_button_text;
+	private $button_text;
 
 	/**
 	 * Admin screen action button URL.
@@ -121,7 +105,7 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $action_button_url;
+	private $button_url;
 
 	/**
 	 * Errors data.
@@ -252,19 +236,11 @@ class Wpyes {
 	public function add_tab( $args ) {
 		$args = $this->normalize_tab( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_tab = $args['id'];
-			$this->tabs[]     = $args;
+			$this->settings[] = array(
+				'type' => 'tab',
+				'data' => $args,
+			);
 		}
-	}
-
-	/**
-	 * Get settings tabs.
-	 *
-	 * @since 0.0.1
-	 * @return array All registered setting tabs.
-	 */
-	private function get_tabs() {
-		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_tabs', $this->tabs );
 	}
 
 	/**
@@ -311,11 +287,6 @@ class Wpyes {
 			$args['title'] = $this->humanize_slug( $args['id'] );
 		}
 
-		// Assign recent tab id if not available in the $args.
-		if ( empty( $args['tab'] ) && ! empty( $this->recent_tab ) ) {
-			$args['tab'] = $this->recent_tab;
-		}
-
 		return $args;
 	}
 
@@ -349,19 +320,11 @@ class Wpyes {
 	public function add_section( $args ) {
 		$args = $this->normalize_section( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_section = $args['id'];
-			$this->sections[]     = $args;
+			$this->settings[] = array(
+				'type' => 'section',
+				'data' => $args,
+			);
 		}
-	}
-
-	/**
-	 * Get settings sections.
-	 *
-	 * @since 0.0.1
-	 * @return array All registered settings sections.
-	 */
-	private function get_sections() {
-		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_sections', $this->sections );
 	}
 
 	/**
@@ -440,16 +403,6 @@ class Wpyes {
 			$args['data_type'] = 'number';
 		}
 
-		// Assign recent tab id if not available in the $args.
-		if ( empty( $args['tab'] ) && ! empty( $this->recent_tab ) ) {
-			$args['tab'] = $this->recent_tab;
-		}
-
-		// Assign recent section id if not available in the $args.
-		if ( empty( $args['section'] ) && ! empty( $this->recent_section ) ) {
-			$args['section'] = $this->recent_section;
-		}
-
 		return $args;
 	}
 
@@ -495,19 +448,11 @@ class Wpyes {
 	public function add_field( $args ) {
 		$args = $this->normalize_field( $args );
 		if ( ! empty( $args['id'] ) ) {
-			$this->recent_field = $args['id'];
-			$this->fields[]     = $args;
+			$this->settings[] = array(
+				'type' => 'field',
+				'data' => $args,
+			);
 		}
-	}
-
-	/**
-	 * Get settings fields.
-	 *
-	 * @since 0.0.1
-	 * @return array  All registered settings fields.
-	 */
-	private function get_fields() {
-		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_fields', $this->fields );
 	}
 
 	/**
@@ -1028,6 +973,9 @@ class Wpyes {
 	 * @return array All settings data array.
 	 */
 	private function get_settings() {
+		if ( ! $this->settings_populated ) {
+			return array();
+		}
 		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings', $this->settings );
 	}
 
@@ -1037,67 +985,84 @@ class Wpyes {
 	private function populate_settings() {
 
 		$settings = array();
-		$tabs     = $this->get_tabs();
-		$sections = $this->get_sections();
-		$fields   = $this->get_fields();
+		$tabs     = array();
+		$sections = array();
+		$fields   = array();
+
+		foreach ( $this->settings as $setting ) {
+
+			if ( empty( $setting['type'] ) || empty( $setting['data'] ) ) {
+				continue;
+			}
+
+			$data = $setting['data'];
+
+			switch ( $setting['type'] ) {
+				case 'tab':
+					$this->recent_tab = $data['id'];
+
+					// $settings[ $data['id'] ] = $data;
+					array_push( $tabs, $data );
+
+					break;
+				case 'section':
+					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
+						$data['tab'] = $this->recent_tab;
+					}
+
+					$this->recent_section = $data['id'];
+
+					// $settings[ $data['tab'] ]['sections'][ $data['id'] ] = $data;
+					array_push( $sections, $data );
+
+					break;
+				case 'field':
+					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
+						$data['tab'] = $this->recent_tab;
+					}
+					if ( empty( $data['section'] ) && ! empty( $this->recent_section ) ) {
+						$data['section'] = $this->recent_section;
+					}
+
+					$this->recent_field = $data['id'];
+
+					// $settings[ $data['tab'] ]['sections'][ $data['section'] ]['fields'][ $data['id'] ] = $data;
+					array_push( $fields, $data );
+
+					break;
+			}
+		}
 
 		uasort( $tabs, array( $this, 'sort_by_position' ) );
 		uasort( $sections, array( $this, 'sort_by_position' ) );
 		uasort( $fields, array( $this, 'sort_by_position' ) );
 
-		if ( empty( $tabs ) ) {
-			$this->add_tab(
-				array(
-					'id' => $this->menu_slug,
-				)
-			);
-			$tabs = $this->get_tabs();
-		}
-
-		// Reset tabs data for rebuild.
-		$this->tabs = array();
+		// Asiggn tabs to settings data.
 		foreach ( $tabs as $tab ) {
 			$settings[ $tab['id'] ] = $tab;
-
-			// Rebuild tabs data for later use.
-			$this->tabs[ $tab['id'] ] = $tab;
 		}
 
-		// Reset sections data for rebuild.
-		$this->sections = array();
+		// Asiggn sections to settings data.
 		foreach ( $sections as $section ) {
-			if ( ! isset( $section['tab'] ) && $this->recent_tab ) {
-				$section['tab'] = $this->recent_tab;
-			}
 			if ( ! isset( $section['tab'] ) ) {
 				continue;
 			}
 			$settings[ $section['tab'] ]['sections'][ $section['id'] ] = $section;
-
-			// Rebuild sections data for later use.
-			$this->sections[ $this->get_section_unique_id( $section ) ] = $section;
 		}
 
-		// Reset fields data for rebuild.
-		$this->fields = array();
+		// Asiggn fields to settings data.
 		foreach ( $fields as $field_key => $field ) {
-			if ( ! isset( $field['tab'] ) && $this->recent_tab ) {
-				$field['tab'] = $this->recent_tab;
-			}
-			if ( ! isset( $field['section'] ) && $this->recent_section ) {
-				$field['section'] = $this->recent_section;
-			}
 			if ( ! isset( $field['tab'] ) || ! isset( $field['section'] ) ) {
 				continue;
 			}
 			$settings[ $field['tab'] ]['sections'][ $field['section'] ]['fields'][ $field['id'] ] = $field;
-
-			// Rebuild fields data for later use.
-			$this->fields[ $this->get_field_name( $field ) ] = $field;
 		}
 
+		// Set settings data with populated data.
 		$this->settings = $settings;
 
+		// Set settings data is populated state.
+		$this->settings_populated = true;
 	}
 
 	/**
@@ -1142,7 +1107,7 @@ class Wpyes {
 					add_filter( "sanitize_option_{$option_name}", array( $this, 'validate_field' ), 10, 3 );
 				}
 			}
-			add_action( $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ) );
+			add_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ) );
 		}
 	}
 
@@ -1281,22 +1246,22 @@ class Wpyes {
 	}
 
 	/**
-	 * Add admin action button.
+	 * Add admin button.
 	 *
 	 * @since 0.0.1
 	 * @param string $text   Page action button text will be place beside of the setting page title'. Default empty.
 	 * @param string $url    Page action button URL will be place beside of the setting page title. Default empty.
 	 * @return void
 	 */
-	public function add_action_button( $text, $url ) {
+	public function add_button( $text, $url ) {
 
 		// Validate action button text and url.
 		if ( empty( $text ) || empty( $url ) || ! is_string( $text ) || ! is_string( $url ) ) {
 			return;
 		}
 
-		$this->action_button_text = $text;
-		$this->action_button_url  = $url;
+		$this->button_text = $text;
+		$this->button_url  = $url;
 	}
 
 	/**
@@ -1307,9 +1272,9 @@ class Wpyes {
 		?>
 		<div class="wrap wpyes-wrap">
 			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
-				<h1 class="<?php echo ( $this->action_button_url && $this->action_button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
-				<?php if ( ! empty( $this->action_button_url ) && ! empty( $this->action_button_text ) ) : ?>
-					<a href="<?php echo esc_url( $this->action_button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->action_button_text ); ?></a>
+				<h1 class="<?php echo ( $this->button_url && $this->button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+				<?php if ( ! empty( $this->button_url ) && ! empty( $this->button_text ) ) : ?>
+					<a href="<?php echo esc_url( $this->button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->button_text ); ?></a>
 					<hr class="wp-header-end">
 				<?php endif; ?>
 			<?php endif; ?>
@@ -1328,9 +1293,9 @@ class Wpyes {
 				<div class="wpyes-tab-wrapper metabox-holder">
 					<?php foreach ( $settings as $tab_key => $tab ) : ?>
 						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wpyes-tab-group">
-							<?php do_action( $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab ); ?>
-							<?php do_action( $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
-							<?php do_action( $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab ); ?>
+							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab ); ?>
+							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
+							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab ); ?>
 						</div>
 					<?php endforeach; ?>
 				</div>
@@ -1362,7 +1327,7 @@ class Wpyes {
 		wp_enqueue_media();
 
 		// Do custom action hook to enqueue custom script and styles.
-		do_action( $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
+		do_action( 'wpyes_' . $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
 	}
 
 	/**
@@ -1465,7 +1430,7 @@ class Wpyes {
 		<?php
 
 		// Do custom action hook to print scripts needed.
-		do_action( $this->menu_slug . '_admin_footer_js', $screen, $this );
+		do_action( 'wpyes_' . $this->menu_slug . '_admin_footer_js', $screen, $this );
 	}
 
 	/**
