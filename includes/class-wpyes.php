@@ -100,6 +100,14 @@ class Wpyes {
 	private $recent_field;
 
 	/**
+	 * Settings tabs.
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
+	private $help_tabs = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @since 0.0.1
@@ -1118,7 +1126,7 @@ class Wpyes {
 					$args['parent_slug'] = 'options-general.php';
 				}
 
-				call_user_func(
+				$admin_page = call_user_func(
 					$args['method'],
 					$args['parent_slug'],
 					$args['page_title'],
@@ -1131,7 +1139,7 @@ class Wpyes {
 				break;
 
 			case 'add_menu_page':
-				call_user_func(
+				$admin_page = call_user_func(
 					$args['method'],
 					$args['page_title'],
 					$args['menu_title'],
@@ -1144,7 +1152,7 @@ class Wpyes {
 				break;
 
 			default:
-				call_user_func(
+				$admin_page = call_user_func(
 					$args['method'],
 					$args['page_title'],
 					$args['menu_title'],
@@ -1153,6 +1161,66 @@ class Wpyes {
 					$args['callback']
 				);
 				break;
+		}
+
+		// Register added help tabs to current admin screen.
+		add_action( 'load-' . $admin_page, array( $this, 'register_help_tabs' ) );
+	}
+
+	/**
+	 * Add help tab items.
+	 *
+	 * @since 1.0.0
+	 * @param array $help_tabs Indexed array of properties for the new tab object.
+	 */
+	public function add_help_tabs( $help_tabs ) {
+
+		// Validate help tab property.
+		if ( ! $help_tab || ! is_array( $help_tab ) ) {
+			return;
+		}
+
+		foreach ( $help_tabs as $help_tab ) {
+			$this->add_help_tab( $help_tab );
+		}
+	}
+
+	/**
+	 * Add help tab item.
+	 *
+	 * @since 1.0.0
+	 * @param array $help_tab { Array of properties for the help tab object.
+	 *  @type string            $id              ID for the setting tab. Default empty.
+	 *  @type string            $title           Label for the setting tab. Default empty.
+	 *  @type string|callable   $content         Setting sections that will be linked to the tab. Default array().
+	 * }
+	 */
+	public function add_help_tab( $help_tab ) {
+
+		// Validate help tab property.
+		if ( ! $help_tab || ! is_array( $help_tab ) || ! isset( $help_tab['id'], $help_tab['title'], $help_tab['content'] ) ) {
+			return;
+		}
+
+		$this->help_tabs[ $help_tab['id'] ] = $help_tab;
+	}
+
+	/**
+	 * Register help tabs to current admin screen.
+	 *
+	 * This function is hooked into "load-{$this->menu_slug}" action.
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_help_tabs() {
+		if ( ! $this->help_tabs ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		foreach ( $this->help_tabs as $help_tab ) {
+			$screen->add_help_tab( $help_tab );
 		}
 	}
 
