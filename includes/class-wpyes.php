@@ -994,7 +994,7 @@ class Wpyes {
 
 				case 'decimal':
 					if ( ! is_numeric( $value ) ) {
-							throw new Exception( __( 'Value must be a number.', 'wpyes' ) );
+						throw new Exception( __( 'Value must be a number.', 'wpyes' ) );
 					}
 					break;
 			}
