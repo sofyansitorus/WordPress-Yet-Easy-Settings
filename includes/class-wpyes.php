@@ -100,12 +100,28 @@ class Wpyes {
 	private $recent_field;
 
 	/**
-	 * Settings tabs.
+	 * Admin screen help_tabs.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $help_tabs = array();
+
+	/**
+	 * Admin screen action button text.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $action_button_text;
+
+	/**
+	 * Admin screen action button URL.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $action_button_url;
 
 	/**
 	 * Constructor
@@ -123,8 +139,6 @@ class Wpyes {
 	 *  @type string     $icon_url             URL to the icon to be used for this menu. Used when $method is 'add_menu_page'. Default empty.
 	 *  @type integer    $position             Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
 	 *  @type string     $parent_slug          Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
-	 *  @type string     $action_button_url    Page action button URL will be place beside of the setting page title. Default empty.
-	 *  @type string     $action_button_text   Page action button text will be place beside of the setting page title'. Default empty.
 	 * }
 	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the prefix should be
 	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'field_example_1'
@@ -139,16 +153,14 @@ class Wpyes {
 		$menu_args = wp_parse_args(
 			$menu_args,
 			array(
-				'method'             => 'add_menu_page',
-				'capability'         => 'manage_options',
-				'page_title'         => '',
-				'menu_title'         => '',
-				'callback'           => '',
-				'icon_url'           => '',
-				'position'           => null,
-				'parent_slug'        => '',
-				'action_button_url'  => '',
-				'action_button_text' => '',
+				'method'      => 'add_menu_page',
+				'capability'  => 'manage_options',
+				'page_title'  => '',
+				'menu_title'  => '',
+				'callback'    => '',
+				'icon_url'    => '',
+				'position'    => null,
+				'parent_slug' => '',
 			)
 		);
 
@@ -1225,6 +1237,25 @@ class Wpyes {
 	}
 
 	/**
+	 * Add admin action button.
+	 *
+	 * @since 1.0.0
+	 * @param string $text   Page action button text will be place beside of the setting page title'. Default empty.
+	 * @param string $url    Page action button URL will be place beside of the setting page title. Default empty.
+	 * @return void
+	 */
+	public function add_action_button( $text, $url ) {
+
+		// Validate action_button text and url.
+		if ( empty( $text ) || empty( $url ) || ! is_string( $text ) || ! is_string( $url ) ) {
+			return;
+		}
+
+		$this->action_button_text = $text;
+		$this->action_button_url  = $url;
+	}
+
+	/**
 	 * Render the settings form.
 	 */
 	public function render_form() {
@@ -1232,9 +1263,9 @@ class Wpyes {
 		?>
 		<div class="wrap wpyes-wrap">
 			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
-				<h1 class="<?php echo ( $this->menu_args['action_button_url'] && $this->menu_args['action_button_text'] ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
-				<?php if ( ! empty( $this->menu_args['action_button_url'] ) && ! empty( $this->menu_args['action_button_text'] ) ) : ?>
-					<a href="<?php echo esc_url( $this->menu_args['action_button_url'] ); ?>" class="page-title-action"><?php echo esc_html( $this->menu_args['action_button_text'] ); ?></a>
+				<h1 class="<?php echo ( $this->action_button_url && $this->action_button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+				<?php if ( ! empty( $this->action_button_url ) && ! empty( $this->action_button_text ) ) : ?>
+					<a href="<?php echo esc_url( $this->action_button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->action_button_text ); ?></a>
 					<hr class="wp-header-end">
 				<?php endif; ?>
 			<?php endif; ?>
