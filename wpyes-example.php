@@ -38,157 +38,148 @@ if ( ! class_exists( 'Wpyes' ) ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpyes.php';
 }
 
-if ( ! function_exists( 'wpyes_example_init' ) ) {
+if ( ! function_exists( 'wpyes_init_example_1' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
 	 * @since  1.0.0
 	 * @return void
 	 */
-	function wpyes_example_init() {
+	function wpyes_init_example_1() {
 
-		$setting_tabs = array(
+		$settings = new Wpyes( 'wpyes_example_1' ); // Initialize the Wpyes class.
+
+		$settings->add_tab(
 			array(
-				'id'       => 'miscellaneous_settings',
-				'priority' => 20,
-				'label'    => __( 'Miscellaneous', 'wpyes_example' ),
-			),
-			array(
-				'id' => 'email_settings',
-			),
+				'id' => 'tab_1',
+			)
 		);
 
-		$sections_of_email_tab = array(
+		$settings->add_section(
 			array(
-				'tab'   => 'email_settings',
-				'id'    => 'email_settings_sender',
-				'title' => __( 'Email Sender Options', 'wpyes_example' ),
-			),
-			array(
-				'tab'   => 'email_settings',
-				'id'    => 'email_settings_smtp',
-				'title' => __( 'SMTP Server Options', 'wpyes_example' ),
-			),
-			array(
-				'tab'   => 'email_settings',
-				'id'    => 'email_settings_imap',
-				'title' => __( 'IMAP Server Options', 'wpyes_example' ),
-			),
+				'id' => 'section_1',
+			)
 		);
 
-		$sections_of_miscellaneous_tab = array(
+		$settings->add_field(
 			array(
-				'tab'   => 'miscellaneous_settings',
-				'id'    => 'email_settings_senderx',
-				'title' => __( 'Email Sender Options', 'wpyes_example' ),
-			),
-			array(
-				'tab'   => 'miscellaneous_settings',
-				'id'    => 'email_settings_smtpx',
-				'title' => __( 'SMTP Server Options', 'wpyes_example' ),
-			),
-			array(
-				'tab'   => 'miscellaneous_settings',
-				'id'    => 'email_settings_imapx',
-				'title' => __( 'IMAP Server Options', 'wpyes_example' ),
-			),
+				'id' => 'wpyes_example_1_field_1_section_1_tab_1',
+			)
 		);
 
-		$fields_of_email_tab = array(
+		$settings->add_field(
 			array(
-				'section'  => 'email_settings_sender',
-				'id'       => 'email_from_name',
-				'label'    => __( '"From" Name', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 10,
-			),
-			array(
-				'section'  => 'email_settings_sender',
-				'id'       => 'email_from_address',
-				'label'    => __( '"From" Email Address', 'wpyes_example' ),
-				'type'     => 'email',
-				'priority' => 20,
-			),
-			array(
-				'section'  => 'email_settings_smtp',
-				'id'       => 'smtp_server',
-				'label'    => __( 'SMTP Server', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 10,
-			),
-			array(
-				'section'  => 'email_settings_smtp',
-				'id'       => 'smtp_username',
-				'label'    => __( 'SMTP Username', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 20,
-			),
-			array(
-				'section'  => 'email_settings_smtp',
-				'id'       => 'smtp_password',
-				'label'    => __( 'SMTP Password', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 30,
-			),
-			array(
-				'section'  => 'email_settings_smtp',
-				'id'       => 'smtp_port',
-				'label'    => __( 'SMTP Port', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 40,
-			),
-			array(
-				'section'  => 'email_settings_imap',
-				'id'       => 'imap_server',
-				'label'    => __( 'IMAP Server', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 10,
-			),
-			array(
-				'section'  => 'email_settings_imap',
-				'id'       => 'imap_username',
-				'label'    => __( 'IMAP Username', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 20,
-			),
-			array(
-				'section'  => 'email_settings_imap',
-				'id'       => 'imap_password',
-				'label'    => __( 'IMAP Password', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 30,
-			),
-			array(
-				'section'  => 'email_settings_imap',
-				'id'       => 'imap_port',
-				'label'    => __( 'IMAP Port', 'wpyes_example' ),
-				'type'     => 'text',
-				'priority' => 40,
-			),
-		);
-
-		$settings = new Wpyes( 'wpyes_example' ); // Initialize the Wpyes class.
-
-		$settings->add_tabs( $setting_tabs ); // Set the settings tabs.
-
-		$settings->add_sections( $sections_of_email_tab ); // Set the settings sections.
-
-		$settings->add_sections( $sections_of_miscellaneous_tab ); // Set the settings sections.
-
-		$settings->add_fields( $fields_of_email_tab ); // Set the settings fields.
-
-		// Set the admin page for the settings.
-		$settings->set_admin_page(
-			array(
-				'page_title' => __( 'Wpyes Settings Example', 'wpyes_example' ),
-				'menu_title' => __( 'Wpyes Settings', 'wpyes_example' ),
+				'id' => 'wpyes_example_1_field_2_section_1_tab_1',
 			)
 		);
 
 		$settings->init(); // Run the Wpyes class.
-
 	}
 
-	wpyes_example_init();
+	wpyes_init_example_1();
+}// End if().
 
+if ( ! function_exists( 'wpyes_init_example_2' ) ) {
+	/**
+	 * Initialize the plugin.
+	 *
+	 * @since  1.0.0
+	 * @return void
+	 */
+	function wpyes_init_example_2() {
+		$settings = new Wpyes(
+			'wpyes_example_2', array(
+				'action_button_url'  => admin_url( 'test' ),
+				'action_button_text' => 'Add New',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_example_2_field_1_section_1_tab_1',
+				'required' => true,
+				'type'     => 'number',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_example_2_field_2_section_1_tab_1',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_2',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_example_2_field_1_section_1_tab_2',
+				'required' => true,
+				'type'     => 'file',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_example_2_field_2_section_1_tab_2',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->add_help_tab(
+			array(
+				'id'      => 'my_help_tab',
+				'title'   => __( 'My Help Tab' ),
+				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here.' ) . '</p>',
+			)
+		);
+
+		$settings->add_help_tab(
+			array(
+				'id'      => 'my_help_tab2',
+				'title'   => __( 'My Help Tab2' ),
+				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here 2.' ) . '</p>',
+			)
+		);
+
+		$settings->add_action_button( 'Add New', 'admin.php' );
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_init_example_2();
 }// End if().
