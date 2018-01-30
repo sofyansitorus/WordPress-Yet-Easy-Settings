@@ -1270,7 +1270,7 @@ class Wpyes {
 				<?php endif; ?>
 			<?php endif; ?>
 			<?php settings_errors(); ?>
-			<?php if ( 0 < count( $settings ) ) : ?>
+			<?php if ( 1 < count( $settings ) ) : ?>
 				<div class="metabox-holder">
 					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
 						<?php foreach ( $settings as $tab_key => $tab ) : ?>
