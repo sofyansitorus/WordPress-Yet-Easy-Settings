@@ -264,8 +264,7 @@ class Wpyes {
 	 * @return array All registered setting tabs.
 	 */
 	private function get_tabs() {
-		uasort( $this->tabs, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_tabs', $this->tabs );
+		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_tabs', $this->tabs );
 	}
 
 	/**
@@ -362,8 +361,7 @@ class Wpyes {
 	 * @return array All registered settings sections.
 	 */
 	private function get_sections() {
-		uasort( $this->sections, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_sections', $this->sections );
+		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_sections', $this->sections );
 	}
 
 	/**
@@ -509,8 +507,7 @@ class Wpyes {
 	 * @return array  All registered settings fields.
 	 */
 	private function get_fields() {
-		uasort( $this->fields, array( $this, 'sort_by_position' ) );
-		return apply_filters( $this->menu_slug . '_settings_fields', $this->fields );
+		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings_fields', $this->fields );
 	}
 
 	/**
@@ -1031,7 +1028,7 @@ class Wpyes {
 	 * @return array All settings data array.
 	 */
 	private function get_settings() {
-		return apply_filters( $this->menu_slug . '_settings', $this->settings );
+		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings', $this->settings );
 	}
 
 	/**
@@ -1043,6 +1040,10 @@ class Wpyes {
 		$tabs     = $this->get_tabs();
 		$sections = $this->get_sections();
 		$fields   = $this->get_fields();
+
+		uasort( $tabs, array( $this, 'sort_by_position' ) );
+		uasort( $sections, array( $this, 'sort_by_position' ) );
+		uasort( $fields, array( $this, 'sort_by_position' ) );
 
 		if ( empty( $tabs ) ) {
 			$this->add_tab(
@@ -1386,7 +1387,7 @@ class Wpyes {
 
 				$(document).ready(function($) {
 
-					var menuSlug = "<?php echo $this->menu_slug; ?>";
+					var menuSlug = "<?php echo esc_html( $this->menu_slug ); ?>";
 
 					// Initiate color picker.
 					$(".wpyes-color-picker").wpColorPicker();
@@ -1454,11 +1455,7 @@ class Wpyes {
 					// Remove file from input.
 					$(".wpyes-remove-media").on("click", function(e) {
 						e.preventDefault();
-
-						$(this)
-							.closest("td")
-							.find('input[type="text"]')
-							.val("");
+						$(this).closest("td").find('input[type="text"]').val("");
 					});
 
 				});
@@ -1508,7 +1505,7 @@ class Wpyes {
 		}
 
 		// Define ignored words.
-		$ignores = apply_filters( $this->menu_slug . '_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
+		$ignores = apply_filters( 'wpyes_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
 
 		foreach ( $words as $index => $word ) {
 
