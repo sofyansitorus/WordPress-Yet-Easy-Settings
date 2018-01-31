@@ -1166,10 +1166,12 @@ class Wpyes {
 						</div>
 					<?php endforeach; ?>
 				</div>
+				<?php if ( 0 < count( $this->settings ) ) : ?>
 				<div class="wpyes-button-wrapper">
 					<?php settings_fields( $this->menu_slug ); ?>
 					<?php submit_button(); ?>
 				</div>
+				<?php endif; ?>
 			</form>
 		</div>
 		<?php
