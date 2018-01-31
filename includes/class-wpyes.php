@@ -52,12 +52,12 @@ class Wpyes {
 	private $settings = array();
 
 	/**
-	 * Settings is populated.
+	 * Populated settings data.
 	 *
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $settings_populated = false;
+	private $settings_populated = array();
 
 	/**
 	 * Recent tab id registered.
@@ -186,6 +186,7 @@ class Wpyes {
 	 *  @type string          $label           Label for the setting tab. Default empty.
 	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
 	 *  @type integer         $position        Setting tab position. Higher will displayed last. Default 10.
+	 *  @type callable        $callback        Callable function to be called to render output the tab content. Default Wpyes::render_tab.
 	 * }
 	 * @return array Normalized setting tab property.
 	 */
@@ -197,12 +198,17 @@ class Wpyes {
 				'label'    => '',
 				'sections' => array(),
 				'position' => 10,
+				'callback' => '',
 			)
 		);
 
 		// Create label if empty and not false.
 		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
 			$args['label'] = $this->humanize_slug( $args['id'] );
+		}
+
+		if ( empty( $args['callback'] ) || ! is_callable( $args['callback'] ) ) {
+			$args['callback'] = array( $this, 'render_tab' );
 		}
 
 		return $args;
@@ -483,30 +489,6 @@ class Wpyes {
 	 */
 	private function get_field_value( $field ) {
 		return get_option( $this->get_field_name( $field ), $field['default'] );
-	}
-
-	/**
-	 * Get settings field label from DB.
-	 *
-	 * @since 0.0.1
-	 * @param string $field_id Setting field name.
-	 */
-	private function get_field_label( $field_id ) {
-		$field = isset( $this->fields[ $field_id ] ) ? $this->fields[ $field_id ] : array();
-		if ( isset( $field['label'] ) ) {
-			return $field['label'];
-		}
-		return $this->humanize_slug( $field_id );
-	}
-
-	/**
-	 * Get settings field by option name.
-	 *
-	 * @since 0.0.1
-	 * @param string $option_name Option name.
-	 */
-	private function get_field( $option_name ) {
-		return isset( $this->fields[ $option_name ] ) ? $this->fields[ $option_name ] : array();
 	}
 
 	/**
@@ -908,59 +890,58 @@ class Wpyes {
 	 */
 	public function validate_field( $value, $option, $original_value ) {
 		try {
-			$field = $this->get_field( $option );
 
+			$field = isset( $this->settings[ $option ] ) ? $this->settings[ $option ] : false;
 			if ( empty( $field ) ) {
 				return $value;
 			}
 
 			// Validate if field is required.
 			if ( $field['required'] && ! is_numeric( $value ) && empty( $value ) ) {
-				throw new Exception( __( 'Value can not be empty.', 'wpyes' ) );
+				throw new Exception( __( 'Value can not be empty.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 			}
 
 			// Validate by field type.
 			switch ( $field['type'] ) {
-
 				case 'email':
 					if ( ! is_email( $value ) ) {
-						throw new Exception( __( 'Value must be a valid email address.', 'wpyes' ) );
+						throw new Exception( __( 'Value must be a valid email address.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
-
 				case 'url':
 					if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
-						throw new Exception( __( 'Value must be a valid URL.', 'wpyes' ) );
+						throw new Exception( __( 'Value must be a valid URL.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
-
 				case 'number':
 					if ( $value > intval( $value ) || $value < intval( $value ) ) {
-						throw new Exception( __( 'Value must be an integer.', 'wpyes' ) );
+						throw new Exception( __( 'Value must be an integer.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					$value = intval( $value );
 					break;
-
 				case 'decimal':
 					if ( ! is_numeric( $value ) ) {
-						throw new Exception( __( 'Value must be a number.', 'wpyes' ) );
+						throw new Exception( __( 'Value must be a number.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
 			}
 		} catch ( Exception $e ) {
 
 			// Check if same error already exists.
-			if ( ! isset( $this->errors[ $option ] ) ) {
-				$label     = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
-				$error_msg = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
-				add_settings_error(
-					$option,
-					$this->get_field_id( $field ),
-					$error_msg,
-					'error'
-				);
-				$this->errors[ $option ] = $error_msg;
+			if ( isset( $this->errors[ $option ] ) ) {
+				return $value;
 			}
+
+			// Add settings error.
+			$label     = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
+			$error_msg = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
+			add_settings_error(
+				$option,
+				$this->get_field_id( $field ),
+				$error_msg,
+				'error'
+			);
+			$this->errors[ $option ] = $error_msg;
 		}
 
 		return $value;
@@ -985,6 +966,7 @@ class Wpyes {
 	private function populate_settings() {
 
 		$settings = array();
+
 		$tabs     = array();
 		$sections = array();
 		$fields   = array();
@@ -999,38 +981,55 @@ class Wpyes {
 
 			switch ( $setting['type'] ) {
 				case 'tab':
+					// Assign recent tab ID.
 					$this->recent_tab = $data['id'];
 
-					array_push( $tabs, $data );
+					// Push data to tabs variable.
+					$tabs[ $data['id'] ] = $data;
 
 					break;
 				case 'section':
+					// Set tab key for $data if empty and $recent_tab is not empty.
 					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
 						$data['tab'] = $this->recent_tab;
 					}
 
-					$this->recent_section = $data['id'];
+					// Check if tab key for section $data is not empty.
+					if ( ! empty( $data['tab'] ) ) {
+						// Assign recent section ID.
+						$this->recent_section = $data['id'];
 
-					array_push( $sections, $data );
+						$section_unique_id = $data['tab'] . '_' . $data['id'];
+
+						$data['id'] = $section_unique_id;
+
+						// Push data to sections variable.
+						$sections[ $section_unique_id ] = $data;
+					}
 
 					break;
 				case 'field':
+					// Set tab key for $data if empty and $recent_tab is not empty.
 					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
 						$data['tab'] = $this->recent_tab;
 					}
+
+					// Set section key for $data if empty and $recent_section is not empty.
 					if ( empty( $data['section'] ) && ! empty( $this->recent_section ) ) {
 						$data['section'] = $this->recent_section;
 					}
 
-					$this->recent_field = $data['id'];
-
-					array_push( $fields, $data );
+					// Check if tab and section key for field $data is not empty.
+					if ( ! empty( $data['tab'] ) && ! empty( $data['section'] ) ) {
+						$data['section']       = $data['tab'] . '_' . $data['section'];
+						$fields[ $data['id'] ] = $data;
+					}
 
 					break;
 			}
 		}
 
-		if ( empty( $tabs ) || empty( $sections ) || empty( $sections ) ) {
+		if ( empty( $tabs ) || empty( $sections ) || empty( $fields ) ) {
 			return;
 		}
 
@@ -1043,32 +1042,33 @@ class Wpyes {
 		// Sort tabs to settings data by positin property.
 		uasort( $fields, array( $this, 'sort_by_position' ) );
 
-		// Asiggn tabs to settings data.
-		foreach ( $tabs as $tab ) {
-			$settings[ $tab['id'] ] = $tab;
-		}
+		$this->settings = array();
 
-		// Asiggn sections to settings data.
-		foreach ( $sections as $section ) {
-			if ( ! isset( $section['tab'] ) ) {
+		foreach ( $fields as $key => $field ) {
+
+			// Validate field data.
+			if ( ! isset( $tabs[ $field['tab'] ] ) || ! isset( $sections[ $field['section'] ] ) ) {
 				continue;
 			}
-			$settings[ $section['tab'] ]['sections'][ $section['id'] ] = $section;
+
+			$sections[ $field['section'] ]['fields'][ $key ]   = $field;
+			$this->settings[ $this->get_field_name( $field ) ] = $field;
 		}
 
-		// Asiggn fields to settings data.
-		foreach ( $fields as $field_key => $field ) {
-			if ( ! isset( $field['tab'] ) || ! isset( $field['section'] ) ) {
+		foreach ( $sections as $key => $section ) {
+
+			// Validate section data.
+			if ( ! isset( $tabs[ $section['tab'] ] ) ) {
 				continue;
 			}
-			$settings[ $field['tab'] ]['sections'][ $field['section'] ]['fields'][ $field['id'] ] = $field;
+
+			$tabs[ $section['tab'] ]['sections'][ $key ] = $section;
 		}
 
-		// Set settings data with populated data.
-		$this->settings = $settings;
-
-		// Set settings data state is populated.
-		$this->settings_populated = true;
+		// Set populated settings data.
+		foreach ( $tabs as $key => $tab ) {
+			$this->settings_populated[ $key ] = $tab;
+		}
 	}
 
 	/**
@@ -1093,32 +1093,85 @@ class Wpyes {
 	}
 
 	/**
-	 * Registers the settings sections and fileds to WordPress
+	 * Registers the settings to WordPress.
 	 *
 	 * This function is hooked into admin_init.
 	 */
 	public function register_settings() {
-		$settings = $this->get_settings();
-		foreach ( $settings as $tab_key => $tab ) {
+		foreach ( $this->settings_populated as $tab_key => $tab ) {
+
+			// Add action hook to render for the tab content.
+			add_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab['callback'] );
+
 			foreach ( $tab['sections'] as $section_key => $section ) {
 				$section_unique_id = $this->get_section_unique_id( $section );
+
+				// Add a new section to a settings page.
 				add_settings_section( $section_unique_id, $section['title'], $section['callback'], $section_unique_id );
+
 				foreach ( $section['fields'] as $field_key => $field ) {
-					$option_name = $this->get_field_name( $field );
-					add_settings_field( $option_name, $field['label'], array( $this, 'render_field' ), $section_unique_id, $section_unique_id, $field );
-					$register_setting_args = array(
-						'type'              => $field['data_type'],
-						'group'             => $this->menu_slug,
-						'description'       => $field['description'],
-						'sanitize_callback' => $field['sanitize_callback'],
-						'show_in_rest'      => $field['show_in_rest'],
+					$option = $this->get_field_name( $field );
+
+					// Register a settings field to a settings page and section.
+					add_settings_field( $option, $field['label'], array( $this, 'render_field' ), $section_unique_id, $section_unique_id, $field );
+
+					// Register a setting and its data.
+					register_setting(
+						$this->menu_slug, $option, array(
+							'type'              => $field['data_type'],
+							'group'             => $this->menu_slug,
+							'description'       => $field['description'],
+							'sanitize_callback' => $field['sanitize_callback'],
+							'show_in_rest'      => $field['show_in_rest'],
+						)
 					);
-					register_setting( $this->menu_slug, $option_name, $register_setting_args );
-					add_filter( "sanitize_option_{$option_name}", array( $this, 'validate_field' ), 10, 3 );
+
+					// Add filter hook to validate for the setting field.
+					add_filter( "sanitize_option_{$option}", array( $this, 'validate_field' ), 10, 3 );
 				}
 			}
-			add_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, array( $this, 'render_tab' ) );
 		}
+	}
+
+	/**
+	 * Render the settings form.
+	 */
+	public function render_form() {
+		?>
+		<div class="wrap wpyes-wrap">
+			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
+				<h1 class="<?php echo ( $this->button_url && $this->button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
+				<?php if ( ! empty( $this->button_url ) && ! empty( $this->button_text ) ) : ?>
+					<a href="<?php echo esc_url( $this->button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->button_text ); ?></a>
+					<hr class="wp-header-end">
+				<?php endif; ?>
+			<?php endif; ?>
+			<?php settings_errors(); ?>
+			<?php if ( 1 < count( $this->settings_populated ) ) : ?>
+				<div class="metabox-holder">
+					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
+						<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
+						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wpyes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
+						<?php endforeach; ?>
+					</h2>
+				</div>
+				<div class"clear"></div>
+			<?php endif; ?>
+			<form method="post" action="options.php">
+				<div class="wpyes-tab-wrapper metabox-holder">
+					<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
+						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wpyes-tab-group">
+							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
+						</div>
+					<?php endforeach; ?>
+				</div>
+				<div class="wpyes-button-wrapper">
+					<?php settings_fields( $this->menu_slug ); ?>
+					<?php submit_button(); ?>
+				</div>
+			</form>
+		</div>
+		<?php
 	}
 
 	/**
@@ -1272,50 +1325,6 @@ class Wpyes {
 
 		$this->button_text = $text;
 		$this->button_url  = $url;
-	}
-
-	/**
-	 * Render the settings form.
-	 */
-	public function render_form() {
-		$settings = $this->get_settings();
-		?>
-		<div class="wrap wpyes-wrap">
-			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
-				<h1 class="<?php echo ( $this->button_url && $this->button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
-				<?php if ( ! empty( $this->button_url ) && ! empty( $this->button_text ) ) : ?>
-					<a href="<?php echo esc_url( $this->button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->button_text ); ?></a>
-					<hr class="wp-header-end">
-				<?php endif; ?>
-			<?php endif; ?>
-			<?php settings_errors(); ?>
-			<?php if ( 1 < count( $settings ) ) : ?>
-				<div class="metabox-holder">
-					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
-						<?php foreach ( $settings as $tab_key => $tab ) : ?>
-						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wpyes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
-						<?php endforeach; ?>
-					</h2>
-				</div>
-				<div class"clear"></div>
-			<?php endif; ?>
-			<form method="post" action="options.php">
-				<div class="wpyes-tab-wrapper metabox-holder">
-					<?php foreach ( $settings as $tab_key => $tab ) : ?>
-						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wpyes-tab-group">
-							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_before_' . $tab_key, $tab ); ?>
-							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
-							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_after_' . $tab_key, $tab ); ?>
-						</div>
-					<?php endforeach; ?>
-				</div>
-				<div class="wpyes-button-wrapper">
-					<?php settings_fields( $this->menu_slug ); ?>
-					<?php submit_button(); ?>
-				</div>
-			</form>
-		</div>
-		<?php
 	}
 
 	/**
