@@ -60,6 +60,14 @@ class Wpyes {
 	private $settings_populated = array();
 
 	/**
+	 * Setting errors data.
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
+	private $errors = array();
+
+	/**
 	 * Recent tab id registered.
 	 *
 	 * @since 0.0.1
@@ -106,14 +114,6 @@ class Wpyes {
 	 * @var string
 	 */
 	private $button_url;
-
-	/**
-	 * Errors data.
-	 *
-	 * @since 0.0.1
-	 * @var array
-	 */
-	private $errors = array();
 
 	/**
 	 * Constructor
@@ -207,6 +207,7 @@ class Wpyes {
 			$args['label'] = $this->humanize_slug( $args['id'] );
 		}
 
+		// Add default callback to render tab content.
 		if ( empty( $args['callback'] ) || ! is_callable( $args['callback'] ) ) {
 			$args['callback'] = array( $this, 'render_tab' );
 		}
@@ -578,7 +579,7 @@ class Wpyes {
 	 */
 	public function render_field( $field ) {
 		if ( ! empty( $field['callback_before'] ) && is_callable( $field['callback_before'] ) ) {
-			call_user_func( $field['callback_before'], $field, $this );
+			call_user_func( $field['callback_before'], $field );
 		}
 
 		if ( is_string( $field['type'] ) && is_callable( array( $this, 'render_field_' . $field['type'] ) ) ) {
@@ -586,11 +587,11 @@ class Wpyes {
 		}
 
 		if ( ! is_string( $field['type'] ) && is_callable( $field['type'] ) ) {
-			call_user_func( $type, $field, $this );
+			call_user_func( $field['type'], $field );
 		}
 
 		if ( ! empty( $field['callback_after'] ) && is_callable( $field['callback_after'] ) ) {
-			call_user_func( $field['callback_after'], $field, $this );
+			call_user_func( $field['callback_after'], $field );
 		}
 	}
 
@@ -880,6 +881,8 @@ class Wpyes {
 	/**
 	 * Validate setting field.
 	 *
+	 * This function is hooked into sanitize_option_{$option} filter.
+	 *
 	 * @since 0.0.1
 	 *
 	 * @param string $value          The sanitized option value.
@@ -964,8 +967,6 @@ class Wpyes {
 	 * Populate settings data.
 	 */
 	private function populate_settings() {
-
-		$settings = array();
 
 		$tabs     = array();
 		$sections = array();
@@ -1197,55 +1198,53 @@ class Wpyes {
 			'add_submenu_page',
 		);
 
-		$args = $this->menu_args;
-
-		if ( ! in_array( $args['method'], $allowed, true ) ) {
-			$args['method'] = 'add_menu_page';
+		if ( ! in_array( $this->menu_args['method'], $allowed, true ) ) {
+			$this->menu_args['method'] = 'add_menu_page';
 		}
 
-		switch ( $args['method'] ) {
+		switch ( $this->menu_args['method'] ) {
 			case 'add_submenu_page':
-				if ( empty( $args['parent_slug'] ) ) {
-					$args['parent_slug'] = 'options-general.php';
+				if ( empty( $this->menu_args['parent_slug'] ) ) {
+					$this->menu_args['parent_slug'] = 'options-general.php';
 				}
 
 				$admin_page = call_user_func(
-					$args['method'],
-					$args['parent_slug'],
-					$args['page_title'],
-					$args['menu_title'],
-					$args['capability'],
+					$this->menu_args['method'],
+					$this->menu_args['parent_slug'],
+					$this->menu_args['page_title'],
+					$this->menu_args['menu_title'],
+					$this->menu_args['capability'],
 					$this->menu_slug,
-					$args['callback']
+					$this->menu_args['callback']
 				);
 				break;
 
 			case 'add_menu_page':
 				$admin_page = call_user_func(
-					$args['method'],
-					$args['page_title'],
-					$args['menu_title'],
-					$args['capability'],
+					$this->menu_args['method'],
+					$this->menu_args['page_title'],
+					$this->menu_args['menu_title'],
+					$this->menu_args['capability'],
 					$this->menu_slug,
-					$args['callback'],
-					$args['icon_url'],
-					$args['position']
+					$this->menu_args['callback'],
+					$this->menu_args['icon_url'],
+					$this->menu_args['position']
 				);
 				break;
 
 			default:
 				$admin_page = call_user_func(
-					$args['method'],
-					$args['page_title'],
-					$args['menu_title'],
-					$args['capability'],
+					$this->menu_args['method'],
+					$this->menu_args['page_title'],
+					$this->menu_args['menu_title'],
+					$this->menu_args['capability'],
 					$this->menu_slug,
-					$args['callback']
+					$this->menu_args['callback']
 				);
 				break;
 		}
 
-		// Register added help tabs to current admin screen.
+		// Register help tabs to current admin screen.
 		add_action( 'load-' . $admin_page, array( $this, 'register_help_tabs' ) );
 	}
 
@@ -1309,11 +1308,11 @@ class Wpyes {
 	}
 
 	/**
-	 * Add admin button.
+	 * Add custom button beside of the setting page title.
 	 *
 	 * @since 0.0.1
-	 * @param string $text   Page action button text will be place beside of the setting page title'. Default empty.
-	 * @param string $url    Page action button URL will be place beside of the setting page title. Default empty.
+	 * @param string $text   The action button text.
+	 * @param string $url    The action button URL.
 	 * @return void
 	 */
 	public function add_button( $text, $url ) {
