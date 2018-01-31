@@ -149,7 +149,7 @@ class Wpyes {
 				'capability'  => 'manage_options',
 				'page_title'  => '',
 				'menu_title'  => '',
-				'callback'    => '',
+				'callback'    => array( $this, 'render_form' ),
 				'icon_url'    => '',
 				'position'    => null,
 				'parent_slug' => '',
@@ -167,7 +167,7 @@ class Wpyes {
 		}
 
 		// Set menu_title if empty and not false.
-		if ( empty( $menu_args['callback'] ) || ! is_callable( $menu_args['callback'] ) ) {
+		if ( empty( $menu_args['callback'] ) ) {
 			$menu_args['callback'] = array( $this, 'render_form' );
 		}
 
@@ -1079,10 +1079,6 @@ class Wpyes {
 
 		$this->populate_settings();
 
-		if ( ! $this->settings_populated ) {
-			return;
-		}
-
 		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
 
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 10 );
@@ -1099,6 +1095,11 @@ class Wpyes {
 	 * This function is hooked into admin_init.
 	 */
 	public function register_settings() {
+
+		if ( ! $this->settings_populated ) {
+			return;
+		}
+
 		foreach ( $this->settings_populated as $tab_key => $tab ) {
 
 			// Add action hook to render for the tab content.
