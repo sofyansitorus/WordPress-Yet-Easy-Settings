@@ -8,13 +8,13 @@
  * that starts the plugin.
  *
  * @link              https://github.com/sofyansitorus
- * @since             1.0.0
+ * @since             0.0.1
  * @package           Wpyes
  *
  * Plugin Name:       Wpyes Example
  * Plugin URI:        https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings
  * Description:       This is sample for how to use WordPress-Yet-Easy-Settings in a plugin.
- * Version:           1.0.0
+ * Version:           0.0.1
  * Author:            Sofyan Sitorus
  * Author URI:        https://github.com/sofyansitorus
  * License:           GPL-2.0+
@@ -26,10 +26,10 @@
 /**
  * Load plugin textdomain.
  *
- * @since 1.0.0
+ * @since 0.0.1
  */
 function wpyes_example_load_textdomain() {
-	load_plugin_textdomain( 'wpyes_example', false, basename( dirname( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'wpyes', false, basename( dirname( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'wpyes_example_load_textdomain' );
 
@@ -38,16 +38,16 @@ if ( ! class_exists( 'Wpyes' ) ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpyes.php';
 }
 
-if ( ! function_exists( 'wpyes_example_simple' ) ) {
+if ( ! function_exists( 'wpyes_simple' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
-	 * @since  1.0.0
+	 * @since  0.0.1
 	 * @return void
 	 */
-	function wpyes_example_simple() {
+	function wpyes_simple() {
 
-		$settings = new Wpyes( 'wpyes_example_simple' ); // Initialize the Wpyes class.
+		$settings = new Wpyes( 'wpyes_simple' ); // Initialize the Wpyes class.
 
 		$settings->add_tab(
 			array(
@@ -63,31 +63,31 @@ if ( ! function_exists( 'wpyes_example_simple' ) ) {
 
 		$settings->add_field(
 			array(
-				'id' => 'wpyes_example_field_1',
+				'id' => 'wpyes_simple_field_1',
 			)
 		);
 
 		$settings->add_field(
 			array(
-				'id' => 'wpyes_example_field_2',
+				'id' => 'wpyes_simple_field_2',
 			)
 		);
 
 		$settings->init(); // Run the Wpyes class.
 	}
 
-	wpyes_example_simple();
+	wpyes_simple();
 }// End if().
 
-if ( ! function_exists( 'wpyes_example_tabs' ) ) {
+if ( ! function_exists( 'wpyes_tabs' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
-	 * @since  1.0.0
+	 * @since  0.0.1
 	 * @return void
 	 */
-	function wpyes_example_tabs() {
-		$settings = new Wpyes( 'wpyes_example_tabs' ); // Initialize the Wpyes class.
+	function wpyes_tabs() {
+		$settings = new Wpyes( 'wpyes_tabs' ); // Initialize the Wpyes class.
 
 		$settings->add_tab(
 			array(
@@ -103,17 +103,17 @@ if ( ! function_exists( 'wpyes_example_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_tabs_field_1',
+				'id'       => 'wpyes_tabs_field_1',
 				'required' => true,
-				'type'     => 'number',
+				'type'     => 'text',
 			)
 		);
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_tabs_field_2',
+				'id'       => 'wpyes_tabs_field_2',
 				'required' => true,
-				'type'     => 'multiselect',
+				'type'     => 'multicheckbox',
 				'options'  => array(
 					'foo'     => 'foo',
 					'bar'     => 'bar',
@@ -136,7 +136,7 @@ if ( ! function_exists( 'wpyes_example_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_tabs_field_3',
+				'id'       => 'wpyes_tabs_field_3',
 				'required' => true,
 				'type'     => 'file',
 			)
@@ -144,7 +144,7 @@ if ( ! function_exists( 'wpyes_example_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_tabs_field_4',
+				'id'       => 'wpyes_tabs_field_4',
 				'required' => true,
 				'type'     => 'multiselect',
 				'options'  => array(
@@ -158,18 +158,18 @@ if ( ! function_exists( 'wpyes_example_tabs' ) ) {
 		$settings->init(); // Run the Wpyes class.
 	}
 
-	wpyes_example_tabs();
+	wpyes_tabs();
 }// End if().
 
-if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
+if ( ! function_exists( 'wpyes_button' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
-	 * @since  1.0.0
+	 * @since  0.0.1
 	 * @return void
 	 */
-	function wpyes_example_help_tabs() {
-		$settings = new Wpyes( 'wpyes_example_help_tabs' ); // Initialize the Wpyes class.
+	function wpyes_button() {
+		$settings = new Wpyes( 'wpyes_button' ); // Initialize the Wpyes class.
 
 		$settings->add_tab(
 			array(
@@ -185,7 +185,7 @@ if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_help_tabs_field_1',
+				'id'       => 'wpyes_button_field_1',
 				'required' => true,
 				'type'     => 'number',
 			)
@@ -193,7 +193,7 @@ if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_help_tabs_field_2',
+				'id'       => 'wpyes_button_field_2',
 				'required' => true,
 				'type'     => 'multiselect',
 				'options'  => array(
@@ -204,9 +204,28 @@ if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
 			)
 		);
 
+		$settings->add_button( 'Custom Action Button', 'index.php' );
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_button();
+}// End if().
+
+
+if ( ! function_exists( 'wpyes_help_tabs' ) ) {
+	/**
+	 * Initialize the plugin.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_help_tabs() {
+		$settings = new Wpyes( 'wpyes_help_tabs' ); // Initialize the Wpyes class.
+
 		$settings->add_tab(
 			array(
-				'id' => 'tab_2',
+				'id' => 'tab_1',
 			)
 		);
 
@@ -218,15 +237,15 @@ if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_help_tabs_field_3',
+				'id'       => 'wpyes_help_tabs_field_1',
 				'required' => true,
-				'type'     => 'file',
+				'type'     => 'number',
 			)
 		);
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_help_tabs_field_4',
+				'id'       => 'wpyes_help_tabs_field_2',
 				'required' => true,
 				'type'     => 'multiselect',
 				'options'  => array(
@@ -256,121 +275,21 @@ if ( ! function_exists( 'wpyes_example_help_tabs' ) ) {
 		$settings->init(); // Run the Wpyes class.
 	}
 
-	wpyes_example_help_tabs();
+	wpyes_help_tabs();
 }// End if().
 
-if ( ! function_exists( 'wpyes_example_action_button' ) ) {
+if ( ! function_exists( 'wpyes_submenu' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
-	 * @since  1.0.0
+	 * @since  0.0.1
 	 * @return void
 	 */
-	function wpyes_example_action_button() {
-		$settings = new Wpyes( 'wpyes_example_action_button' ); // Initialize the Wpyes class.
-
-		$settings->add_tab(
-			array(
-				'id' => 'tab_1',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_example_action_button_field_1',
-				'required' => true,
-				'type'     => 'number',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_example_action_button_field_2',
-				'required' => true,
-				'type'     => 'multiselect',
-				'options'  => array(
-					'foo'     => 'foo',
-					'bar'     => 'bar',
-					'foo bar' => 'foo bar',
-				),
-			)
-		);
-
-		$settings->add_tab(
-			array(
-				'id' => 'tab_2',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_example_action_button_field_3',
-				'required' => true,
-				'type'     => 'file',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_example_action_button_field_4',
-				'required' => true,
-				'type'     => 'multiselect',
-				'options'  => array(
-					'foo'     => 'foo',
-					'bar'     => 'bar',
-					'foo bar' => 'foo bar',
-				),
-			)
-		);
-
-		$settings->add_help_tab(
-			array(
-				'id'      => 'my_help_tab',
-				'title'   => __( 'My Help Tab' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here.' ) . '</p>',
-			)
-		);
-
-		$settings->add_help_tab(
-			array(
-				'id'      => 'my_help_tab2',
-				'title'   => __( 'My Help Tab2' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here 2.' ) . '</p>',
-			)
-		);
-
-		$settings->add_action_button( 'New Custom Button', 'index.php' );
-
-		$settings->init(); // Run the Wpyes class.
-	}
-
-	wpyes_example_action_button();
-}// End if().
-
-if ( ! function_exists( 'wpyes_example_submenu' ) ) {
-	/**
-	 * Initialize the plugin.
-	 *
-	 * @since  1.0.0
-	 * @return void
-	 */
-	function wpyes_example_submenu() {
+	function wpyes_submenu() {
 		$settings = new Wpyes(
-			'wpyes_example_submenu', array(
+			'wpyes_submenu', array(
 				'method'      => 'add_submenu_page',
-				'parent_slug' => 'wpyes_example_simple',
+				'parent_slug' => 'wpyes_simple',
 			)
 		); // Initialize the Wpyes class.
 
@@ -388,7 +307,7 @@ if ( ! function_exists( 'wpyes_example_submenu' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_submenu_field_1',
+				'id'       => 'wpyes_submenu_field_1',
 				'required' => true,
 				'type'     => 'number',
 			)
@@ -396,7 +315,7 @@ if ( ! function_exists( 'wpyes_example_submenu' ) ) {
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_submenu_field_2',
+				'id'       => 'wpyes_submenu_field_2',
 				'required' => true,
 				'type'     => 'multiselect',
 				'options'  => array(
@@ -407,40 +326,27 @@ if ( ! function_exists( 'wpyes_example_submenu' ) ) {
 			)
 		);
 
-		$settings->add_help_tab(
-			array(
-				'id'      => 'my_help_tab',
-				'title'   => __( 'My Help Tab' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here.' ) . '</p>',
-			)
-		);
-
-		$settings->add_help_tab(
-			array(
-				'id'      => 'my_help_tab2',
-				'title'   => __( 'My Help Tab2' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here 2.' ) . '</p>',
-			)
-		);
-
-		$settings->add_action_button( 'New Custom Button', 'index.php' );
-
 		$settings->init(); // Run the Wpyes class.
 	}
 
-	wpyes_example_submenu();
+	wpyes_submenu();
 }// End if().
 
 
-if ( ! function_exists( 'wpyes_example_all_fields' ) ) {
+if ( ! function_exists( 'wpyes_all' ) ) {
 	/**
 	 * Initialize the plugin.
 	 *
-	 * @since  1.0.0
+	 * @since  0.0.1
 	 * @return void
 	 */
-	function wpyes_example_all_fields() {
-		$settings = new Wpyes( 'wpyes_example_all_fields' ); // Initialize the Wpyes class.
+	function wpyes_all() {
+
+		$settings = new Wpyes(
+			'wpyes_all', array(
+				'page_title' => __( 'All Settings Fields', 'wpyes' ),
+			)
+		); // Initialize the Wpyes class.
 
 		$settings->add_tab(
 			array(
@@ -450,24 +356,81 @@ if ( ! function_exists( 'wpyes_example_all_fields' ) ) {
 
 		$settings->add_section(
 			array(
-				'id' => 'section_1',
+				'id' => 'section_basic',
+				'id' => __( 'Basic Field Type', 'wpyes' ),
 			)
 		);
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_all_fields_field_1',
-				'required' => true,
-				'type'     => 'number',
+				'id'    => 'wpyes_all_field_text',
+				'label' => __( 'Text', 'wpyes' ),
+				'type'  => 'text',
 			)
 		);
 
 		$settings->add_field(
 			array(
-				'id'       => 'wpyes_example_all_fields_field_2',
-				'required' => true,
-				'type'     => 'multiselect',
-				'options'  => array(
+				'id'    => 'wpyes_all_field_url',
+				'label' => __( 'URL', 'wpyes' ),
+				'type'  => 'url',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_number',
+				'label' => __( 'Number', 'wpyes' ),
+				'type'  => 'number',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_decimal',
+				'label' => __( 'Decimal', 'wpyes' ),
+				'type'  => 'decimal',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_password',
+				'label' => __( 'Password', 'wpyes' ),
+				'type'  => 'password',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_email',
+				'label' => __( 'Email', 'wpyes' ),
+				'type'  => 'email',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_textarea',
+				'label' => __( 'Textarea', 'wpyes' ),
+				'type'  => 'textarea',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_checkbox',
+				'label' => __( 'Checkbox', 'wpyes' ),
+				'type'  => 'checkbox',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'      => 'wpyes_all_field_multicheckbox',
+				'label'   => __( 'Multi Checkbox', 'wpyes' ),
+				'type'    => 'multicheckbox',
+				'options' => array(
 					'foo'     => 'foo',
 					'bar'     => 'bar',
 					'foo bar' => 'foo bar',
@@ -475,26 +438,78 @@ if ( ! function_exists( 'wpyes_example_all_fields' ) ) {
 			)
 		);
 
-		$settings->add_help_tab(
+		$settings->add_field(
 			array(
-				'id'      => 'my_help_tab',
-				'title'   => __( 'My Help Tab' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here.' ) . '</p>',
+				'id'      => 'wpyes_all_field_select',
+				'label'   => __( 'Select', 'wpyes' ),
+				'type'    => 'select',
+				'options' => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
 			)
 		);
 
-		$settings->add_help_tab(
+		$settings->add_field(
 			array(
-				'id'      => 'my_help_tab2',
-				'title'   => __( 'My Help Tab2' ),
-				'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here 2.' ) . '</p>',
+				'id'      => 'wpyes_all_field_multiselect',
+				'label'   => __( 'Multi Select', 'wpyes' ),
+				'type'    => 'multiselect',
+				'options' => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
 			)
 		);
 
-		$settings->add_action_button( 'New Custom Button', 'index.php' );
+		$settings->add_field(
+			array(
+				'id'      => 'wpyes_all_field_radio',
+				'label'   => __( 'Radio', 'wpyes' ),
+				'type'    => 'radio',
+				'options' => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_advanced',
+				'id' => __( 'Advanced Field Type', 'wpyes' ),
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_color',
+				'label' => __( 'Color Picker', 'wpyes' ),
+				'type'  => 'color',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_file',
+				'label' => __( 'File Upload', 'wpyes' ),
+				'type'  => 'file',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'    => 'wpyes_all_field_wysiwyg',
+				'label' => __( 'WYSIWYG', 'wpyes' ),
+				'type'  => 'wysiwyg',
+			)
+		);
 
 		$settings->init(); // Run the Wpyes class.
 	}
 
-	wpyes_example_all_fields();
+	wpyes_all();
 }// End if().
