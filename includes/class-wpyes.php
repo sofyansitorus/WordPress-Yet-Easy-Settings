@@ -904,6 +904,11 @@ class Wpyes {
 				throw new Exception( __( 'Value can not be empty.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
 			}
 
+			// If value is empty and not numeric, no need to validate further.
+			if ( empty( $value ) && ! is_numeric( $value ) ) {
+				return $value;
+			}
+
 			// Validate by field type.
 			switch ( $field['type'] ) {
 				case 'email':
