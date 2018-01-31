@@ -40,7 +40,7 @@ if ( ! class_exists( 'Wpyes' ) ) {
 
 if ( ! function_exists( 'wpyes_simple' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for simple settings
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -81,7 +81,7 @@ if ( ! function_exists( 'wpyes_simple' ) ) {
 
 if ( ! function_exists( 'wpyes_tabs' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for settings with tabs
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -163,7 +163,7 @@ if ( ! function_exists( 'wpyes_tabs' ) ) {
 
 if ( ! function_exists( 'wpyes_button' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for settings with custom action button
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -215,7 +215,7 @@ if ( ! function_exists( 'wpyes_button' ) ) {
 
 if ( ! function_exists( 'wpyes_help_tabs' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for settings with help tabs
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -280,7 +280,7 @@ if ( ! function_exists( 'wpyes_help_tabs' ) ) {
 
 if ( ! function_exists( 'wpyes_submenu' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for submenu settings
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -335,7 +335,7 @@ if ( ! function_exists( 'wpyes_submenu' ) ) {
 
 if ( ! function_exists( 'wpyes_all' ) ) {
 	/**
-	 * Initialize the plugin.
+	 * Example for settings with all available fields type.
 	 *
 	 * @since  0.0.1
 	 * @return void
@@ -512,4 +512,237 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 	}
 
 	wpyes_all();
+}// End if().
+
+if ( ! function_exists( 'wpyes_custom_tab_content' ) ) {
+	/**
+	 * Example for custom tab content
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_tab_content() {
+		$settings = new Wpyes( 'wpyes_custom_tab_content' ); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id' => 'wpyes_custom_tab_content_field_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id' => 'wpyes_custom_tab_content_field_2',
+			)
+		);
+
+		$settings->add_tab(
+			array(
+				'id'       => 'tab_2',
+				'callback' => function() {
+				?>
+				<div>
+					<canvas id="myChart" width="400" height="200"></canvas>
+				</div>
+				<?php
+				},
+			)
+		);
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_custom_tab_content();
+
+	/**
+	 * Enqueue dependencies js scripts for chartjs.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_tab_content_enqueue_scripts() {
+		wp_enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false );
+	}
+
+	add_action( 'wpyes_wpyes_custom_tab_content_admin_enqueue_scripts', 'wpyes_custom_tab_content_enqueue_scripts' );
+
+	/**
+	 * Enqueue dependencies js scripts for chartjs.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_tab_content_print_footer_js() {
+	?>
+		<script>
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var chart = new Chart(ctx, {
+			// The type of chart we want to create
+			type: 'line', // also try bar or other graph types
+
+			// The data for our dataset
+			data: {
+				labels: ["Jun 2016", "Jul 2016", "Aug 2016", "Sep 2016", "Oct 2016", "Nov 2016", "Dec 2016", "Jan 2017", "Feb 2017", "Mar 2017", "Apr 2017", "May 2017"],
+				// Information about the dataset
+			datasets: [{
+					label: "Rainfall",
+					backgroundColor: 'lightblue',
+					borderColor: 'royalblue',
+					data: [26.4, 39.8, 66.8, 66.4, 40.6, 55.2, 77.4, 69.8, 57.8, 76, 110.8, 142.6],
+				}]
+			},
+
+			// Configuration options
+			options: {
+			layout: {
+			padding: 10,
+			},
+				legend: {
+					position: 'bottom',
+				},
+				title: {
+					display: true,
+					text: 'Precipitation in Toronto'
+				},
+				scales: {
+					yAxes: [{
+						scaleLabel: {
+							display: true,
+							labelString: 'Precipitation in mm'
+						}
+					}],
+					xAxes: [{
+						scaleLabel: {
+							display: true,
+							labelString: 'Month of the Year'
+						}
+					}]
+				}
+			}
+		});
+	</script>
+	<?php
+	}
+
+	add_action( 'wpyes_wpyes_custom_tab_content_admin_footer_js', 'wpyes_custom_tab_content_print_footer_js' );
+
+}// End if().
+
+if ( ! function_exists( 'wpyes_custom_page_content' ) ) {
+	/**
+	 * Example for custom admin page content
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_page_content() {
+		$settings = new Wpyes(
+			'wpyes_custom_page_content', array(
+				'callback' => 'wpyes_custom_page_content_canvas',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_custom_page_content();
+
+	/**
+	 * Enqueue dependencies js scripts for chartjs.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_page_content_canvas() {
+	?>
+	<div>
+		<canvas id="myChart" width="400" height="200"></canvas>
+	</div>
+	<?php
+	}
+
+
+	/**
+	 * Enqueue dependencies js scripts for chartjs.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_page_content_enqueue_scripts() {
+		wp_enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false );
+	}
+
+	add_action( 'wpyes_wpyes_custom_page_content_admin_enqueue_scripts', 'wpyes_custom_page_content_enqueue_scripts' );
+
+	/**
+	 * Enqueue dependencies js scripts for chartjs.
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_custom_page_content_print_footer_js() {
+		?>
+		<script>
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var chart = new Chart(ctx, {
+			// The type of chart we want to create
+			type: 'line', // also try bar or other graph types
+
+			// The data for our dataset
+			data: {
+				labels: ["Jun 2016", "Jul 2016", "Aug 2016", "Sep 2016", "Oct 2016", "Nov 2016", "Dec 2016", "Jan 2017", "Feb 2017", "Mar 2017", "Apr 2017", "May 2017"],
+				// Information about the dataset
+			datasets: [{
+					label: "Rainfall",
+					backgroundColor: 'lightblue',
+					borderColor: 'royalblue',
+					data: [26.4, 39.8, 66.8, 66.4, 40.6, 55.2, 77.4, 69.8, 57.8, 76, 110.8, 142.6],
+				}]
+			},
+
+			// Configuration options
+			options: {
+			layout: {
+			padding: 10,
+			},
+				legend: {
+					position: 'bottom',
+				},
+				title: {
+					display: true,
+					text: 'Precipitation in Toronto'
+				},
+				scales: {
+					yAxes: [{
+						scaleLabel: {
+							display: true,
+							labelString: 'Precipitation in mm'
+						}
+					}],
+					xAxes: [{
+						scaleLabel: {
+							display: true,
+							labelString: 'Month of the Year'
+						}
+					}]
+				}
+			}
+		});
+	</script>
+	<?php
+	}
+
+	add_action( 'wpyes_wpyes_custom_page_content_admin_footer_js', 'wpyes_custom_page_content_print_footer_js' );
 }// End if().
