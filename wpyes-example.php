@@ -357,7 +357,7 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 		$settings->add_section(
 			array(
 				'id' => 'section_basic',
-				'id' => __( 'Basic Field Type', 'wpyes' ),
+				'title' => __( 'Basic Field Type', 'wpyes' ),
 			)
 		);
 
@@ -480,7 +480,7 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 		$settings->add_section(
 			array(
 				'id' => 'section_advanced',
-				'id' => __( 'Advanced Field Type', 'wpyes' ),
+				'title' => __( 'Advanced Field Type', 'wpyes' ),
 			)
 		);
 
