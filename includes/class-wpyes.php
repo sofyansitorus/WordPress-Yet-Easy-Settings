@@ -36,7 +36,7 @@ class Wpyes {
 	private $menu_args;
 
 	/**
-	 * Setting setting_prefix.
+	 * Setting prefix.
 	 *
 	 * @since 0.0.1
 	 * @var string
@@ -120,7 +120,7 @@ class Wpyes {
 	 *
 	 * @since 0.0.1
 	 * @param string $menu_slug        The slug name to refer to this menu (should be unique).
-	 * @param array  $menu_args        { Optional. Array of properties for the new field object. Default empty array.
+	 * @param array  $menu_args        { Optional. Array of properties for the new admin menu object. Default empty array.
 	 *  @type string     $method               Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page,
 	 *                                         add_theme_page, add_plugins_page, add_users_page, add_dashboard_page, add_posts_page, add_media_page, add_links_page,
 	 *                                         add_pages_page, add_comments_page, add_submenu_page. Default 'add_menu_page'.
