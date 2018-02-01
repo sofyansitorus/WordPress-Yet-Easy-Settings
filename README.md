@@ -19,7 +19,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 * WYSIWYG
 
 ### Advanced features
-* Add as many as admin pages, placed it any where as top menu as submenu.
+* Add as many as admin pages, placed it any where as top level admin menu or as submenu.
 * Add custom callback to render custom setting field type.
 * Add custom callback to render custom tab content.
 * Add custom callback to render custom page content.
