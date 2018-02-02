@@ -32,7 +32,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 
 Include the Wpyes class file in your plugin main file:
 
-`include_once "libs/gettext/src/autoloader.php";`
+`require_once "includes/class-wpyes.php";`
 
 After you include the Wpyes class file, all you have to do is to initialize the Wpyes class, then add the settings object propertis in sequence add tab, add sections, add fields.
 
