@@ -103,7 +103,7 @@ if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
             )
         );
 
-        $settings->add_tab(
+        $settings->add_tab( // <-- Add tab 2.
             array(
                 'id' => 'tab_2',
             )
@@ -149,7 +149,7 @@ if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
             )
         );
 
-        $settings->add_help_tab(  // <-- Add help tab 1.
+        $settings->add_help_tab(  // <-- Add help tab 2.
             array(
                 'id'      => 'my_help_tab2',
                 'title'   => __( 'My Help Tab2' ),
