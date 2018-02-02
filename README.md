@@ -75,7 +75,7 @@ if ( ! function_exists( 'wpyes_simple' ) ) {
 ```
 
 ### Multiple tabs admin page setting
-If you want to add another tabs, just call the **add_tab** method after the last **add_field** on the first tab, then following in sequence calling **add_section** and **add_field** method. If there is only 1 tab registered, the tab links will not displayed.
+If you want to add another tabs, just call the **Wpyes::add_tab** method after the last **Wpyes::add_field** on the first tab, then following in sequence calling **Wpyes::add_section** and **Wpyes::add_field** method. If there is only 1 tab registered, the tab links will not displayed.
 
 
 ```php
@@ -130,10 +130,10 @@ if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
 }// End if().
 ```
 
-A note you must keep in hand here is that you neeed to have a unique value for the **menu_slug** parameter that passed in the Wpyes class constructor and field **id** key in the **addd_field** method parameter. You can have same tab id in different page manu, also can has same sections id in different tabs.
+A note you must keep in hand here is that you neeed to have a unique value for the **menu_slug** parameter that passed in the Wpyes class constructor and field **id** key in the **Wpyes::add_field** method parameter. You can have same tab id in different page manu, also can has same sections id in different tabs.
 
 ### Admin page setting with custom action button and help tabs
-To add help tabs and custom actin button to the admin page, you need to call **add_help_tab** and **add_button** method anywhere before calling the **init** method.
+To add help tabs and custom actin button to the admin page, you need to call **Wpyes::add_help_tab** and **Wpyes::add_button** method anywhere before calling the **Wpyes::init** method.
 
 ```php
 if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
