@@ -32,11 +32,27 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 The easiest way to implement this class is to look at the example plugin in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php).
 
 ## Screenshots
-* [Simple Setting Form](https://www.screencast.com/t/nLzukxLrTS)
-* [All Fields Types](https://www.screencast.com/t/Tkjb0Us4)
-* [Setting Form with Tabs](https://www.screencast.com/t/kEx2mRFD92my)
-* [Admin Page with Action Button](https://www.screencast.com/t/vUCwnVlqa8FR)
-* [Admin Page with Help Tabs](https://www.screencast.com/t/RfP2JohsVZzE)
-* [Submenu Admin Page](https://www.screencast.com/t/bptqDhXBNR)
-* [Custom Tab Content](https://www.screencast.com/t/R0By7ht2id9X)
-* [Custom Page Content](https://www.screencast.com/t/ecHWiPLyRA9)
+
+### Simple Setting Form
+![Simple Setting Form](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/f85423e6-c28e-4429-8978-0dfc8796b052/2018-02-01_01-39-12.png)
+
+### All Fields Types
+![All Fields Types](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a12e5a97-dce1-49e0-8780-463bfad75b62/2018-02-01_01-42-40.png)
+
+### Setting Form with Tabs
+![Setting Form with Tabs](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/cdd44ab3-591d-498c-a441-31ad1f6bbcc9/2018-02-01_01-47-28.png)
+
+### Admin Page with Action Button
+![Admin Page with Action Button](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a1803569-8264-4db9-b8bd-49b597186dc3/2018-02-01_01-49-06.png)
+
+### Admin Page with Help Tabs
+* ![Admin Page with Help Tabs](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/6919b9ce-399b-42b7-bbcc-58cc7f9a8120/2018-02-01_01-49-58.png)
+
+### Submenu Admin Page
+![Submenu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a1803569-8264-4db9-b8bd-49b597186dc3/2018-02-01_01-49-06.png)
+
+### Custom Tab Content
+![Custom Tab Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/2ab79e35-0e7d-4555-80a4-5fb72e57414d/2018-02-01_01-43-32.png)
+
+### Custom Page Content
+![Custom Page Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/2ab79e35-0e7d-4555-80a4-5fb72e57414d/2018-02-01_01-43-32.png)
