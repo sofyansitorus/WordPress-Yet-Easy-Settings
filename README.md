@@ -46,7 +46,7 @@ The easiest way to implement this class is to look at the example plugin in [wpy
 ![Admin Page with Action Button](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a1803569-8264-4db9-b8bd-49b597186dc3/2018-02-01_01-49-06.png)
 
 ### Admin Page with Help Tabs
-* ![Admin Page with Help Tabs](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/6919b9ce-399b-42b7-bbcc-58cc7f9a8120/2018-02-01_01-49-58.png)
+![Admin Page with Help Tabs](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/6919b9ce-399b-42b7-bbcc-58cc7f9a8120/2018-02-01_01-49-58.png)
 
 ### Submenu Admin Page
 ![Submenu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a1803569-8264-4db9-b8bd-49b597186dc3/2018-02-01_01-49-06.png)
