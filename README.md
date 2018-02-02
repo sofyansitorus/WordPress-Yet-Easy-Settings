@@ -192,7 +192,7 @@ To get the option value is by call built-in WordPress **get_option** function wi
 get_option( 'wpyes_simple_field_1' );
 ```
 
-If you set the $setting_prefix value at third arguments in Wpyes constructor, then you need to perpend in when calling  *get_option** function to get the stored option value.
+If you set the $setting_prefix value at third arguments in Wpyes constructor, then you need to prepend that prefix when calling  *get_option** function.
 
 ```php
 if ( ! function_exists( 'wpyes_with_prefix' ) ) {
