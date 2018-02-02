@@ -29,7 +29,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 
 
 ## How to Use
-The easiest way to implement this class is to look at the example plugin in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php).
+The easiest way to implement this class is by install this plugin and take a look at the example in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php).
 
 ## Screenshots
 
