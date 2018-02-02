@@ -75,7 +75,7 @@ if ( ! function_exists( 'wpyes_simple' ) ) {
 ```
 
 ### Multiple tabs admin page setting
-If you want to add another tabs, just call the **add_tab** method after the last **add_field** on the first tab, then following in sequence calling **add_section** and **add_field** method.
+If you want to add another tabs, just call the **add_tab** method after the last **add_field** on the first tab, then following in sequence calling **add_section** and **add_field** method. If there only 1 tab registered, the tabs link will not displayed.
 
 
 ```php
