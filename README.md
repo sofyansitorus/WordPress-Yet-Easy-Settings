@@ -29,7 +29,206 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 
 
 ## How to Use
-The easiest way to implement this class is by install this plugin and take a look at the example in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php).
+
+Include the Wpyes class file in your plugin main file:
+
+`include_once "libs/gettext/src/autoloader.php";`
+
+After you include the Wpyes class file, all you have to do is to initialize the Wpyes class, then add the settings object propertis in sequence add tab, add sections, add fields.
+
+### Simple admin page setting
+```php
+if ( ! function_exists( 'wpyes_simple' ) ) {
+    function wpyes_simple() {
+
+        $settings = new Wpyes( 'wpyes_simple' ); // Initialize the Wpyes class.
+
+        $settings->add_tab(
+            array(
+                'id' => 'tab_1',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'wpyes_simple_field_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'wpyes_simple_field_2',
+            )
+        );
+
+        $settings->init(); // Run the Wpyes class.
+    }
+
+    wpyes_simple();
+}// End if().
+```
+
+### Multiple tabs admin page setting
+If you want to add another tabs, just call the **add_tab** method after the last **add_field** on the first tab, then following in squence calling **add_section** and **add_field** method.
+
+
+```php
+if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
+    function wpyes_multi_tabs() {
+        $settings = new Wpyes( 'wpyes_multi_tabs' ); // Initialize the Wpyes class.
+
+        $settings->add_tab(
+            array(
+                'id' => 'tab_1',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id'       => 'wpyes_multi_tabs_field_1',
+                'required' => true,
+                'type'     => 'text',
+            )
+        );
+
+        $settings->add_tab(
+            array(
+                'id' => 'tab_2',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id'       => 'wpyes_multi_tabs_field_3',
+                'required' => true,
+                'type'     => 'file',
+            )
+        );
+
+        $settings->init(); // Run the Wpyes class.
+    }
+
+    wpyes_multi_tabs();
+}// End if().
+```
+
+A note you must keep in hand here is that you neeed to have a unique value for the **menu_slug** parameter that passed in the Wpyes class constructor and field **id** key in the **addd_field** method parameter. You can have same tab id in different page manu, also can has same sections id in different tabs.
+
+### Admin page setting with custom action button and help tabs
+To add help tabs and custom actin button to the admin page, you need to call **add_help_tab** and **add_button** method anywhere before calling the **init** method.
+
+```php
+if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
+    function wpyes_button_and_help_tabs() {
+
+        $settings = new Wpyes( 'wpyes_button_and_help_tabs' ); // Initialize the Wpyes class.
+
+        $settings->add_help_tab(  // <-- Add help tab 1.
+            array(
+                'id'      => 'my_help_tab',
+                'title'   => __( 'My Help Tab' ),
+                'content' => '<p>' . __('Descriptive content that will show in My Help Tab-body goes here.') . '</p>',
+            )
+        );
+
+        $settings->add_help_tab(  // <-- Add help tab 1.
+            array(
+                'id'      => 'my_help_tab2',
+                'title'   => __( 'My Help Tab2' ),
+                'content' => '<p>' . __( 'Descriptive content that will show in My Help Tab-body goes here 2. ') . '</p>',
+            )
+        );
+
+        $settings->add_tab(
+            array(
+                'id' => 'tab_1',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'wpyes_button_and_help_tabs_field_1',
+            )
+        );
+
+        $settings->add_button( 'Custom Action Button', 'index.php' ); // <-- Add custom action button.
+
+        $settings->init(); // Run the Wpyes class.
+    }
+
+    wpyes_button_and_help_tabs();
+}// End if().
+```
+
+### Getting the stored option value
+
+To get the option value is by call built-in WordPress **get_option** function with filed id as the first argument.
+
+```php
+get_option( 'wpyes_simple_field_1' );
+```
+
+If you set the $setting_prefix value at third arguments in Wpyes constructor, then you need to perpend in when calling  *get_option** function to get the stored option value.
+
+```php
+if ( ! function_exists( 'wpyes_with_prefix' ) ) {
+    function wpyes_with_prefix() {
+
+        $settings = new Wpyes( 'wpyes_with_prefix', array(), 'my_setting_prefix' ); // Initialize the Wpyes class.
+
+        $settings->add_tab(
+            array(
+                'id' => 'tab_1',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'wpyes_with_prefix_field_1',
+            )
+        );
+
+        $settings->init(); // Run the Wpyes class.
+    }
+
+    wpyes_with_prefix();
+}// End if().
+
+// To get stored option value for setting field wpyes_with_prefix_field_1
+get_option( 'my_setting_prefix_wpyes_with_prefix_field_1' );
+```
+
+Please take a look at the example in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php) for more advanced example such as adding custom tab content, adding custom page content, etc.
 
 ## Screenshots
 
