@@ -298,11 +298,6 @@ class Wpyes {
 			)
 		);
 
-		// Create title if empty and not false.
-		if ( empty( $args['title'] ) && ! is_bool( $args['title'] ) ) {
-			$args['title'] = $this->humanize_slug( $args['id'] );
-		}
-
 		return $args;
 	}
 
