@@ -15,7 +15,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 * Multiple Select
 * Radio Button
 * Color Picker
-* File Uploade
+* File Upload
 * WYSIWYG
 
 ### Advanced features
