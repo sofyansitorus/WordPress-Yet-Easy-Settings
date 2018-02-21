@@ -116,6 +116,15 @@ class Wpyes {
 	private $button_url;
 
 	/**
+	 * If set to true errors will not be shown if the settings page has
+	 * already been submitted.
+	 *
+	 * @since 0.0.1
+	 * @var string
+	 */
+	private $hide_on_update = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 0.0.1
@@ -1190,7 +1199,7 @@ class Wpyes {
 					<hr class="wp-header-end">
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php settings_errors(); ?>
+			<?php settings_errors( '', false, $this->hide_on_update ); ?>
 			<?php if ( 1 < count( $this->settings_populated ) ) : ?>
 				<div class="metabox-holder">
 					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
@@ -1253,6 +1262,10 @@ class Wpyes {
 					$this->menu_args['parent_slug'] = 'options-general.php';
 				}
 
+				if ( false !== strpos( $this->menu_args['parent_slug'], 'options-general.php' ) ) {
+					$this->hide_on_update = true;
+				}
+
 				$admin_page = call_user_func(
 					$this->menu_args['method'],
 					$this->menu_args['parent_slug'],
@@ -1278,6 +1291,9 @@ class Wpyes {
 				break;
 
 			default:
+				if ( 'add_options_page' === $this->menu_args['method'] ) {
+					$this->hide_on_update = true;
+				}
 				$admin_page = call_user_func(
 					$this->menu_args['method'],
 					$this->menu_args['page_title'],
