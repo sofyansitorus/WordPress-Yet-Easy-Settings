@@ -40,7 +40,7 @@ After you include the Wpyes class file, all you have to do is to initialize the 
 
 ### Simple admin page setting
 
-This is the simplest way to initoialize the setting page without defining the tabs and section.
+This is the simplest way to initialize the setting page without defining the tabs and sections.
 
 ```php
 if ( ! function_exists( 'wpyes_simple' ) ) {
