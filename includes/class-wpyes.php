@@ -175,11 +175,6 @@ class Wpyes {
 			$menu_args['menu_title'] = $this->humanize_slug( $this->menu_slug );
 		}
 
-		// Set menu_title if empty and not false.
-		if ( empty( $menu_args['callback'] ) ) {
-			$menu_args['callback'] = array( $this, 'render_form' );
-		}
-
 		$this->menu_args = $menu_args;
 
 		// Set the menu arguments property.
