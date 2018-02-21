@@ -233,6 +233,7 @@ Please take a look at the example in [wpyes-example.php](https://github.com/sofy
 ### All Fields Types
 
 ![All Fields Types](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a12e5a97-dce1-49e0-8780-463bfad75b62/2018-02-01_01-42-40.png)
+![All Fields Types](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/efc1b981-b376-4c41-b243-2ac8926542ff/2018-02-21_16-52-01.png)
 
 ### Setting Form with Tabs
 
