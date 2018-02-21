@@ -256,4 +256,4 @@ Please take a look at the example in [wpyes-example.php](https://github.com/sofy
 
 ### Custom Page Content
 
-![Custom Page Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/2ab79e35-0e7d-4555-80a4-5fb72e57414d/2018-02-01_01-43-32.png)
+![Custom Page Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/c6491599-ea81-48e1-b0fc-2783f25eda8e/2018-02-01_01-44-20.png)
