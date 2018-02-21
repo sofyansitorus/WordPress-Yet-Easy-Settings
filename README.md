@@ -246,10 +246,6 @@ Please take a look at the example in [wpyes-example.php](https://github.com/sofy
 
 ![Admin Page with Help Tabs](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/6919b9ce-399b-42b7-bbcc-58cc7f9a8120/2018-02-01_01-49-58.png)
 
-### Submenu Admin Page
-
-![Submenu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/a1803569-8264-4db9-b8bd-49b597186dc3/2018-02-01_01-49-06.png)
-
 ### Custom Tab Content
 
 ![Custom Tab Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/2ab79e35-0e7d-4555-80a4-5fb72e57414d/2018-02-01_01-43-32.png)
@@ -257,3 +253,7 @@ Please take a look at the example in [wpyes-example.php](https://github.com/sofy
 ### Custom Page Content
 
 ![Custom Page Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/c6491599-ea81-48e1-b0fc-2783f25eda8e/2018-02-01_01-44-20.png)
+
+### Submenu Admin Page
+
+![Submenu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/85c042bf-5516-4cbd-82cc-345247704a08/2018-02-21_16-31-46.png)
