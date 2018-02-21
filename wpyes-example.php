@@ -48,19 +48,6 @@ if ( ! function_exists( 'wpyes_simple' ) ) {
 	function wpyes_simple() {
 
 		$settings = new Wpyes( 'wpyes_simple' ); // Initialize the Wpyes class.
-
-		$settings->add_tab(
-			array(
-				'id' => 'tab_1',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
-			)
-		);
-
 		$settings->add_field(
 			array(
 				'id' => 'wpyes_simple_field_1',
