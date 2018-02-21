@@ -1000,6 +1000,18 @@ class Wpyes {
 						$data['tab'] = $this->recent_tab;
 					}
 
+					if ( empty( $data['tab'] ) && empty( $this->recent_tab ) ) {
+						$auto_tab                 = $this->normalize_tab(
+							array(
+								'id' => $this->menu_slug,
+							)
+						);
+						$tabs[ $this->menu_slug ] = $auto_tab;
+
+						$this->recent_tab = $this->menu_slug;
+						$data['tab']      = $this->recent_tab;
+					}
+
 					// Check if tab key for section $data is not empty.
 					if ( ! empty( $data['tab'] ) ) {
 						// Assign recent section ID.
@@ -1020,9 +1032,34 @@ class Wpyes {
 						$data['tab'] = $this->recent_tab;
 					}
 
+					if ( empty( $data['tab'] ) && empty( $this->recent_tab ) ) {
+						$this->recent_tab         = $this->menu_slug;
+						$auto_tab                 = $this->normalize_tab(
+							array(
+								'id' => $this->menu_slug,
+							)
+						);
+						$tabs[ $this->menu_slug ] = $auto_tab;
+						$data['tab']              = $this->recent_tab;
+					}
+
 					// Set section key for $data if empty and $recent_section is not empty.
 					if ( empty( $data['section'] ) && ! empty( $this->recent_section ) ) {
 						$data['section'] = $this->recent_section;
+					}
+
+					// Set section key for $data if empty and $recent_section is not empty.
+					if ( empty( $data['section'] ) && empty( $this->recent_section ) ) {
+						$this->recent_section           = $this->menu_slug;
+						$auto_section                   = $this->normalize_section(
+							array(
+								'id'  => $this->menu_slug,
+								'tab' => $data['tab'],
+							)
+						);
+						$section_unique_id              = $data['tab'] . '_' . $auto_section['id'];
+						$sections[ $section_unique_id ] = $auto_section;
+						$data['section']                = $auto_section['id'];
 					}
 
 					// Check if tab and section key for field $data is not empty.
