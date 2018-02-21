@@ -265,114 +265,6 @@ if ( ! function_exists( 'wpyes_help_tabs' ) ) {
 	wpyes_help_tabs();
 }// End if().
 
-if ( ! function_exists( 'wpyes_submenu' ) ) {
-	/**
-	 * Example for submenu settings
-	 *
-	 * @since  0.0.1
-	 * @return void
-	 */
-	function wpyes_submenu() {
-		$settings = new Wpyes(
-			'wpyes_submenu', array(
-				'method'      => 'add_submenu_page',
-				'parent_slug' => 'wpyes_simple',
-			)
-		); // Initialize the Wpyes class.
-
-		$settings->add_tab(
-			array(
-				'id' => 'tab_1',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_submenu_field_1',
-				'required' => true,
-				'type'     => 'number',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_submenu_field_2',
-				'required' => true,
-				'type'     => 'multiselect',
-				'options'  => array(
-					'foo'     => 'foo',
-					'bar'     => 'bar',
-					'foo bar' => 'foo bar',
-				),
-			)
-		);
-
-		$settings->init(); // Run the Wpyes class.
-	}
-
-	wpyes_submenu();
-}// End if().
-
-if ( ! function_exists( 'wpyes_submenu_under_general' ) ) {
-	/**
-	 * Example for submenu settings
-	 *
-	 * @since  0.0.1
-	 * @return void
-	 */
-	function wpyes_submenu_under_general() {
-		$settings = new Wpyes(
-			'wpyes_submenu_under_general', array(
-				'method'      => 'add_options_page',
-				// 'parent_slug' => 'tools.php',
-			)
-		); // Initialize the Wpyes class.
-
-		$settings->add_tab(
-			array(
-				'id' => 'tab_1',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_submenu_under_general_field_1',
-				'required' => true,
-				'type'     => 'number',
-			)
-		);
-
-		$settings->add_field(
-			array(
-				'id'       => 'wpyes_submenu_under_general_field_2',
-				'required' => true,
-				'type'     => 'multiselect',
-				'options'  => array(
-					'foo'     => 'foo',
-					'bar'     => 'bar',
-					'foo bar' => 'foo bar',
-				),
-			)
-		);
-
-		$settings->init(); // Run the Wpyes class.
-	}
-
-	wpyes_submenu_under_general();
-}// End if().
-
 
 if ( ! function_exists( 'wpyes_all' ) ) {
 	/**
@@ -397,7 +289,7 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 
 		$settings->add_section(
 			array(
-				'id' => 'section_basic',
+				'id'    => 'section_basic',
 				'title' => __( 'Basic Field Type', 'wpyes' ),
 			)
 		);
@@ -520,7 +412,7 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 
 		$settings->add_section(
 			array(
-				'id' => 'section_advanced',
+				'id'    => 'section_advanced',
 				'title' => __( 'Advanced Field Type', 'wpyes' ),
 			)
 		);
@@ -786,4 +678,233 @@ if ( ! function_exists( 'wpyes_custom_page_content' ) ) {
 	}
 
 	add_action( 'wpyes_wpyes_custom_page_content_admin_footer_js', 'wpyes_custom_page_content_print_footer_js' );
+}// End if().
+
+if ( ! function_exists( 'wpyes_submenu' ) ) {
+	/**
+	 * Example for submenu
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_submenu() {
+		// Initialize blank parent menu.
+		$settings = new Wpyes(
+			'wpyes_submenu_1', array(
+				'menu_title' => 'Wpyes',
+				'callback'   => null,
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->init(); // Run the Wpyes class.
+
+		$settings = new Wpyes(
+			'wpyes_submenu_1', array(
+				'menu_title'  => 'Submenu 1',
+				'page_title'  => 'Submenu 1 Page Title',
+				'method'      => 'add_submenu_page',
+				'parent_slug' => 'wpyes_submenu_1',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_1_field_1',
+				'required' => true,
+				'type'     => 'text',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_1_field_2',
+				'required' => true,
+				'type'     => 'multicheckbox',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_2',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_1_field_3',
+				'required' => true,
+				'type'     => 'file',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_1_field_4',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->init(); // Run the Wpyes class.
+
+		$settings = new Wpyes(
+			'wpyes_submenu_2', array(
+				'menu_title'  => 'Submenu 2',
+				'page_title'  => 'Submenu 2 Page Title',
+				'method'      => 'add_submenu_page',
+				'parent_slug' => 'wpyes_submenu_1',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_2_field_1',
+				'required' => true,
+				'type'     => 'text',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_2_field_2',
+				'required' => true,
+				'type'     => 'multicheckbox',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_2',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_2_field_3',
+				'required' => true,
+				'type'     => 'file',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_2_field_4',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_submenu();
+}// End if().
+
+if ( ! function_exists( 'wpyes_submenu_under_tools' ) ) {
+	/**
+	 * Example for submenu under tools page
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_submenu_under_tools() {
+		$settings = new Wpyes(
+			'wpyes_submenu_under_tools', array(
+				'method' => 'add_management_page',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_under_tools_field_1',
+				'required' => true,
+				'type'     => 'number',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_under_tools_field_2',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_submenu_under_tools();
 }// End if().
