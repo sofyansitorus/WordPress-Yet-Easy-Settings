@@ -1387,7 +1387,7 @@ class Wpyes {
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 
-		if ( ! strpos( $hook, '_' . $this->menu_slug ) ) {
+		if ( ! $this->menu_args['callback'] || ! strpos( $hook, '_' . $this->menu_slug ) ) {
 			return;
 		}
 
@@ -1410,7 +1410,7 @@ class Wpyes {
 
 		$screen = get_current_screen();
 
-		if ( ! isset( $screen->base ) || ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
+		if ( ! $this->menu_args['callback'] || ! isset( $screen->base ) || ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
 			return;
 		}
 		?>
