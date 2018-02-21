@@ -319,6 +319,60 @@ if ( ! function_exists( 'wpyes_submenu' ) ) {
 	wpyes_submenu();
 }// End if().
 
+if ( ! function_exists( 'wpyes_submenu_under_general' ) ) {
+	/**
+	 * Example for submenu settings
+	 *
+	 * @since  0.0.1
+	 * @return void
+	 */
+	function wpyes_submenu_under_general() {
+		$settings = new Wpyes(
+			'wpyes_submenu_under_general', array(
+				'method'      => 'add_options_page',
+				// 'parent_slug' => 'tools.php',
+			)
+		); // Initialize the Wpyes class.
+
+		$settings->add_tab(
+			array(
+				'id' => 'tab_1',
+			)
+		);
+
+		$settings->add_section(
+			array(
+				'id' => 'section_1',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_under_general_field_1',
+				'required' => true,
+				'type'     => 'number',
+			)
+		);
+
+		$settings->add_field(
+			array(
+				'id'       => 'wpyes_submenu_under_general_field_2',
+				'required' => true,
+				'type'     => 'multiselect',
+				'options'  => array(
+					'foo'     => 'foo',
+					'bar'     => 'bar',
+					'foo bar' => 'foo bar',
+				),
+			)
+		);
+
+		$settings->init(); // Run the Wpyes class.
+	}
+
+	wpyes_submenu_under_general();
+}// End if().
+
 
 if ( ! function_exists( 'wpyes_all' ) ) {
 	/**
