@@ -100,20 +100,12 @@ class Wpyes {
 	private $help_tabs = array();
 
 	/**
-	 * Admin screen action button text.
+	 * Admin screen action buttons.
 	 *
 	 * @since 0.0.1
 	 * @var string
 	 */
-	private $button_text;
-
-	/**
-	 * Admin screen action button URL.
-	 *
-	 * @since 0.0.1
-	 * @var string
-	 */
-	private $button_url;
+	private $buttons = array();
 
 	/**
 	 * If set to true errors will not be shown if the settings page has
@@ -1176,19 +1168,27 @@ class Wpyes {
 		}
 	}
 
+	public function page_title() {
+		?>
+		<h1 class="<?php echo empty( $this->buttons ) ? '' : esc_attr( 'wp-heading-inline' ); ?>">
+			<?php echo esc_html( $this->menu_args['page_title'] ); ?>
+			<?php if ( ! empty( $this->buttons ) ) : ?>
+				<?php foreach( $this->buttons as $index => $button ) : ?>
+					<a href="<?php echo esc_url( $button['url'] ); ?>" id="<?php echo empty( $button['id'] ) ? 'button-' . $this->menu_slug . '-' . esc_attr( $index ) : esc_attr( $button['id'] ); ?>" class="page-title-action"><?php echo esc_html( $button['text'] ); ?></a>
+				<?php endforeach; ?>
+				<hr class="wp-header-end">
+			<?php endif; ?>
+		</h1>
+		<?php
+	}
+
 	/**
 	 * Render the settings form.
 	 */
 	public function render_form() {
 		?>
 		<div class="wrap wpyes-wrap">
-			<?php if ( ! empty( $this->menu_args['page_title'] ) ) : ?>
-				<h1 class="<?php echo ( $this->button_url && $this->button_text ) ? esc_attr( 'wp-heading-inline' ) : ''; ?>"><?php echo esc_html( $this->menu_args['page_title'] ); ?></h1>
-				<?php if ( ! empty( $this->button_url ) && ! empty( $this->button_text ) ) : ?>
-					<a href="<?php echo esc_url( $this->button_url ); ?>" class="page-title-action"><?php echo esc_html( $this->button_text ); ?></a>
-					<hr class="wp-header-end">
-				<?php endif; ?>
-			<?php endif; ?>
+			<?php $this->page_title(); ?>
 			<?php settings_errors( '', false, $this->hide_on_update ); ?>
 			<?php if ( 1 < count( $this->settings_populated ) ) : ?>
 				<div class="metabox-holder">
@@ -1364,17 +1364,21 @@ class Wpyes {
 	 * @since 0.0.1
 	 * @param string $text   The action button text.
 	 * @param string $url    The action button URL.
+	 * @param string $id     The action button ID.
 	 * @return void
 	 */
-	public function add_button( $text, $url ) {
+	public function add_button( $text, $url, $id = '' ) {
 
 		// Validate action button text and url.
 		if ( empty( $text ) || empty( $url ) || ! is_string( $text ) || ! is_string( $url ) ) {
 			return;
 		}
 
-		$this->button_text = $text;
-		$this->button_url  = $url;
+		$this->buttons[] = array(
+			'text' => $text,
+			'url'  => $url,
+			'id'   => $id,
+		);
 	}
 
 	/**

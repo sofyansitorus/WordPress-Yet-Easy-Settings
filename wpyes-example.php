@@ -192,6 +192,7 @@ if ( ! function_exists( 'wpyes_button' ) ) {
 		);
 
 		$settings->add_button( 'Custom Action Button', 'index.php' );
+		$settings->add_button( 'Custom Action Button 2', 'index.php' );
 
 		$settings->init(); // Run the Wpyes class.
 	}
