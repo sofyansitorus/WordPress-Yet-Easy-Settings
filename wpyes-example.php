@@ -278,6 +278,7 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 
 		$settings = new Wpyes(
 			'wpyes_all', array(
+				'menu_title' => __( 'Wpyes All Fields', 'wpyes' ),
 				'page_title' => __( 'All Settings Fields', 'wpyes' ),
 			)
 		); // Initialize the Wpyes class.
@@ -449,6 +450,15 @@ if ( ! function_exists( 'wpyes_all' ) ) {
 }// End if().
 
 if ( ! function_exists( 'wpyes_custom_tab_content' ) ) {
+
+	function wpyes_custom_tab_2_content_chart() {
+		?>
+		<div>
+			<canvas id="myChart" width="400" height="200"></canvas>
+		</div>
+		<?php
+	}
+	
 	/**
 	 * Example for custom tab content
 	 *
@@ -485,13 +495,7 @@ if ( ! function_exists( 'wpyes_custom_tab_content' ) ) {
 		$settings->add_tab(
 			array(
 				'id'       => 'tab_2',
-				'callback' => function() {
-				?>
-				<div>
-					<canvas id="myChart" width="400" height="200"></canvas>
-				</div>
-				<?php
-				},
+				'callback' => 'wpyes_custom_tab_2_content_chart',
 			)
 		);
 
