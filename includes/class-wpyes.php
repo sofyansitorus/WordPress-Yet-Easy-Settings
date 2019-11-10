@@ -2,7 +2,7 @@
 /**
  * Core file for Wpyes Class.
  *
- * @link       https://github.com/sofyansitorus
+ * @link       https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings
  * @since      0.0.1
  * @package    Wpyes
  */
