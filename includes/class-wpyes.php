@@ -1307,8 +1307,8 @@ class Wpyes {
 	 */
 	public function add_help_tabs( $help_tabs ) {
 
-		// Validate help tab property.
-		if ( ! $help_tab || ! is_array( $help_tab ) ) {
+		// Validate help tabs property.
+		if ( ! $help_tabs || ! is_array( $help_tabs ) ) {
 			return;
 		}
 
