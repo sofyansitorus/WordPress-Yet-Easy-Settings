@@ -1198,7 +1198,7 @@ class Wpyes {
 						<?php endforeach; ?>
 					</h2>
 				</div>
-				<div class"clear"></div>
+				<div class="clear"></div>
 			<?php endif; ?>
 			<form method="post" action="options.php">
 				<div class="wpyes-tab-wrapper metabox-holder">
