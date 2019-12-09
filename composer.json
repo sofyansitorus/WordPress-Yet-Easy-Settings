@@ -4,7 +4,6 @@
     "homepage": "https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings",
     "license": "GPL-2.0",
     "type": "wordpress-plugin",
-    "version": "1.0.0",
     "minimum-stability": "stable",
     "authors": [
         {
