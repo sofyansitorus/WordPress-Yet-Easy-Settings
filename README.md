@@ -34,7 +34,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 
 Installation:
 
-`composer require sofyansitorus/wp-yes";`
+`composer require sofyansitorus/wp-yes;`
 
 After you include the WP_Yes class file, all you have to do is to initialize the WP_Yes class, then add the settings object properties in sequence add tabs, add sections, add fields.
 
