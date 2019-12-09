@@ -84,12 +84,20 @@ class WP_Yes {
 	private $recent_section;
 
 	/**
-	 * Recent field id registered.
+	 * All tabs data.
 	 *
 	 * @since 1.0.0
 	 * @var string
 	 */
-	private $recent_field;
+	private $all_tabs;
+
+	/**
+	 * All sections data.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $all_sections;
 
 	/**
 	 * Admin screen help_tabs.
@@ -179,7 +187,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new tab object.
 	 *  @type string          $id              ID for the setting tab. Default empty.
-	 *  @type string          $label           Label for the setting tab. Default empty.
+	 *  @type string          $title           Title for the setting tab. Default empty.
 	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
 	 *  @type integer         $position        Setting tab position. Higher will displayed last. Default 10.
 	 *  @type callable        $callback        Callable function to be called to render output the tab content. Default WP_Yes::render_tab.
@@ -191,16 +199,16 @@ class WP_Yes {
 			$args,
 			array(
 				'id'       => '',
-				'label'    => '',
+				'title'    => '',
 				'sections' => array(),
 				'position' => 10,
 				'callback' => '',
 			)
 		);
 
-		// Create label if empty and not false.
-		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
-			$args['label'] = $this->humanize_slug( $args['id'] );
+		// Create title if empty and not false.
+		if ( empty( $args['title'] ) && ! is_bool( $args['title'] ) ) {
+			$args['title'] = $this->humanize_slug( $args['id'] );
 		}
 
 		// Add default callback to render tab content.
@@ -238,12 +246,19 @@ class WP_Yes {
 	 */
 	public function add_tab( $args ) {
 		$args = $this->normalize_tab( $args );
-		if ( ! empty( $args['id'] ) ) {
-			$this->settings[] = array(
-				'type' => 'tab',
-				'data' => $args,
-			);
+
+		if ( empty( $args['id'] ) || ! empty( $this->all_tabs[ $args['id'] ] ) ) {
+			return;
 		}
+
+		$this->all_tabs[ $args['id'] ] = $args;
+		$this->recent_tab              = $args['id'];
+		$this->recent_section          = null;
+
+		$this->settings[] = array(
+			'type' => 'tab',
+			'data' => $args,
+		);
 	}
 
 	/**
@@ -317,12 +332,36 @@ class WP_Yes {
 	 */
 	public function add_section( $args ) {
 		$args = $this->normalize_section( $args );
-		if ( ! empty( $args['id'] ) ) {
-			$this->settings[] = array(
-				'type' => 'section',
-				'data' => $args,
-			);
+
+		if ( empty( $args['id'] ) || ! empty( $this->all_section[ $args['id'] ] ) ) {
+			return;
 		}
+
+		if ( empty( $this->recent_tab ) ) {
+			$this->add_tab(
+				array(
+					'id' => $this->menu_slug,
+				)
+			);
+
+			$this->recent_tab = $this->menu_slug;
+		}
+
+		if ( empty( $args['tab'] ) ) {
+			$args['tab'] = $this->recent_tab;
+		}
+
+		if ( empty( $this->all_tabs[ $args['id'] ] ) ) {
+			return;
+		}
+
+		$this->all_sections[ $args['id'] ] = $args;
+		$this->recent_section              = $args['id'];
+
+		$this->settings[] = array(
+			'type' => 'section',
+			'data' => $args,
+		);
 	}
 
 	/**
@@ -444,12 +483,47 @@ class WP_Yes {
 	 */
 	public function add_field( $args ) {
 		$args = $this->normalize_field( $args );
-		if ( ! empty( $args['id'] ) ) {
-			$this->settings[] = array(
-				'type' => 'field',
-				'data' => $args,
-			);
+
+		if ( empty( $args['id'] ) ) {
+			return;
 		}
+
+		if ( empty( $this->recent_tab ) ) {
+			$this->add_tab(
+				array(
+					'id' => $this->menu_slug,
+				)
+			);
+
+			$this->recent_tab = $this->menu_slug;
+		}
+
+		if ( empty( $this->recent_section ) ) {
+			$this->add_section(
+				array(
+					'id' => $this->recent_tab,
+				)
+			);
+
+			$this->recent_section = $this->recent_tab;
+		}
+
+		if ( empty( $args['tab'] ) ) {
+			$args['tab'] = $this->recent_tab;
+		}
+
+		if ( empty( $args['section'] ) ) {
+			$args['section'] = $this->recent_section;
+		}
+
+		if ( empty( $this->all_tabs[ $args['tab'] ] ) || empty( $this->all_sections[ $args['section'] ] ) ) {
+			return;
+		}
+
+		$this->settings[] = array(
+			'type' => 'field',
+			'data' => $args,
+		);
 	}
 
 	/**
@@ -1039,6 +1113,10 @@ class WP_Yes {
 						$data['section'] = $this->recent_section;
 					}
 
+					if ( empty( $data['section'] ) && ! empty( $this->recent_tab ) ) {
+						$data['section'] = $this->recent_tab;
+					}
+
 					// Set section key for $data if empty and $recent_section is not empty.
 					if ( empty( $data['section'] ) && empty( $this->recent_section ) ) {
 						$this->recent_section           = $this->menu_slug;
@@ -1198,7 +1276,7 @@ class WP_Yes {
 				<div class="metabox-holder">
 					<h2 class="wp_yes-nav-tab-wrapper nav-tab-wrapper">
 						<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
-						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wp_yes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
+						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wp_yes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['title'] ); ?></a>
 						<?php endforeach; ?>
 					</h2>
 				</div>
