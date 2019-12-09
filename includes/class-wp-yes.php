@@ -144,8 +144,15 @@ class WP_Yes {
 	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the $setting_prefix would be
 	 *                                 pre-pended when getting option value. Example: If $setting_prefix = 'wp_yes_txt', to get option value for setting id 'example_1'
 	 *                                 is get_option('wp_yes_example_1'). Default empty.
+	 *
+	 * @throws Exception Throw an exception when the requirements is not met.
 	 */
 	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
+		$check_requirements = self::check_requirements();
+
+		if ( is_wp_error( $check_requirements ) ) {
+			throw new Exception( $check_requirements->get_error_message() );
+		}
 
 		// Set the menu slug property.
 		$this->menu_slug = sanitize_key( $menu_slug );
@@ -1043,7 +1050,7 @@ class WP_Yes {
 		$sections = array();
 		$fields   = array();
 
-		foreach ( $this->settings as $setting ) {
+		foreach ( $this->settings as $index => $setting ) {
 			if ( empty( $setting['type'] ) || empty( $setting['data'] ) ) {
 				continue;
 			}
@@ -1056,7 +1063,12 @@ class WP_Yes {
 					$this->recent_tab = $data['id'];
 
 					// Push data to tabs variable.
-					$tabs[ $data['id'] ] = $data;
+					$tabs[ $data['id'] ] = array_merge(
+						$data,
+						array(
+							'index' => $index,
+						)
+					);
 
 					break;
 				case 'section':
@@ -1087,7 +1099,12 @@ class WP_Yes {
 						$data['id'] = $section_unique_id;
 
 						// Push data to sections variable.
-						$sections[ $section_unique_id ] = $data;
+						$sections[ $section_unique_id ] = array_merge(
+							$data,
+							array(
+								'index' => $index,
+							)
+						);
 					}
 
 					break;
@@ -1134,7 +1151,12 @@ class WP_Yes {
 					// Check if tab and section key for field $data is not empty.
 					if ( ! empty( $data['tab'] ) && ! empty( $data['section'] ) ) {
 						$data['section']       = $data['tab'] . '_' . $data['section'];
-						$fields[ $data['id'] ] = $data;
+						$fields[ $data['id'] ] = array_merge(
+							$data,
+							array(
+								'index' => $index,
+							)
+						);
 					}
 
 					break;
@@ -1594,14 +1616,16 @@ class WP_Yes {
 	 * @return integer
 	 */
 	protected function sort_by_position( $a, $b ) {
-		$a = isset( $a['position'] ) ? (int) $a['position'] : 10;
-		$b = isset( $b['position'] ) ? (int) $b['position'] : 10;
+		$a_position = isset( $a['position'] ) ? (int) $a['position'] : 10;
+		$b_position = isset( $b['position'] ) ? (int) $b['position'] : 10;
+		$a_index    = isset( $a['index'] ) ? (int) $a['index'] : 10;
+		$b_index    = isset( $b['index'] ) ? (int) $b['index'] : 10;
 
-		if ( $a === $b ) {
-			return 0;
+		if ( $a_position === $b_position ) {
+			return ( $a_index < $b_index ) ? -1 : 1;
 		}
 
-		return ( $a < $b ) ? -1 : 1;
+		return ( $a_position < $b_position ) ? -1 : 1;
 	}
 
 	/**
@@ -1647,5 +1671,24 @@ class WP_Yes {
 
 		// Return joined words with space.
 		return implode( ' ', $words );
+	}
+
+	/**
+	 * Check if the plugin meets requirements
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool|WP_Error true on success, WP_Error on failure.
+	 */
+	public static function check_requirements() {
+		if ( version_compare( PHP_VERSION, '5.6.3', '<' ) ) {
+			return new WP_Error( 'php_version', __( 'This plugin requires PHP 5.6.3 or higher!', 'wp_yes_txt' ) );
+		}
+
+		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
+			return new WP_Error( 'php_version', __( 'WordPress must be at least version 4.7.3 or greater!', 'wp_yes_txt' ) );
+		}
+
+		return true;
 	}
 }
