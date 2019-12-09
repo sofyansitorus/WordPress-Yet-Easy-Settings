@@ -22,59 +22,59 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 
 ## Advanced features
 
-* Add as many as admin pages, placed it any where as top level admin menu or submenu.
+* Add as many as admin pages, placed it any where as top level admin menu or sub-menu.
 * Add custom callback to render custom setting field type.
 * Add custom callback to render custom tab content.
 * Add custom callback to render custom page content.
-* Built-in data sanitazion and validation.
+* Built-in data sanitation and validation.
 * Easy to add help tabs for admin page.
 * Easy to add custom action button for admin page.
 
 ## How to Use
 
-Include the Wpyes class file in your plugin main file:
+Installation:
 
-`require_once "includes/class-wpyes.php";`
+`composer require sofyansitorus/wp-yes";`
 
-After you include the Wpyes class file, all you have to do is to initialize the Wpyes class, then add the settings object propertis in sequence add tabs, add sections, add fields.
+After you include the WP_Yes class file, all you have to do is to initialize the WP_Yes class, then add the settings object properties in sequence add tabs, add sections, add fields.
 
 ### Simple admin page setting
 
 This is the simplest way to initialize the setting page without defining the tabs and sections.
 
 ```php
-if ( ! function_exists( 'wpyes_simple' ) ) {
-    function wpyes_simple() {
+if ( ! function_exists( 'wp_yes_simple' ) ) {
+    function wp_yes_simple() {
 
-        $settings = new Wpyes( 'wpyes_simple' ); // Initialize the Wpyes class.
+        $settings = new WP_Yes( 'wp_yes_simple' ); // Initialize the WP_Yes class.
 
         $settings->add_field(
             array(
-                'id' => 'wpyes_simple_field_1',
+                'id' => 'wp_yes_simple_field_1',
             )
         );
 
         $settings->add_field(
             array(
-                'id' => 'wpyes_simple_field_2',
+                'id' => 'wp_yes_simple_field_2',
             )
         );
 
-        $settings->init(); // Run the Wpyes class.
+        $settings->init(); // Run the WP_Yes class.
     }
+}
 
-    wpyes_simple();
-}// End if().
+add_action( 'init', 'wp_yes_simple' );
 ```
 
 ### Multiple tabs admin page setting
 
-By default, the setting page will only has 1 tab. If you want to add more tabs, just simply call the **Wpyes::add_tab** method after the last **Wpyes::add_field** fora each tab, then following in sequence calling **Wpyes::add_section** and **Wpyes::add_field** method.
+By default, the setting page will only has 1 tab. If you want to add more tabs, just simply call the **WP_Yes::add_tab** method after the last **WP_Yes::add_field** fora each tab, then following in sequence calling **WP_Yes::add_section** and **WP_Yes::add_field** method.
 
 ```php
-if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
-    function wpyes_multi_tabs() {
-        $settings = new Wpyes( 'wpyes_multi_tabs' ); // Initialize the Wpyes class.
+if ( ! function_exists( 'wp_yes_multi_tabs' ) ) {
+    function wp_yes_multi_tabs() {
+        $settings = new WP_Yes( 'wp_yes_multi_tabs' ); // Initialize the WP_Yes class.
 
         $settings->add_tab(
             array(
@@ -90,7 +90,7 @@ if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
 
         $settings->add_field(
             array(
-                'id'       => 'wpyes_multi_tabs_field_1',
+                'id'       => 'wp_yes_multi_tabs_field_1',
                 'required' => true,
                 'type'     => 'text',
             )
@@ -110,30 +110,29 @@ if ( ! function_exists( 'wpyes_multi_tabs' ) ) {
 
         $settings->add_field(
             array(
-                'id'       => 'wpyes_multi_tabs_field_3',
+                'id'       => 'wp_yes_multi_tabs_field_3',
                 'required' => true,
                 'type'     => 'file',
             )
         );
 
-        $settings->init(); // Run the Wpyes class.
+        $settings->init(); // Run the WP_Yes class.
     }
-
-    wpyes_multi_tabs();
-}// End if().
+}
+add_action( 'init', 'wp_yes_multi_tabs' );
 ```
 
-A note you must keep in hand here is that you neeed to have a unique value for the **menu_slug** parameter that passed in the Wpyes class constructor and field **id** key in the **Wpyes::add_field** method parameter. You can have same tab id in different page manu, also can has same sections id in different tabs.
+A note you must keep in hand here is that you need to have a unique value for the **menu_slug** parameter that passed in the WP_Yes class constructor and field **id** key in the **WP_Yes::add_field** method parameter. You can have same tab id in different page menu, also can has same sections id in different tabs.
 
 ### Admin page setting with custom action button and help tabs
 
-To add help tabs and custom actin button to the admin page, you need to call **Wpyes::add_help_tab** and **Wpyes::add_button** method anywhere before calling the **Wpyes::init** method.
+To add help tabs and custom actin button to the admin page, you need to call **WP_Yes::add_help_tab** and **WP_Yes::add_button** method anywhere before calling the **WP_Yes::init** method.
 
 ```php
-if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
-    function wpyes_button_and_help_tabs() {
+if ( ! function_exists( 'wp_yes_button_and_help_tabs' ) ) {
+    function wp_yes_button_and_help_tabs() {
 
-        $settings = new Wpyes( 'wpyes_button_and_help_tabs' ); // Initialize the Wpyes class.
+        $settings = new WP_Yes( 'wp_yes_button_and_help_tabs' ); // Initialize the WP_Yes class.
 
         $settings->add_help_tab(  // <-- Add help tab 1.
             array(
@@ -165,17 +164,16 @@ if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
 
         $settings->add_field(
             array(
-                'id' => 'wpyes_button_and_help_tabs_field_1',
+                'id' => 'wp_yes_button_and_help_tabs_field_1',
             )
         );
 
         $settings->add_button( 'Custom Action Button', 'index.php' ); // <-- Add custom action button.
 
-        $settings->init(); // Run the Wpyes class.
+        $settings->init(); // Run the WP_Yes class.
     }
-
-    wpyes_button_and_help_tabs();
-}// End if().
+}
+add_action( 'init', 'wp_yes_button_and_help_tabs' );
 ```
 
 ### Getting the stored option value
@@ -183,16 +181,16 @@ if ( ! function_exists( 'wpyes_button_and_help_tabs' ) ) {
 To get the option value is by call built-in WordPress **get_option** function with filed id as the first argument.
 
 ```php
-get_option( 'wpyes_simple_field_1' );
+get_option( 'wp_yes_simple_field_1' );
 ```
 
-If you set the $setting_prefix value at third arguments in Wpyes constructor, then you need to prepend that prefix when calling  *get_option** function.
+If you set the $setting_prefix value at third arguments in WP_Yes constructor, then you need to pre-pend that prefix when calling  *get_option** function.
 
 ```php
-if ( ! function_exists( 'wpyes_with_prefix' ) ) {
-    function wpyes_with_prefix() {
+if ( ! function_exists( 'wp_yes_with_prefix' ) ) {
+    function wp_yes_with_prefix() {
 
-        $settings = new Wpyes( 'wpyes_with_prefix', array(), 'my_setting_prefix' ); // Initialize the Wpyes class.
+        $settings = new WP_Yes( 'wp_yes_with_prefix', array(), 'my_setting_prefix' ); // Initialize the WP_Yes class.
 
         $settings->add_tab(
             array(
@@ -208,21 +206,20 @@ if ( ! function_exists( 'wpyes_with_prefix' ) ) {
 
         $settings->add_field(
             array(
-                'id' => 'wpyes_with_prefix_field_1',
+                'id' => 'wp_yes_with_prefix_field_1',
             )
         );
 
-        $settings->init(); // Run the Wpyes class.
+        $settings->init(); // Run the WP_Yes class.
     }
+}
+add_action( 'init', 'wp_yes_with_prefix' );
 
-    wpyes_with_prefix();
-}// End if().
-
-// To get stored option value for setting field wpyes_with_prefix_field_1
-get_option( 'my_setting_prefix_wpyes_with_prefix_field_1' );
+// To get stored option value for setting field wp_yes_with_prefix_field_1
+get_option( 'my_setting_prefix_wp_yes_with_prefix_field_1' );
 ```
 
-Please take a look at the example in [wpyes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wpyes-example.php) for more advanced example such as adding custom tab content, adding custom page content, etc.
+Please take a look at the example in [wp-yes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wp-yes-example.php) for more advanced example such as adding custom tab content, adding custom page content, etc.
 
 ## Screenshots
 
@@ -255,6 +252,6 @@ Please take a look at the example in [wpyes-example.php](https://github.com/sofy
 
 ![Custom Page Content](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/c6491599-ea81-48e1-b0fc-2783f25eda8e/2018-02-01_01-44-20.png)
 
-### Submenu Admin Page
+### Sub-menu Admin Page
 
-![Submenu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/85c042bf-5516-4cbd-82cc-345247704a08/2018-02-21_16-31-46.png)
+![Sub-menu Admin Page](https://content.screencast.com/users/SofyanSitorus/folders/Snagit/media/85c042bf-5516-4cbd-82cc-345247704a08/2018-02-21_16-31-46.png)
