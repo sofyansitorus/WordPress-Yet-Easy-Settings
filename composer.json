@@ -1,5 +1,7 @@
 {
     "name": "sofyansitorus/wp-yes",
+    "description": "WordPress Yet Easy Settings class is PHP class for easy to build advanced admin page for WordPress.",
+    "license": "MIT",
     "type": "wordpress-plugin",
     "authors": [
         {
