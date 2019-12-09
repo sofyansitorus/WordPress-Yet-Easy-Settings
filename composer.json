@@ -1,13 +1,17 @@
 {
     "name": "sofyansitorus/wp-yes",
     "description": "WordPress Yet Easy Settings class is PHP class for easy to build advanced admin page for WordPress.",
-    "license": "MIT",
+    "homepage": "https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings",
+    "license": "GPL-2.0",
     "type": "wordpress-plugin",
     "version": "1.0.0",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Sofyan Sitorus",
-            "email": "sofyansitorus@gmail.com"
+            "email": "sofyansitorus@gmail.com",
+            "homepage": "https://github.com/sofyansitorus",
+            "role": "Developer"
         }
     ],
     "autoload": {
