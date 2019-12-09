@@ -1,0 +1,26 @@
+{
+    "name": "sofyansitorus/wp-yes",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Sofyan Sitorus",
+            "email": "sofyansitorus@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "includes/class-wp-yes.php"
+        ]
+    },
+    "require-dev": {
+        "phpcompatibility/php-compatibility": "*",
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "wp-coding-standards/wpcs": "^2.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+        "sirbrillig/phpcs-variable-analysis": "^2.7"
+    },
+    "scripts": {
+        "phpcs": "vendor/bin/phpcs",
+        "phpcbf": "vendor/bin/phpcbf"
+    }
+}
