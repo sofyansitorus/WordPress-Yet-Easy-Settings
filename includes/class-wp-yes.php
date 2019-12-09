@@ -1,28 +1,28 @@
 <?php
 /**
- * Core file for Wpyes Class.
+ * Core file for WP_Yes Class.
  *
  * @link       https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings
- * @since      0.0.1
- * @package    Wpyes
+ * @since      1.0.0
+ * @package    WP_Yes
  */
 
 /**
- * Wpyes class.
+ * WP_Yes class.
  *
  * WordPress Yet Easy Settings class is PHP class for easy to build WordPress admin settings page.
  *
- * @version    0.0.1
- * @since      0.0.1
- * @package    Wpyes
+ * @version    1.0.0
+ * @since      1.0.0
+ * @package    WP_Yes
  * @author     Sofyan Sitorus <sofyansitorus@gmail.com>
  */
-class Wpyes {
+class WP_Yes {
 
 	/**
 	 * Admin menu slug.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $menu_slug;
@@ -30,7 +30,7 @@ class Wpyes {
 	/**
 	 * Admin menu arguments.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $menu_args;
@@ -38,7 +38,7 @@ class Wpyes {
 	/**
 	 * Setting prefix.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $setting_prefix;
@@ -46,7 +46,7 @@ class Wpyes {
 	/**
 	 * Settings data.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $settings = array();
@@ -54,7 +54,7 @@ class Wpyes {
 	/**
 	 * Populated settings data.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $settings_populated = array();
@@ -62,7 +62,7 @@ class Wpyes {
 	/**
 	 * Setting errors data.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $errors = array();
@@ -70,7 +70,7 @@ class Wpyes {
 	/**
 	 * Recent tab id registered.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $recent_tab;
@@ -78,7 +78,7 @@ class Wpyes {
 	/**
 	 * Recent section id registered.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $recent_section;
@@ -86,7 +86,7 @@ class Wpyes {
 	/**
 	 * Recent field id registered.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $recent_field;
@@ -94,7 +94,7 @@ class Wpyes {
 	/**
 	 * Admin screen help_tabs.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $help_tabs = array();
@@ -102,7 +102,7 @@ class Wpyes {
 	/**
 	 * Admin screen action buttons.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $buttons = array();
@@ -111,7 +111,7 @@ class Wpyes {
 	 * If set to true errors will not be shown if the settings page has
 	 * already been submitted.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @var string
 	 */
 	private $hide_on_update = false;
@@ -119,7 +119,7 @@ class Wpyes {
 	/**
 	 * Constructor
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param string $menu_slug        The slug name to refer to this menu (should be unique).
 	 * @param array  $menu_args        { Optional. Array of properties for the new admin menu object. Default empty array.
 	 *  @type string     $method               Built-in WP function used to register menu. Available options: add_menu_page, add_management_page, add_options_page,
@@ -128,14 +128,14 @@ class Wpyes {
 	 *  @type string     $capability           Capability required for this menu to be displayed to the user. Default 'manage_options'.
 	 *  @type string     $page_title           Text to be displayed in the title tags of the page when the menu is selected. Default $menu_slug property.
 	 *  @type string     $menu_title           Text to be used for the menu. Default $menu_slug property.
-	 *  @type callable   $callback             Function to be called to output the content for this page. Default Wpyes::render_form.
+	 *  @type callable   $callback             Function to be called to output the content for this page. Default WP_Yes::render_form.
 	 *  @type string     $icon_url             URL to the icon to be used for this menu. Used when $method is 'add_menu_page'. Default empty.
 	 *  @type integer    $position             Position in the menu order this one should appear. Used when $method is 'add_menu_page'. Default null.
 	 *  @type string     $parent_slug          Slug name for the parent menu. Required if $method is 'add_submenu_page'. Default empty.
 	 * }
 	 * @param string $setting_prefix   Setting field prefix. This will affect you how you to get the option value. If not empty, the $setting_prefix would be
-	 *                                 prepended when getting option value. Example: If $setting_prefix = 'wpyes', to get option value for setting id 'example_1'
-	 *                                 is get_option('wpyes_example_1'). Default empty.
+	 *                                 pre-pended when getting option value. Example: If $setting_prefix = 'wp_yes_txt', to get option value for setting id 'example_1'
+	 *                                 is get_option('wp_yes_example_1'). Default empty.
 	 */
 	public function __construct( $menu_slug, $menu_args = array(), $setting_prefix = '' ) {
 
@@ -176,17 +176,17 @@ class Wpyes {
 	/**
 	 * Normalize settings tab property.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new tab object.
 	 *  @type string          $id              ID for the setting tab. Default empty.
 	 *  @type string          $label           Label for the setting tab. Default empty.
 	 *  @type array           $sections        Setting sections that will be linked to the tab. Default array().
 	 *  @type integer         $position        Setting tab position. Higher will displayed last. Default 10.
-	 *  @type callable        $callback        Callable function to be called to render output the tab content. Default Wpyes::render_tab.
+	 *  @type callable        $callback        Callable function to be called to render output the tab content. Default WP_Yes::render_tab.
 	 * }
 	 * @return array Normalized setting tab property.
 	 */
-	private function normalize_tab( $args ) {
+	protected function normalize_tab( $args ) {
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -214,7 +214,7 @@ class Wpyes {
 	/**
 	 * Register settings tabs in bulk.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $tabs Indexed array of settings tab property.
 	 */
 	public function add_tabs( $tabs ) {
@@ -228,7 +228,7 @@ class Wpyes {
 	/**
 	 * Register settings tab.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new tab object.
 	 *  @type string          $id              ID for the setting tab. Default empty.
 	 *  @type string          $label           Label for the setting tab. Default empty.
@@ -249,11 +249,11 @@ class Wpyes {
 	/**
 	 * Render settings tab.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $tab Setting tab property.
 	 */
 	public function render_tab( $tab ) {
-		foreach ( $tab['sections'] as $section_id => $section ) {
+		foreach ( $tab['sections'] as $section ) {
 			do_settings_sections( $this->get_section_unique_id( $section ) );
 		}
 	}
@@ -261,18 +261,18 @@ class Wpyes {
 	/**
 	 * Normalize settings section property.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new section object.
 	 *  @type string          $id              ID for the setting section. Default empty.
 	 *  @type string          $label           Label for the setting section. Default empty.
 	 *  @type callable        $callback        A callback function that render the setting section.
 	 *  @type array           $fields          Setting fields that linked directly to the section. Default array().
 	 *  @type integer         $position        Setting section position. Higher will displayed last. Default 10.
-	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
+	 *  @type string          $tab             Tab ID where will be the section displayed. Default empty.
 	 * }
 	 * @return array Normalized setting section property.
 	 */
-	private function normalize_section( $args ) {
+	protected function normalize_section( $args ) {
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -291,7 +291,7 @@ class Wpyes {
 	/**
 	 * Register settings sections in bulk.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $sections Indexed array of settings section property.
 	 */
 	public function add_sections( $sections ) {
@@ -305,14 +305,14 @@ class Wpyes {
 	/**
 	 * Register settings section.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new section object.
 	 *  @type string          $id              ID for the setting section. Default empty.
 	 *  @type string          $label           Label for the setting section. Default empty.
 	 *  @type callable        $callback        A callback function that render the setting section.
 	 *  @type array           $fields          Setting fields that linked directly to the section. Default array().
 	 *  @type integer         $position        Setting section position. Higher will displayed last. Default 10.
-	 *  @type string          $tab             Tab ID where whill be the section displayed. Default empty.
+	 *  @type string          $tab             Tab ID where will be the section displayed. Default empty.
 	 * }
 	 */
 	public function add_section( $args ) {
@@ -328,18 +328,18 @@ class Wpyes {
 	/**
 	 * Get settings section unique ID.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $section Setting section property.
 	 * @return string Unique ID of section object.
 	 */
-	private function get_section_unique_id( $section ) {
+	protected function get_section_unique_id( $section ) {
 		return $this->menu_slug . '_' . $section['tab'] . '_' . $section['id'];
 	}
 
 	/**
 	 * Normalize setting field properties
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new field object.
 	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
 	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
@@ -362,8 +362,7 @@ class Wpyes {
 	 *  @type bool            $show_in_rest       Whether data associated with this setting should be included in the REST API. Default false.
 	 * }
 	 */
-	private function normalize_field( $args ) {
-
+	protected function normalize_field( $args ) {
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -407,7 +406,7 @@ class Wpyes {
 	/**
 	 * Register settings fields in bulk.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $fields Indexed array of settings field property.
 	 */
 	public function add_fields( $fields ) {
@@ -421,7 +420,7 @@ class Wpyes {
 	/**
 	 * Register settings field.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $args { Optional. Array of properties for the new field object.
 	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
 	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
@@ -456,40 +455,40 @@ class Wpyes {
 	/**
 	 * Get settings field attribute id.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function get_field_id( $field ) {
+	protected function get_field_id( $field ) {
 		return implode( '_', array( $field['tab'], $field['section'], $field['id'] ) );
 	}
 
 	/**
 	 * Get settings field attribute name.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function get_field_name( $field ) {
+	protected function get_field_name( $field ) {
 		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['id'] : $field['id'];
 	}
 
 	/**
 	 * Get settings field value from DB.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function get_field_value( $field ) {
+	protected function get_field_value( $field ) {
 		return get_option( $this->get_field_name( $field ), $field['default'] );
 	}
 
 	/**
 	 * Get settings field attributes.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function field_attrs( $field ) {
+	protected function field_attrs( $field ) {
 		switch ( $field['type'] ) {
 			case 'text':
 			case 'url':
@@ -514,13 +513,13 @@ class Wpyes {
 				break;
 			case 'color':
 				if ( ! isset( $field['attrs']['class'] ) ) {
-					$field['attrs']['class'] = 'regular-text wpyes-color-picker';
+					$field['attrs']['class'] = 'regular-text wp_yes-color-picker';
 				}
 				if ( false === strpos( $field['attrs']['class'], 'regular-text' ) ) {
 					$field['attrs']['class'] .= ' regular-text';
 				}
-				if ( false === strpos( $field['attrs']['class'], 'wpyes-color-picker' ) ) {
-					$field['attrs']['class'] .= ' wpyes-color-picker';
+				if ( false === strpos( $field['attrs']['class'], 'wp_yes-color-picker' ) ) {
+					$field['attrs']['class'] .= ' wp_yes-color-picker';
 				}
 				break;
 			case 'textarea':
@@ -535,16 +534,16 @@ class Wpyes {
 		}
 
 		if ( ! isset( $field['attrs']['class'] ) ) {
-			$field['attrs']['class'] = 'wpyes-field';
+			$field['attrs']['class'] = 'wp_yes-field';
 		}
 
-		if ( false === strpos( $field['attrs']['class'], 'wpyes-field' ) ) {
-			$field['attrs']['class'] .= ' wpyes-field';
+		if ( false === strpos( $field['attrs']['class'], 'wp_yes-field' ) ) {
+			$field['attrs']['class'] .= ' wp_yes-field';
 		}
 
 		if ( is_string( $field['type'] ) ) {
-			if ( false === strpos( $field['attrs']['class'], 'wpyes-field-' . $field['type'] ) ) {
-				$field['attrs']['class'] .= ' wpyes-field-' . $field['type'];
+			if ( false === strpos( $field['attrs']['class'], 'wp_yes-field-' . $field['type'] ) ) {
+				$field['attrs']['class'] .= ' wp_yes-field-' . $field['type'];
 			}
 		}
 
@@ -558,14 +557,18 @@ class Wpyes {
 		unset( $field['attrs']['multiple'] );
 
 		foreach ( $field['attrs'] as $key => $value ) {
-			echo esc_html( $key ) . '="' . esc_attr( $value ) . '" ';
+			if ( in_array( $key, array( 'src', 'href' ), true ) ) {
+				echo esc_html( $key ) . '="' . esc_url( $value ) . '" ';
+			} else {
+				echo esc_html( $key ) . '="' . esc_attr( $value ) . '" ';
+			}
 		}
 	}
 
 	/**
 	 * Render the setting field.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field( $field ) {
@@ -589,10 +592,10 @@ class Wpyes {
 	/**
 	 * Render the setting field for text.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function render_field_text( $field ) {
+	protected function render_field_text( $field ) {
 		?>
 		<input 
 		type="<?php echo esc_attr( $field['type'] ); ?>" 
@@ -609,30 +612,30 @@ class Wpyes {
 	/**
 	 * Render the setting field for url.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function render_field_url( $field ) {
+	protected function render_field_url( $field ) {
 		$this->render_field_text( $field );
 	}
 
 	/**
 	 * Render the setting field for number.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function render_field_number( $field ) {
+	protected function render_field_number( $field ) {
 		$this->render_field_text( $field );
 	}
 
 	/**
 	 * Render the setting field for decimal.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	private function render_field_decimal( $field ) {
+	protected function render_field_decimal( $field ) {
 		$field['type']          = 'number';
 		$field['attrs']['step'] = 'any';
 		$this->render_field_text( $field );
@@ -641,7 +644,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for password.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_password( $field ) {
@@ -651,7 +654,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for email.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_email( $field ) {
@@ -661,7 +664,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for color.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_color( $field ) {
@@ -671,7 +674,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for checkbox.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_checkbox( $field ) {
@@ -696,7 +699,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for multicheckbox.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_multicheckbox( $field ) {
@@ -729,7 +732,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for radio.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_radio( $field ) {
@@ -759,7 +762,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for select.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_select( $field ) {
@@ -779,7 +782,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for multiselect.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_multiselect( $field ) {
@@ -802,7 +805,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for textarea.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_textarea( $field ) {
@@ -821,7 +824,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for wysiwyg.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_wysiwyg( $field ) {
@@ -838,7 +841,7 @@ class Wpyes {
 
 		$width = isset( $field['width'] ) ? $field['width'] : '500px';
 		?>
-		<div style="max-width:<?php echo esc_attr( $width ); ?>;" <?php $this->field_attrs( $field ); ?>>
+		<div style="max-width:<?php echo esc_attr( $width ); ?>" <?php $this->field_attrs( $field ); ?>>
 		<?php wp_editor( $this->get_field_value( $field ), $this->get_field_name( $field ), $editor_settings ); ?>
 		</div>
 		<?php if ( ! empty( $field['description'] ) ) : ?>
@@ -850,7 +853,7 @@ class Wpyes {
 	/**
 	 * Render the setting field for file.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
 	public function render_field_file( $field ) {
@@ -861,8 +864,8 @@ class Wpyes {
 		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
 		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
 		<?php $this->field_attrs( $field ); ?> />
-		<button type="button" class="button wpyes-browse-media"><span class="dashicons dashicons-upload"></span></button>
-		<button type="button" class="button wpyes-remove-media"><span class="dashicons dashicons-trash"></span></button>
+		<button type="button" class="button wp_yes-browse-media"><span class="dashicons dashicons-upload"></span></button>
+		<button type="button" class="button wp_yes-remove-media"><span class="dashicons dashicons-trash"></span></button>
 		<?php if ( ! empty( $field['description'] ) ) : ?>
 		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
 		<?php endif; ?>
@@ -874,7 +877,7 @@ class Wpyes {
 	 *
 	 * This function is hooked into sanitize_option_{$option} filter.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 *
 	 * @param string $value          The sanitized option value.
 	 * @param string $option         The option name.
@@ -884,7 +887,6 @@ class Wpyes {
 	 */
 	public function validate_field( $value, $option, $original_value ) {
 		try {
-
 			$field = isset( $this->settings[ $option ] ) ? $this->settings[ $option ] : false;
 			if ( empty( $field ) ) {
 				return $value;
@@ -892,7 +894,7 @@ class Wpyes {
 
 			// Validate if field is required.
 			if ( $field['required'] && ! is_numeric( $value ) && empty( $value ) ) {
-				throw new Exception( __( 'Value can not be empty.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
+				throw new Exception( __( 'Value can not be empty.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
 			}
 
 			// If value is empty and not numeric, no need to validate further.
@@ -904,23 +906,23 @@ class Wpyes {
 			switch ( $field['type'] ) {
 				case 'email':
 					if ( ! is_email( $value ) ) {
-						throw new Exception( __( 'Value must be a valid email address.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
+						throw new Exception( __( 'Value must be a valid email address.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
 				case 'url':
 					if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
-						throw new Exception( __( 'Value must be a valid URL.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
+						throw new Exception( __( 'Value must be a valid URL.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
 				case 'number':
 					if ( $value > intval( $value ) || $value < intval( $value ) ) {
-						throw new Exception( __( 'Value must be an integer.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
+						throw new Exception( __( 'Value must be an integer.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					$value = intval( $value );
 					break;
 				case 'decimal':
 					if ( ! is_numeric( $value ) ) {
-						throw new Exception( __( 'Value must be a number.', 'wpyes' ) ); // @todo Change text-domain based on your plugin or theme.
+						throw new Exception( __( 'Value must be a number.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
 					}
 					break;
 			}
@@ -949,27 +951,25 @@ class Wpyes {
 	/**
 	 * Get settings tabs, sections and fields as associative array array
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @return array All settings data array.
 	 */
-	private function get_settings() {
+	protected function get_settings() {
 		if ( ! $this->settings_populated ) {
 			return array();
 		}
-		return apply_filters( 'wpyes_' . $this->menu_slug . '_settings', $this->settings );
+		return apply_filters( 'wp_yes_' . $this->menu_slug . '_settings', $this->settings );
 	}
 
 	/**
 	 * Populate settings data.
 	 */
-	private function populate_settings() {
-
+	protected function populate_settings() {
 		$tabs     = array();
 		$sections = array();
 		$fields   = array();
 
 		foreach ( $this->settings as $setting ) {
-
 			if ( empty( $setting['type'] ) || empty( $setting['data'] ) ) {
 				continue;
 			}
@@ -1067,13 +1067,13 @@ class Wpyes {
 			return;
 		}
 
-		// Sort tabs to settings data by positin property.
+		// Sort tabs to settings data by position property.
 		uasort( $tabs, array( $this, 'sort_by_position' ) );
 
-		// Sort tabs to settings data by positin property.
+		// Sort tabs to settings data by position property.
 		uasort( $sections, array( $this, 'sort_by_position' ) );
 
-		// Sort tabs to settings data by positin property.
+		// Sort tabs to settings data by position property.
 		uasort( $fields, array( $this, 'sort_by_position' ) );
 
 		$this->settings = array();
@@ -1106,10 +1106,9 @@ class Wpyes {
 	}
 
 	/**
-	 * Initialize and build the settings tabs, sections and fileds.
+	 * Initialize and build the settings tabs, sections and fields.
 	 */
 	public function init() {
-
 		$this->populate_settings();
 
 		add_action( 'admin_init', array( $this, 'register_settings' ), 10 );
@@ -1119,7 +1118,6 @@ class Wpyes {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
 		add_action( 'admin_print_footer_scripts', array( $this, 'admin_footer_js' ) );
-
 	}
 
 	/**
@@ -1128,7 +1126,6 @@ class Wpyes {
 	 * This function is hooked into admin_init.
 	 */
 	public function register_settings() {
-
 		if ( ! $this->settings_populated ) {
 			return;
 		}
@@ -1136,15 +1133,15 @@ class Wpyes {
 		foreach ( $this->settings_populated as $tab_key => $tab ) {
 
 			// Add action hook to render for the tab content.
-			add_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab['callback'] );
+			add_action( 'wp_yes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab['callback'] );
 
-			foreach ( $tab['sections'] as $section_key => $section ) {
+			foreach ( $tab['sections'] as $section ) {
 				$section_unique_id = $this->get_section_unique_id( $section );
 
 				// Add a new section to a settings page.
 				add_settings_section( $section_unique_id, $section['title'], $section['callback'], $section_unique_id );
 
-				foreach ( $section['fields'] as $field_key => $field ) {
+				foreach ( $section['fields'] as $field ) {
 					$option = $this->get_field_name( $field );
 
 					// Register a settings field to a settings page and section.
@@ -1152,7 +1149,9 @@ class Wpyes {
 
 					// Register a setting and its data.
 					register_setting(
-						$this->menu_slug, $option, array(
+						$this->menu_slug,
+						$option,
+						array(
 							'type'              => $field['data_type'],
 							'group'             => $this->menu_slug,
 							'description'       => $field['description'],
@@ -1168,13 +1167,18 @@ class Wpyes {
 		}
 	}
 
+	/**
+	 * Render settings page title
+	 *
+	 * @return void
+	 */
 	public function page_title() {
 		?>
 		<h1 class="<?php echo empty( $this->buttons ) ? '' : esc_attr( 'wp-heading-inline' ); ?>">
 			<?php echo esc_html( $this->menu_args['page_title'] ); ?>
 			<?php if ( ! empty( $this->buttons ) ) : ?>
-				<?php foreach( $this->buttons as $index => $button ) : ?>
-					<a href="<?php echo esc_url( $button['url'] ); ?>" id="<?php echo empty( $button['id'] ) ? 'button-' . $this->menu_slug . '-' . esc_attr( $index ) : esc_attr( $button['id'] ); ?>" class="page-title-action"><?php echo esc_html( $button['text'] ); ?></a>
+				<?php foreach ( $this->buttons as $index => $button ) : ?>
+					<a href="<?php echo esc_url( $button['url'] ); ?>" id="<?php echo empty( $button['id'] ) ? 'button-' . esc_attr( $this->menu_slug ) . '-' . esc_attr( $index ) : esc_attr( $button['id'] ); ?>" class="page-title-action"><?php echo esc_html( $button['text'] ); ?></a>
 				<?php endforeach; ?>
 				<hr class="wp-header-end">
 			<?php endif; ?>
@@ -1187,29 +1191,29 @@ class Wpyes {
 	 */
 	public function render_form() {
 		?>
-		<div class="wrap wpyes-wrap">
+		<div class="wrap wp_yes-wrap">
 			<?php $this->page_title(); ?>
 			<?php settings_errors( '', false, $this->hide_on_update ); ?>
 			<?php if ( 1 < count( $this->settings_populated ) ) : ?>
 				<div class="metabox-holder">
-					<h2 class="wpyes-nav-tab-wrapper nav-tab-wrapper">
+					<h2 class="wp_yes-nav-tab-wrapper nav-tab-wrapper">
 						<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
-						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wpyes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
+						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wp_yes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['label'] ); ?></a>
 						<?php endforeach; ?>
 					</h2>
 				</div>
 				<div class="clear"></div>
 			<?php endif; ?>
 			<form method="post" action="options.php">
-				<div class="wpyes-tab-wrapper metabox-holder">
+				<div class="wp_yes-tab-wrapper metabox-holder">
 					<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
-						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wpyes-tab-group">
-							<?php do_action( 'wpyes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
+						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wp_yes-tab-group">
+							<?php do_action( 'wp_yes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
 						</div>
 					<?php endforeach; ?>
 				</div>
 				<?php if ( 0 < count( $this->settings ) ) : ?>
-				<div class="wpyes-button-wrapper">
+				<div class="wp_yes-button-wrapper">
 					<?php settings_fields( $this->menu_slug ); ?>
 					<?php submit_button(); ?>
 				</div>
@@ -1225,7 +1229,6 @@ class Wpyes {
 	 * This function is hooked into admin_menu to affect admin only.
 	 */
 	public function admin_menu() {
-
 		$allowed = array(
 			'add_menu_page',
 			'add_management_page',
@@ -1302,7 +1305,7 @@ class Wpyes {
 	/**
 	 * Add help tab items.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $help_tabs Indexed array of properties for the new tab object.
 	 */
 	public function add_help_tabs( $help_tabs ) {
@@ -1320,7 +1323,7 @@ class Wpyes {
 	/**
 	 * Add help tab item.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param array $help_tab { Array of properties for the help tab object.
 	 *  @type string            $id              ID for the setting tab. Default empty.
 	 *  @type string            $title           Label for the setting tab. Default empty.
@@ -1328,7 +1331,6 @@ class Wpyes {
 	 * }
 	 */
 	public function add_help_tab( $help_tab ) {
-
 		// Validate help tab property.
 		if ( ! $help_tab || ! is_array( $help_tab ) || ! isset( $help_tab['id'], $help_tab['title'], $help_tab['content'] ) ) {
 			return;
@@ -1342,7 +1344,7 @@ class Wpyes {
 	 *
 	 * This function is hooked into "load-{$this->menu_slug}" action.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 */
 	public function register_help_tabs() {
 		if ( ! $this->help_tabs ) {
@@ -1361,7 +1363,7 @@ class Wpyes {
 	/**
 	 * Add custom button beside of the setting page title.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param string $text   The action button text.
 	 * @param string $url    The action button URL.
 	 * @param string $id     The action button ID.
@@ -1386,21 +1388,21 @@ class Wpyes {
 	 *
 	 * This function is hooked into admin_enqueue_scripts.
 	 *
-	 * @since    0.0.1
+	 * @since    1.0.0
 	 * @param string $hook Current admin page slug loaded.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
-
 		if ( ! $this->menu_args['callback'] || ! strpos( $hook, '_' . $this->menu_slug ) ) {
 			return;
 		}
 
 		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'wp-color-picker', array( 'jquery' ) );
+		wp_enqueue_script( 'jquery' );
+		wp_enqueue_script( 'wp-color-picker' );
 		wp_enqueue_media();
 
 		// Do custom action hook to enqueue custom script and styles.
-		do_action( 'wpyes_' . $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
+		do_action( 'wp_yes_' . $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
 	}
 
 	/**
@@ -1408,10 +1410,9 @@ class Wpyes {
 	 *
 	 * This function is hooked into admin_print_footer_scripts.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 */
 	public function admin_footer_js() {
-
 		$screen = get_current_screen();
 
 		if ( ! $this->menu_args['callback'] || ! isset( $screen->base ) || ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
@@ -1428,47 +1429,47 @@ class Wpyes {
 					var menuSlug = "<?php echo esc_html( $this->menu_slug ); ?>";
 
 					// Initiate color picker.
-					$(".wpyes-color-picker").wpColorPicker();
+					$(".wp_yes-color-picker").wpColorPicker();
 
 					// Initiate tabs.
-					$(".wpyes-tab-group").hide();
+					$(".wp_yes-tab-group").hide();
 
 					var activeTab = "";
 
 					if (typeof localStorage != "undefined") {
-						activeTab = localStorage.getItem("wpyes-active-tab-" + menuSlug);
+						activeTab = localStorage.getItem("wp_yes-active-tab-" + menuSlug);
 					}
 
 					if (activeTab != "" && $(activeTab).length) {
 						$(activeTab).fadeIn();
 					} else {
-						$(".wpyes-tab-group:first").fadeIn();
+						$(".wp_yes-tab-group:first").fadeIn();
 					}
 
 					if (activeTab != "" && $(activeTab + "-tab").length) {
 						$(activeTab + "-tab").addClass("nav-tab-active");
 					} else {
-						$(".wpyes-nav-tab-wrapper a:first").addClass("nav-tab-active");
+						$(".wp_yes-nav-tab-wrapper a:first").addClass("nav-tab-active");
 					}
 
-					$(".wpyes-nav-tab-wrapper a").click(function(e) {
+					$(".wp_yes-nav-tab-wrapper a").click(function(e) {
 						e.preventDefault();
 
-						$(".wpyes-nav-tab-wrapper a").removeClass("nav-tab-active");
+						$(".wp_yes-nav-tab-wrapper a").removeClass("nav-tab-active");
 
 						$(this).addClass("nav-tab-active").blur();
 
 						if (typeof localStorage != "undefined") {
-							localStorage.setItem("wpyes-active-tab-" + menuSlug, $(this).attr("href"));
+							localStorage.setItem("wp_yes-active-tab-" + menuSlug, $(this).attr("href"));
 						}
 
-						$(".wpyes-tab-group").hide();
+						$(".wp_yes-tab-group").hide();
 
 						$($(this).attr("href")).fadeIn();
 					});
 
 					// Media file browser.
-					$(".wpyes-browse-media").on("click", function(e) {
+					$(".wp_yes-browse-media").on("click", function(e) {
 						e.preventDefault();
 
 						var self = $(this);
@@ -1491,7 +1492,7 @@ class Wpyes {
 					});
 
 					// Remove file from input.
-					$(".wpyes-remove-media").on("click", function(e) {
+					$(".wp_yes-remove-media").on("click", function(e) {
 						e.preventDefault();
 						$(this).closest("td").find('input[type="text"]').val("");
 					});
@@ -1503,18 +1504,18 @@ class Wpyes {
 		<?php
 
 		// Do custom action hook to print scripts needed.
-		do_action( 'wpyes_' . $this->menu_slug . '_admin_footer_js', $screen, $this );
+		do_action( 'wp_yes_' . $this->menu_slug . '_admin_footer_js', $screen, $this );
 	}
 
 	/**
 	 * Sort array by position
 	 *
-	 * @since    0.0.1
+	 * @since    1.0.0
 	 * @param array $a First index of the array.
 	 * @param array $b Compared array.
 	 * @return integer
 	 */
-	private function sort_by_position( $a, $b ) {
+	protected function sort_by_position( $a, $b ) {
 		$a = isset( $a['position'] ) ? (int) $a['position'] : 10;
 		$b = isset( $b['position'] ) ? (int) $b['position'] : 10;
 
@@ -1528,11 +1529,11 @@ class Wpyes {
 	/**
 	 * Humanize slug to make them readable.
 	 *
-	 * @since 0.0.1
+	 * @since 1.0.0
 	 * @param string $slug Slug string that will be humanized.
 	 * @return string Humanized text.
 	 */
-	private function humanize_slug( $slug ) {
+	protected function humanize_slug( $slug ) {
 
 		// Split slug by dash and underscore as array.
 		$words = preg_split( '/(_|-)/', $slug );
@@ -1543,7 +1544,7 @@ class Wpyes {
 		}
 
 		// Define ignored words.
-		$ignores = apply_filters( 'wpyes_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
+		$ignores = apply_filters( 'wp_yes_humanize_slug_ignores', array( 'a', 'and', 'or', 'to', 'in', 'at', 'in', 'of' ) );
 
 		foreach ( $words as $index => $word ) {
 
