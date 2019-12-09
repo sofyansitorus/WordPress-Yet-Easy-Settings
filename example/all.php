@@ -16,7 +16,7 @@ if ( ! function_exists( 'wp_yes_all' ) ) {
 	/**
 	 * Example for settings with all available fields type.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_all() {

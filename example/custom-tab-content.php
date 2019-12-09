@@ -16,7 +16,7 @@ if ( ! function_exists( 'wp_yes_custom_tab_content' ) ) {
 	/**
 	 * Example for custom tab 2 content
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_tab_2_content_chart() {
@@ -32,7 +32,7 @@ if ( ! function_exists( 'wp_yes_custom_tab_content' ) ) {
 	/**
 	 * Example for custom tab content
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_tab_content() {
@@ -79,7 +79,7 @@ if ( ! function_exists( 'wp_yes_custom_tab_content_enqueue_scripts' ) ) {
 	/**
 	 * Enqueue dependencies js scripts for chartjs.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_tab_content_enqueue_scripts() {
@@ -92,7 +92,7 @@ if ( ! function_exists( 'wp_yes_custom_tab_content_print_footer_js' ) ) {
 	/**
 	 * Enqueue dependencies js scripts for chartjs.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_tab_content_print_footer_js() {

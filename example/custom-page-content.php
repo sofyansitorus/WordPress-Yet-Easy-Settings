@@ -16,7 +16,7 @@ if ( ! function_exists( 'wp_yes_custom_page_content_canvas' ) ) {
 	/**
 	 * Enqueue dependencies js scripts for chartjs.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_page_content_canvas() {
@@ -31,7 +31,7 @@ if ( ! function_exists( 'wp_yes_custom_page_content' ) ) {
 	/**
 	 * Example for custom admin page content
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_page_content() {
@@ -52,7 +52,7 @@ if ( ! function_exists( 'wp_yes_custom_page_content_enqueue_scripts' ) ) {
 	/**
 	 * Enqueue dependencies js scripts for chartjs.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_page_content_enqueue_scripts() {
@@ -65,7 +65,7 @@ if ( ! function_exists( 'wp_yes_custom_page_content_print_footer_js' ) ) {
 	/**
 	 * Enqueue dependencies js scripts for chartjs.
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_custom_page_content_print_footer_js() {

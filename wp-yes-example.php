@@ -8,13 +8,13 @@
  * that starts the plugin.
  *
  * @link              https://github.com/sofyansitorus
- * @since             0.0.1
+ * @since             1.0.0
  * @package           WP_Yes
  *
  * Plugin Name:       WP Yes Example
  * Plugin URI:        https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings
  * Description:       This is sample for how to use WordPress-Yet-Easy-Settings in a plugin.
- * Version:           0.0.1
+ * Version:           1.0.0
  * Author:            Sofyan Sitorus
  * Author URI:        https://github.com/sofyansitorus
  * License:           GPL-2.0+

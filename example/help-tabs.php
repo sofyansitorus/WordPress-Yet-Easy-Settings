@@ -16,7 +16,7 @@ if ( ! function_exists( 'wp_yes_help_tabs' ) ) {
 	/**
 	 * Example for settings with help tabs
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_help_tabs() {

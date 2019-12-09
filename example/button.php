@@ -16,7 +16,7 @@ if ( ! function_exists( 'wp_yes_button' ) ) {
 	/**
 	 * Example for settings with custom action button
 	 *
-	 * @since  0.0.1
+	 * @since  1.0.0
 	 * @return void
 	 */
 	function wp_yes_button() {
