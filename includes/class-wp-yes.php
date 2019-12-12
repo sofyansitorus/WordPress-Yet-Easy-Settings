@@ -20,6 +20,13 @@
 class WP_Yes {
 
 	/**
+	 * Current version
+	 *
+	 * @var string
+	 */
+	public static $version = '1.0.3';
+
+	/**
 	 * Admin menu slug.
 	 *
 	 * @since 1.0.0
@@ -41,15 +48,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @var string
 	 */
-	private $setting_prefix;
-
-	/**
-	 * Settings data.
-	 *
-	 * @since 1.0.0
-	 * @var array
-	 */
-	private $settings = array();
+	private $setting_prefix = '';
 
 	/**
 	 * Populated settings data.
@@ -57,7 +56,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @var string
 	 */
-	private $settings_populated = array();
+	private $settings = array();
 
 	/**
 	 * Setting errors data.
@@ -84,6 +83,14 @@ class WP_Yes {
 	private $recent_section;
 
 	/**
+	 * Recent field id registered.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $recent_field;
+
+	/**
 	 * All tabs data.
 	 *
 	 * @since 1.0.0
@@ -98,6 +105,14 @@ class WP_Yes {
 	 * @var string
 	 */
 	private $all_sections;
+
+	/**
+	 * All fields data.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $all_fields;
 
 	/**
 	 * Admin screen help_tabs.
@@ -123,6 +138,22 @@ class WP_Yes {
 	 * @var string
 	 */
 	private $hide_on_update = false;
+
+	/**
+	 * Custom scripts data.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $custom_scripts = array();
+
+	/**
+	 * Custom CSS stylesheets data.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
+	private $custom_styles = array();
 
 	/**
 	 * Constructor
@@ -184,7 +215,21 @@ class WP_Yes {
 
 		$this->menu_args = $menu_args;
 
-		// Set the menu arguments property.
+		if ( $setting_prefix ) {
+			$this->set_prefix( $setting_prefix );
+		}
+	}
+
+	/**
+	 * Set setting name prefix
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string $setting_prefix Setting name prefix.
+	 *
+	 * @return void
+	 */
+	public function set_prefix( $setting_prefix ) {
 		$this->setting_prefix = trim( $setting_prefix, '_' );
 	}
 
@@ -254,18 +299,19 @@ class WP_Yes {
 	public function add_tab( $args ) {
 		$args = $this->normalize_tab( $args );
 
-		if ( empty( $args['id'] ) || ! empty( $this->all_tabs[ $args['id'] ] ) ) {
+		if ( empty( $args['id'] ) ) {
 			return;
 		}
 
-		$this->all_tabs[ $args['id'] ] = $args;
-		$this->recent_tab              = $args['id'];
-		$this->recent_section          = null;
+		$unique_id = $this->get_tab_id( $args );
 
-		$this->settings[] = array(
-			'type' => 'tab',
-			'data' => $args,
-		);
+		if ( isset( $this->all_tabs[ $unique_id ] ) ) {
+			return;
+		}
+
+		$this->all_tabs[ $unique_id ] = $args;
+		$this->recent_tab             = $args['id'];
+		$this->recent_section         = null;
 	}
 
 	/**
@@ -276,7 +322,7 @@ class WP_Yes {
 	 */
 	public function render_tab( $tab ) {
 		foreach ( $tab['sections'] as $section ) {
-			do_settings_sections( $this->get_section_unique_id( $section ) );
+			do_settings_sections( $this->get_section_id( $section ) );
 		}
 	}
 
@@ -306,6 +352,18 @@ class WP_Yes {
 				'tab'      => '',
 			)
 		);
+
+		if ( empty( $args['tab'] ) ) {
+			if ( empty( $this->recent_tab ) ) {
+				$this->add_tab(
+					array(
+						'id' => $this->menu_slug,
+					)
+				);
+			}
+
+			$args['tab'] = $this->recent_tab;
+		}
 
 		return $args;
 	}
@@ -340,46 +398,22 @@ class WP_Yes {
 	public function add_section( $args ) {
 		$args = $this->normalize_section( $args );
 
-		if ( empty( $args['id'] ) || ! empty( $this->all_section[ $args['id'] ] ) ) {
+		if ( empty( $args['id'] ) ) {
 			return;
-		}
-
-		if ( empty( $this->recent_tab ) ) {
-			$this->add_tab(
-				array(
-					'id' => $this->menu_slug,
-				)
-			);
-
-			$this->recent_tab = $this->menu_slug;
 		}
 
 		if ( empty( $args['tab'] ) ) {
-			$args['tab'] = $this->recent_tab;
-		}
-
-		if ( empty( $this->all_tabs[ $args['id'] ] ) ) {
 			return;
 		}
 
-		$this->all_sections[ $args['id'] ] = $args;
-		$this->recent_section              = $args['id'];
+		$unique_id = $this->get_section_id( $args );
 
-		$this->settings[] = array(
-			'type' => 'section',
-			'data' => $args,
-		);
-	}
+		if ( isset( $this->all_sections[ $unique_id ] ) ) {
+			return;
+		}
 
-	/**
-	 * Get settings section unique ID.
-	 *
-	 * @since 1.0.0
-	 * @param array $section Setting section property.
-	 * @return string Unique ID of section object.
-	 */
-	protected function get_section_unique_id( $section ) {
-		return $this->menu_slug . '_' . $section['tab'] . '_' . $section['id'];
+		$this->all_sections[ $unique_id ] = $args;
+		$this->recent_section             = $args['id'];
 	}
 
 	/**
@@ -428,8 +462,33 @@ class WP_Yes {
 				'section'           => '',
 				'required'          => false,
 				'show_in_rest'      => false,
+				'conditional'       => array(),
 			)
 		);
+
+		if ( empty( $args['tab'] ) ) {
+			if ( empty( $this->recent_tab ) ) {
+				$this->add_tab(
+					array(
+						'id' => $this->menu_slug,
+					)
+				);
+			}
+
+			$args['tab'] = $this->recent_tab;
+		}
+
+		if ( empty( $args['section'] ) ) {
+			if ( empty( $this->recent_section ) ) {
+				$this->add_section(
+					array(
+						'id' => $this->menu_slug,
+					)
+				);
+			}
+
+			$args['section'] = $this->recent_section;
+		}
 
 		// Set label if empty and not false.
 		if ( empty( $args['label'] ) && ! is_bool( $args['label'] ) ) {
@@ -445,6 +504,34 @@ class WP_Yes {
 		if ( empty( $args['data_type'] ) && 'decimal' === ( $args['type'] ) ) {
 			$args['data_type'] = 'number';
 		}
+
+		$field_class = isset( $args['attrs']['class'] ) ? $args['attrs']['class'] : array();
+
+		if ( ! is_array( $field_class ) ) {
+			$field_class = explode( ' ', $field_class );
+		}
+
+		if ( ! in_array( 'wp-yes--field', $field_class, true ) ) {
+			$field_class[] = 'wp-yes--field';
+		}
+
+		if ( ! in_array( 'wp-yes--field--' . $args['type'], $field_class, true ) ) {
+			$field_class[] = 'wp-yes--field--' . $args['type'];
+		}
+
+		$args['attrs']['class'] = implode( ' ', $field_class );
+
+		if ( ! empty( $args['conditional'] ) ) {
+			$conditional = array();
+
+			foreach ( $args['conditional'] as $key => $value ) {
+				$conditional[ $this->get_field_name( $key ) ] = $value;
+			}
+
+			$args['conditional'] = $conditional;
+		}
+
+		$args['name'] = $this->get_field_name( $args );
 
 		return $args;
 	}
@@ -495,52 +582,89 @@ class WP_Yes {
 			return;
 		}
 
-		if ( empty( $this->recent_tab ) ) {
-			$this->add_tab(
-				array(
-					'id' => $this->menu_slug,
-				)
-			);
-
-			$this->recent_tab = $this->menu_slug;
-		}
-
-		if ( empty( $this->recent_section ) ) {
-			$this->add_section(
-				array(
-					'id' => $this->recent_tab,
-				)
-			);
-
-			$this->recent_section = $this->recent_tab;
-		}
-
-		if ( empty( $args['tab'] ) ) {
-			$args['tab'] = $this->recent_tab;
-		}
-
-		if ( empty( $args['section'] ) ) {
-			$args['section'] = $this->recent_section;
-		}
-
-		if ( empty( $this->all_tabs[ $args['tab'] ] ) || empty( $this->all_sections[ $args['section'] ] ) ) {
+		if ( empty( $args['tab'] ) || empty( $args['section'] ) ) {
 			return;
 		}
 
-		$this->settings[] = array(
-			'type' => 'field',
-			'data' => $args,
-		);
+		$unique_id = $this->get_field_id( $args );
+
+		if ( isset( $this->all_fields[ $unique_id ] ) ) {
+			return;
+		}
+
+		$this->all_fields[ $unique_id ] = $args;
+		$this->recent_field             = $args['id'];
 	}
 
 	/**
-	 * Get settings field attribute id.
+	 * Get settings tab unique ID.
 	 *
 	 * @since 1.0.0
-	 * @param array $field Setting field property.
+	 * @param array $tab Setting tab property.
+	 * @return string Unique ID of tab object.
 	 */
-	protected function get_field_id( $field ) {
-		return implode( '_', array( $field['tab'], $field['section'], $field['id'] ) );
+	protected function get_tab_id( $tab ) {
+		if ( is_array( $tab ) && isset( $tab['id'] ) ) {
+			return $tab['id'];
+		}
+
+		return $tab;
+	}
+
+	/**
+	 * Get settings section unique ID.
+	 *
+	 * @since 1.0.0
+	 * @param array  $section Setting section property.
+	 * @param string $tab Setting section tab slug.
+	 *
+	 * @return string Unique ID of section object.
+	 */
+	protected function get_section_id( $section, $tab = '' ) {
+		$tab_id     = is_array( $section ) && isset( $section['tab'] ) ? $section['tab'] : $tab;
+		$section_id = is_array( $section ) && isset( $section['id'] ) ? $section['id'] : $section;
+
+		return $tab_id . '_' . $section_id;
+	}
+
+	/**
+	 * Get settings field by option name.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $option Setting key.
+	 *
+	 * @return array
+	 */
+	protected function get_field( $option ) {
+		$field = array();
+
+		foreach ( $this->all_fields as $item ) {
+			if ( $this->get_field_name( $item ) === $option ) {
+				$field = $item;
+				break;
+			}
+		}
+
+		return $field;
+	}
+
+	/**
+	 * Get settings field unique ID.
+	 *
+	 * @since 1.0.0
+	 * @param array  $field Setting field property.
+	 * @param string $section Setting field section slug.
+	 * @param string $tab Setting field tab slug.
+	 *
+	 * @return string Unique ID of field object.
+	 */
+	protected function get_field_id( $field, $section = '', $tab = '' ) {
+		$tab_id     = is_array( $field ) && isset( $field['tab'] ) ? $field['tab'] : $tab;
+		$section_id = is_array( $field ) && isset( $field['section'] ) ? $field['section'] : $section;
+		$field_id   = is_array( $field ) && isset( $field['id'] ) ? $field['id'] : $field;
+
+		return $tab_id . '_' . $section_id . '_' . $field_id;
 	}
 
 	/**
@@ -550,7 +674,13 @@ class WP_Yes {
 	 * @param array $field Setting field property.
 	 */
 	protected function get_field_name( $field ) {
-		return $this->setting_prefix ? $this->setting_prefix . '_' . $field['id'] : $field['id'];
+		$field_id = is_array( $field ) && isset( $field['id'] ) ? $field['id'] : $field;
+
+		if ( ! $this->setting_prefix ) {
+			return $field_id;
+		}
+
+		return $this->setting_prefix . '_' . $field_id;
 	}
 
 	/**
@@ -583,6 +713,7 @@ class WP_Yes {
 					$field['attrs']['class'] .= ' regular-text';
 				}
 				break;
+
 			case 'file':
 				if ( ! isset( $field['attrs']['class'] ) ) {
 					$field['attrs']['class'] = 'regular-text';
@@ -592,17 +723,19 @@ class WP_Yes {
 				}
 				$field['attrs']['readonly'] = 'readonly';
 				break;
+
 			case 'color':
 				if ( ! isset( $field['attrs']['class'] ) ) {
-					$field['attrs']['class'] = 'regular-text wp_yes-color-picker';
+					$field['attrs']['class'] = 'regular-text wp-yes--color-picker';
 				}
 				if ( false === strpos( $field['attrs']['class'], 'regular-text' ) ) {
 					$field['attrs']['class'] .= ' regular-text';
 				}
-				if ( false === strpos( $field['attrs']['class'], 'wp_yes-color-picker' ) ) {
-					$field['attrs']['class'] .= ' wp_yes-color-picker';
+				if ( false === strpos( $field['attrs']['class'], 'wp-yes--color-picker' ) ) {
+					$field['attrs']['class'] .= ' wp-yes--color-picker';
 				}
 				break;
+
 			case 'textarea':
 				if ( ! isset( $field['attrs']['rows'] ) ) {
 					$field['attrs']['rows'] = '10';
@@ -612,20 +745,6 @@ class WP_Yes {
 					$field['attrs']['cols'] = '50';
 				}
 				break;
-		}
-
-		if ( ! isset( $field['attrs']['class'] ) ) {
-			$field['attrs']['class'] = 'wp_yes-field';
-		}
-
-		if ( false === strpos( $field['attrs']['class'], 'wp_yes-field' ) ) {
-			$field['attrs']['class'] .= ' wp_yes-field';
-		}
-
-		if ( is_string( $field['type'] ) ) {
-			if ( false === strpos( $field['attrs']['class'], 'wp_yes-field-' . $field['type'] ) ) {
-				$field['attrs']['class'] .= ' wp_yes-field-' . $field['type'];
-			}
 		}
 
 		// Remove core field attributes to avoid conflict.
@@ -657,8 +776,8 @@ class WP_Yes {
 			call_user_func( $field['callback_before'], $field );
 		}
 
-		if ( is_string( $field['type'] ) && is_callable( array( $this, 'render_field_' . $field['type'] ) ) ) {
-			call_user_func( array( $this, 'render_field_' . $field['type'] ), $field );
+		if ( is_string( $field['type'] ) && is_callable( array( $this, 'render_field_type__' . $field['type'] ) ) ) {
+			call_user_func( array( $this, 'render_field_type__' . $field['type'] ), $field );
 		}
 
 		if ( ! is_string( $field['type'] ) && is_callable( $field['type'] ) ) {
@@ -671,23 +790,40 @@ class WP_Yes {
 	}
 
 	/**
+	 * Render field description
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param array $field Field data.
+	 *
+	 * @return void
+	 */
+	protected function render_field_description( $field ) {
+		if ( empty( $field['description'] ) ) {
+			return;
+		}
+		?>
+		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
+		<?php
+	}
+
+	/**
 	 * Render the setting field for text.
 	 *
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	protected function render_field_text( $field ) {
+	protected function render_field_type__text( $field ) {
 		?>
 		<input 
-		type="<?php echo esc_attr( $field['type'] ); ?>" 
-		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
-		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
-		<?php $this->field_attrs( $field ); ?> />
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
+			type="<?php echo esc_attr( $field['type'] ); ?>" 
+			id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
+			name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
+			value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
+			<?php $this->field_attrs( $field ); ?>
+		/>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -696,8 +832,8 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	protected function render_field_url( $field ) {
-		$this->render_field_text( $field );
+	protected function render_field_type__url( $field ) {
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -706,8 +842,8 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	protected function render_field_number( $field ) {
-		$this->render_field_text( $field );
+	protected function render_field_type__number( $field ) {
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -716,10 +852,9 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	protected function render_field_decimal( $field ) {
-		$field['type']          = 'number';
-		$field['attrs']['step'] = 'any';
-		$this->render_field_text( $field );
+	protected function render_field_type__decimal( $field ) {
+		$field['type'] = 'number';
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -728,8 +863,8 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_password( $field ) {
-		$this->render_field_text( $field );
+	public function render_field_type__password( $field ) {
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -738,8 +873,8 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_email( $field ) {
-		$this->render_field_text( $field );
+	public function render_field_type__email( $field ) {
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -748,8 +883,8 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_color( $field ) {
-		$this->render_field_text( $field );
+	public function render_field_type__color( $field ) {
+		$this->render_field_type__text( $field );
 	}
 
 	/**
@@ -758,20 +893,21 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_checkbox( $field ) {
+	public function render_field_type__checkbox( $field ) {
 		?>
 		<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" value="0" />
 		<fieldset>
 			<legend class="screen-reader-text"><span><?php echo esc_html( $field['label'] ); ?></span></legend>
 			<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>">
 				<input 
-				type="checkbox" 
-				id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
-				name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-				value="1" 
-				<?php checked( $this->get_field_value( $field ), '1' ); ?>
-				<?php $this->field_attrs( $field ); ?> />
-				<?php echo esc_html( $field['description'] ); ?>
+					type="checkbox" 
+					id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
+					name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
+					value="1" 
+					<?php checked( $this->get_field_value( $field ), '1' ); ?>
+					<?php $this->field_attrs( $field ); ?>
+				/>
+				<?php $this->render_field_description( $field ); ?>
 			</label>
 		</fieldset>
 		<?php
@@ -783,7 +919,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_multicheckbox( $field ) {
+	public function render_field_type__multicheckbox( $field ) {
 		$value = $this->get_field_value( $field );
 		if ( empty( $value ) || ! is_array( $value ) ) {
 			$value = array();
@@ -794,20 +930,19 @@ class WP_Yes {
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
 				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]">
 					<input 
-					type="checkbox" 
-					id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
-					name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" 
-					value="<?php echo esc_attr( $option_value ); ?>" 
-					<?php checked( in_array( $option_value, $value, true ), true ); ?>
-					<?php $this->field_attrs( $field ); ?> />
+						type="checkbox" 
+						id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
+						name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>[]" 
+						value="<?php echo esc_attr( $option_value ); ?>" 
+						<?php checked( in_array( $option_value, $value, true ), true ); ?>
+						<?php $this->field_attrs( $field ); ?>
+					/>
 					<?php echo esc_html( $option_label ); ?>
 				</label>
 			<?php endforeach; ?>
 		</fieldset>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -816,7 +951,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_radio( $field ) {
+	public function render_field_type__radio( $field ) {
 		$value = $this->get_field_value( $field );
 		?>
 		<fieldset>
@@ -824,20 +959,19 @@ class WP_Yes {
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
 				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]">
 					<input 
-					type="radio" 
-					id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
-					name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-					value="<?php echo esc_attr( $option_value ); ?>" 
-					<?php checked( $value, $option_value ); ?>
-					<?php $this->field_attrs( $field ); ?> />
+						type="radio" 
+						id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
+						name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
+						value="<?php echo esc_attr( $option_value ); ?>" 
+						<?php checked( $value, $option_value ); ?>
+						<?php $this->field_attrs( $field ); ?>
+					/>
 					<?php echo esc_html( $option_label ); ?>
 				</label>
 			<?php endforeach; ?>
 		</fieldset>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -846,7 +980,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_select( $field ) {
+	public function render_field_type__select( $field ) {
 		$value = $this->get_field_value( $field );
 		?>
 		<select id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" <?php $this->field_attrs( $field ); ?>>
@@ -854,10 +988,8 @@ class WP_Yes {
 				<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( $value, $option_value ); ?>><?php echo esc_attr( $option_label ); ?></option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -866,7 +998,7 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_multiselect( $field ) {
+	public function render_field_type__multiselect( $field ) {
 		$value = $this->get_field_value( $field );
 		if ( empty( $value ) || ! is_array( $value ) ) {
 			$value = array();
@@ -877,10 +1009,8 @@ class WP_Yes {
 				<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( in_array( $option_value, $value, true ), true ); ?>><?php echo esc_attr( $option_label ); ?></option>
 			<?php endforeach; ?>
 		</select>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -889,17 +1019,15 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_textarea( $field ) {
+	public function render_field_type__textarea( $field ) {
 		?>
 		<textarea 
-		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
-		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-		<?php $this->field_attrs( $field ); ?>
+			id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
+			name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
+			<?php $this->field_attrs( $field ); ?>
 		><?php echo esc_textarea( $this->get_field_value( $field ) ); ?></textarea>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -908,27 +1036,34 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_wysiwyg( $field ) {
+	public function render_field_type__wysiwyg( $field ) {
 		$editor_settings = array(
-			'teeny'         => true,
-			'media_buttons' => false,
-			'textarea_name' => $this->get_field_name( $field ),
-			'textarea_rows' => 7,
+			'wpautop'          => true,
+			'media_buttons'    => false,
+			'textarea_name'    => $this->get_field_name( $field ),
+			'textarea_rows'    => 7,
+			'tabindex'         => '',
+			'editor_css'       => '',
+			'editor_class'     => $field['attrs']['class'],
+			'editor_height'    => '',
+			'teeny'            => true,
+			'dfw'              => false,
+			'tinymce'          => true,
+			'quicktags'        => true,
+			'drag_drop_upload' => false,
 		);
 
-		if ( isset( $field['options'] ) && is_array( $field['options'] ) ) {
-			$editor_settings = array_merge( $editor_settings, $field['options'] );
-		}
+		foreach ( array_keys( $editor_settings ) as $key ) {
+			if ( ! isset( $field['options'][ $key ] ) ) {
+				continue;
+			}
 
-		$width = isset( $field['width'] ) ? $field['width'] : '500px';
+			$editor_settings[ $key ] = $field['options'][ $key ];
+		}
 		?>
-		<div style="max-width:<?php echo esc_attr( $width ); ?>" <?php $this->field_attrs( $field ); ?>>
-		<?php wp_editor( $this->get_field_value( $field ), $this->get_field_name( $field ), $editor_settings ); ?>
-		</div>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
+		<?php wp_editor( $this->get_field_value( $field ), $this->get_field_id( $field ), $editor_settings ); ?>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -937,20 +1072,19 @@ class WP_Yes {
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_file( $field ) {
+	public function render_field_type__file( $field ) {
 		?>
 		<input 
-		type="text" 
-		id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
-		name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
-		value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
-		<?php $this->field_attrs( $field ); ?> />
-		<button type="button" class="button wp_yes-browse-media"><span class="dashicons dashicons-upload"></span></button>
-		<button type="button" class="button wp_yes-remove-media"><span class="dashicons dashicons-trash"></span></button>
-		<?php if ( ! empty( $field['description'] ) ) : ?>
-		<p class="description"><?php echo esc_html( $field['description'] ); ?></p>
-		<?php endif; ?>
+			type="text" 
+			id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>" 
+			name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" 
+			value="<?php echo esc_attr( $this->get_field_value( $field ) ); ?>" 
+			<?php $this->field_attrs( $field ); ?>
+		/>
+		<button type="button" class="button wp-yes--browse-media"><span class="dashicons dashicons-upload"></span></button>
+		<button type="button" class="button wp-yes--remove-media"><span class="dashicons dashicons-trash"></span></button>
 		<?php
+		$this->render_field_description( $field );
 	}
 
 	/**
@@ -962,251 +1096,138 @@ class WP_Yes {
 	 *
 	 * @param string $value          The sanitized option value.
 	 * @param string $option         The option name.
-	 * @param string $original_value The original value passed to the function.
 	 *
 	 * @throws Exception Throw an exception if the field validation not passed.
 	 */
-	public function validate_field( $value, $option, $original_value ) {
+	public function validate_field( $value, $option ) {
+		$field = $this->get_field( $option );
+
+		if ( empty( $field ) ) {
+			return $value;
+		}
+
 		try {
-			$field = isset( $this->settings[ $option ] ) ? $this->settings[ $option ] : false;
-			if ( empty( $field ) ) {
-				return $value;
+			if ( ! isset( $_POST['wp_yes_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wp_yes_nonce'] ) ), $this->menu_slug ) ) {
+				throw new Exception( __( 'Sorry, your nonce did not verify.', 'wp_yes_txt' ) );
 			}
+
+			if ( $field['conditional'] ) {
+				$need_validation = true;
+
+				foreach ( $field['conditional'] as $conditional_key => $conditional_value ) {
+					$conditional_value_submit = isset( $_POST[ $conditional_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $conditional_key ] ) ) : '';
+
+					$need_validation = is_array( $conditional_value ) ? in_array( $conditional_value_submit, $conditional_value, true ) : $conditional_value === $conditional_value_submit;
+
+					if ( ! $need_validation ) {
+						break;
+					}
+				}
+
+				if ( ! $need_validation ) {
+					return $value;
+				}
+			}
+
+			$validate_value = trim( $value );
 
 			// Validate if field is required.
-			if ( $field['required'] && ! is_numeric( $value ) && empty( $value ) ) {
-				throw new Exception( __( 'Value can not be empty.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
+			if ( $field['required'] && ! strlen( $validate_value ) ) {
+				throw new Exception( __( 'Value can not be empty.', 'wp_yes_txt' ) );
 			}
 
-			// If value is empty and not numeric, no need to validate further.
-			if ( empty( $value ) && ! is_numeric( $value ) ) {
-				return $value;
+			if ( ! $validate_value ) {
+				return get_option( $option, $field['default'] );
 			}
 
 			// Validate by field type.
 			switch ( $field['type'] ) {
 				case 'email':
-					if ( ! is_email( $value ) ) {
-						throw new Exception( __( 'Value must be a valid email address.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
+					if ( ! is_email( $validate_value ) ) {
+						throw new Exception( __( 'Value must be a valid email address.', 'wp_yes_txt' ) );
 					}
 					break;
+
 				case 'url':
-					if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
-						throw new Exception( __( 'Value must be a valid URL.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
+					if ( false === filter_var( $validate_value, FILTER_VALIDATE_URL ) ) {
+						throw new Exception( __( 'Value must be a valid URL.', 'wp_yes_txt' ) );
 					}
 					break;
+
 				case 'number':
-					if ( $value > intval( $value ) || $value < intval( $value ) ) {
-						throw new Exception( __( 'Value must be an integer.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
+					if ( $validate_value > intval( $validate_value ) || $validate_value < intval( $validate_value ) ) {
+						throw new Exception( __( 'Value must be an integer.', 'wp_yes_txt' ) );
 					}
-					$value = intval( $value );
 					break;
+
 				case 'decimal':
-					if ( ! is_numeric( $value ) ) {
-						throw new Exception( __( 'Value must be a number.', 'wp_yes_txt' ) ); // @todo Change text-domain based on your plugin or theme.
+					if ( ! is_numeric( $validate_value ) ) {
+						throw new Exception( __( 'Value must be a number.', 'wp_yes_txt' ) );
 					}
 					break;
 			}
+
+			return $value;
 		} catch ( Exception $e ) {
+			$field_name = $this->get_field_name( $field );
+			$label      = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
+			$error_msg  = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
 
-			// Check if same error already exists.
-			if ( isset( $this->errors[ $option ] ) ) {
-				return $value;
-			}
+			add_settings_error( $option, $field_name, $error_msg );
 
-			// Add settings error.
-			$label     = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
-			$error_msg = sprintf( '%1$s: %2$s', $label, $e->getMessage() );
-			add_settings_error(
-				$option,
-				$this->get_field_id( $field ),
-				$error_msg,
-				'error'
-			);
-			$this->errors[ $option ] = $error_msg;
+			return get_option( $option, $field['default'] );
 		}
-
-		return $value;
-	}
-
-	/**
-	 * Get settings tabs, sections and fields as associative array array
-	 *
-	 * @since 1.0.0
-	 * @return array All settings data array.
-	 */
-	protected function get_settings() {
-		if ( ! $this->settings_populated ) {
-			return array();
-		}
-		return apply_filters( 'wp_yes_' . $this->menu_slug . '_settings', $this->settings );
 	}
 
 	/**
 	 * Populate settings data.
+	 *
+	 * @since 1.0.3
+	 *
+	 * @return void
 	 */
 	protected function populate_settings() {
-		$tabs     = array();
-		$sections = array();
-		$fields   = array();
+		$settings = array();
 
-		foreach ( $this->settings as $index => $setting ) {
-			if ( empty( $setting['type'] ) || empty( $setting['data'] ) ) {
+		foreach ( $this->all_tabs as $unique_id => $tab ) {
+			$settings[ $unique_id ] = $tab;
+		}
+
+		foreach ( $this->all_sections as $unique_id => $section ) {
+			$tab_unique_id = $this->get_tab_id( $section['tab'] );
+
+			if ( ! isset( $settings[ $tab_unique_id ] ) ) {
 				continue;
 			}
 
-			$data = $setting['data'];
-
-			switch ( $setting['type'] ) {
-				case 'tab':
-					// Assign recent tab ID.
-					$this->recent_tab = $data['id'];
-
-					// Push data to tabs variable.
-					$tabs[ $data['id'] ] = array_merge(
-						$data,
-						array(
-							'index' => $index,
-						)
-					);
-
-					break;
-				case 'section':
-					// Set tab key for $data if empty and $recent_tab is not empty.
-					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
-						$data['tab'] = $this->recent_tab;
-					}
-
-					if ( empty( $data['tab'] ) && empty( $this->recent_tab ) ) {
-						$auto_tab                 = $this->normalize_tab(
-							array(
-								'id' => $this->menu_slug,
-							)
-						);
-						$tabs[ $this->menu_slug ] = $auto_tab;
-
-						$this->recent_tab = $this->menu_slug;
-						$data['tab']      = $this->recent_tab;
-					}
-
-					// Check if tab key for section $data is not empty.
-					if ( ! empty( $data['tab'] ) ) {
-						// Assign recent section ID.
-						$this->recent_section = $data['id'];
-
-						$section_unique_id = $data['tab'] . '_' . $data['id'];
-
-						$data['id'] = $section_unique_id;
-
-						// Push data to sections variable.
-						$sections[ $section_unique_id ] = array_merge(
-							$data,
-							array(
-								'index' => $index,
-							)
-						);
-					}
-
-					break;
-				case 'field':
-					// Set tab key for $data if empty and $recent_tab is not empty.
-					if ( empty( $data['tab'] ) && ! empty( $this->recent_tab ) ) {
-						$data['tab'] = $this->recent_tab;
-					}
-
-					if ( empty( $data['tab'] ) && empty( $this->recent_tab ) ) {
-						$this->recent_tab         = $this->menu_slug;
-						$auto_tab                 = $this->normalize_tab(
-							array(
-								'id' => $this->menu_slug,
-							)
-						);
-						$tabs[ $this->menu_slug ] = $auto_tab;
-						$data['tab']              = $this->recent_tab;
-					}
-
-					// Set section key for $data if empty and $recent_section is not empty.
-					if ( empty( $data['section'] ) && ! empty( $this->recent_section ) ) {
-						$data['section'] = $this->recent_section;
-					}
-
-					if ( empty( $data['section'] ) && ! empty( $this->recent_tab ) ) {
-						$data['section'] = $this->recent_tab;
-					}
-
-					// Set section key for $data if empty and $recent_section is not empty.
-					if ( empty( $data['section'] ) && empty( $this->recent_section ) ) {
-						$this->recent_section           = $this->menu_slug;
-						$auto_section                   = $this->normalize_section(
-							array(
-								'id'  => $this->menu_slug,
-								'tab' => $data['tab'],
-							)
-						);
-						$section_unique_id              = $data['tab'] . '_' . $auto_section['id'];
-						$sections[ $section_unique_id ] = $auto_section;
-						$data['section']                = $auto_section['id'];
-					}
-
-					// Check if tab and section key for field $data is not empty.
-					if ( ! empty( $data['tab'] ) && ! empty( $data['section'] ) ) {
-						$data['section']       = $data['tab'] . '_' . $data['section'];
-						$fields[ $data['id'] ] = array_merge(
-							$data,
-							array(
-								'index' => $index,
-							)
-						);
-					}
-
-					break;
-			}
+			$settings[ $tab_unique_id ]['sections'][ $unique_id ] = $section;
 		}
 
-		if ( empty( $tabs ) || empty( $sections ) || empty( $fields ) ) {
-			return;
-		}
+		foreach ( $this->all_fields as $unique_id => $field ) {
+			$tab_unique_id = $this->get_tab_id( $field['tab'] );
 
-		// Sort tabs to settings data by position property.
-		uasort( $tabs, array( $this, 'sort_by_position' ) );
-
-		// Sort tabs to settings data by position property.
-		uasort( $sections, array( $this, 'sort_by_position' ) );
-
-		// Sort tabs to settings data by position property.
-		uasort( $fields, array( $this, 'sort_by_position' ) );
-
-		$this->settings = array();
-
-		foreach ( $fields as $key => $field ) {
-
-			// Validate field data.
-			if ( ! isset( $tabs[ $field['tab'] ] ) || ! isset( $sections[ $field['section'] ] ) ) {
+			if ( ! isset( $settings[ $tab_unique_id ] ) ) {
 				continue;
 			}
 
-			$sections[ $field['section'] ]['fields'][ $key ]   = $field;
-			$this->settings[ $this->get_field_name( $field ) ] = $field;
-		}
+			$section_unique_id = $this->get_section_id( $field['section'], $field['tab'] );
 
-		foreach ( $sections as $key => $section ) {
-
-			// Validate section data.
-			if ( ! isset( $tabs[ $section['tab'] ] ) ) {
+			if ( ! isset( $settings[ $tab_unique_id ]['sections'][ $section_unique_id ] ) ) {
 				continue;
 			}
 
-			$tabs[ $section['tab'] ]['sections'][ $key ] = $section;
+			$settings[ $tab_unique_id ]['sections'][ $section_unique_id ]['fields'][ $unique_id ] = $field;
 		}
 
-		// Set populated settings data.
-		foreach ( $tabs as $key => $tab ) {
-			$this->settings_populated[ $key ] = $tab;
-		}
+		$this->settings = apply_filters( 'wp_yes_settings', $settings, $this );
 	}
 
 	/**
 	 * Initialize and build the settings tabs, sections and fields.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
 	 */
 	public function init() {
 		$this->populate_settings();
@@ -1223,20 +1244,24 @@ class WP_Yes {
 	/**
 	 * Registers the settings to WordPress.
 	 *
+	 * @since 1.0.0
+	 *
 	 * This function is hooked into admin_init.
+	 *
+	 * @return void
 	 */
 	public function register_settings() {
-		if ( ! $this->settings_populated ) {
+		if ( ! $this->settings ) {
 			return;
 		}
 
-		foreach ( $this->settings_populated as $tab_key => $tab ) {
+		foreach ( $this->settings as $tab_key => $tab ) {
 
 			// Add action hook to render for the tab content.
 			add_action( 'wp_yes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab['callback'] );
 
 			foreach ( $tab['sections'] as $section ) {
-				$section_unique_id = $this->get_section_unique_id( $section );
+				$section_unique_id = $this->get_section_id( $section );
 
 				// Add a new section to a settings page.
 				add_settings_section( $section_unique_id, $section['title'], $section['callback'], $section_unique_id );
@@ -1261,7 +1286,7 @@ class WP_Yes {
 					);
 
 					// Add filter hook to validate for the setting field.
-					add_filter( "sanitize_option_{$option}", array( $this, 'validate_field' ), 10, 3 );
+					add_filter( "sanitize_option_{$option}", array( $this, 'validate_field' ), 10, 2 );
 				}
 			}
 		}
@@ -1269,6 +1294,8 @@ class WP_Yes {
 
 	/**
 	 * Render settings page title
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
@@ -1288,32 +1315,37 @@ class WP_Yes {
 
 	/**
 	 * Render the settings form.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
 	 */
 	public function render_form() {
 		?>
-		<div class="wrap wp_yes-wrap">
+		<div class="wrap wp-yes--wrap">
 			<?php $this->page_title(); ?>
 			<?php settings_errors( '', false, $this->hide_on_update ); ?>
-			<?php if ( 1 < count( $this->settings_populated ) ) : ?>
+			<?php if ( 1 < count( $this->settings ) ) : ?>
 				<div class="metabox-holder">
-					<h2 class="wp_yes-nav-tab-wrapper nav-tab-wrapper">
-						<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
-						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wp_yes-nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['title'] ); ?></a>
+					<h2 class="wp-yes--nav-tab-wrapper nav-tab-wrapper">
+						<?php foreach ( $this->settings as $tab_key => $tab ) : ?>
+						<a href="#<?php echo esc_attr( $tab_key ); ?>" class="wp-yes--nav-tab nav-tab" id="<?php echo esc_attr( $tab_key ); ?>-tab"><?php echo esc_html( $tab['title'] ); ?></a>
 						<?php endforeach; ?>
 					</h2>
 				</div>
 				<div class="clear"></div>
 			<?php endif; ?>
-			<form method="post" action="options.php">
-				<div class="wp_yes-tab-wrapper metabox-holder">
-					<?php foreach ( $this->settings_populated as $tab_key => $tab ) : ?>
-						<div id="<?php echo esc_attr( $tab['id'] ); ?>" class="wp_yes-tab-group">
+			<form method="post" action="options.php" id="wp-yes--form--<?php echo esc_attr( $this->menu_slug ); ?>" class="wp-yes--form">
+				<?php wp_nonce_field( $this->menu_slug, 'wp_yes_nonce' ); ?>
+				<div class="wp-yes--tab-wrapper metabox-holder">
+					<?php foreach ( $this->settings as $tab_key => $tab ) : ?>
+						<div id="<?php echo esc_attr( $tab_key ); ?>" class="wp-yes--tab-group">
 							<?php do_action( 'wp_yes_' . $this->menu_slug . '_setting_tab_' . $tab_key, $tab ); ?>
 						</div>
 					<?php endforeach; ?>
 				</div>
 				<?php if ( 0 < count( $this->settings ) ) : ?>
-				<div class="wp_yes-button-wrapper">
+				<div class="wp-yes--button-wrapper">
 					<?php settings_fields( $this->menu_slug ); ?>
 					<?php submit_button(); ?>
 				</div>
@@ -1326,7 +1358,11 @@ class WP_Yes {
 	/**
 	 * Register admin menus to the WP Admin.
 	 *
+	 * @since 1.0.0
+	 *
 	 * This function is hooked into admin_menu to affect admin only.
+	 *
+	 * @return void
 	 */
 	public function admin_menu() {
 		$allowed = array(
@@ -1452,9 +1488,11 @@ class WP_Yes {
 		}
 
 		$screen = get_current_screen();
+
 		if ( ! $screen ) {
 			return;
 		}
+
 		foreach ( $this->help_tabs as $help_tab ) {
 			$screen->add_help_tab( $help_tab );
 		}
@@ -1492,7 +1530,7 @@ class WP_Yes {
 	 * @param string $hook Current admin page slug loaded.
 	 */
 	public function admin_enqueue_scripts( $hook ) {
-		if ( ! $this->menu_args['callback'] || ! strpos( $hook, '_' . $this->menu_slug ) ) {
+		if ( ! $this->menu_args['callback'] || ! $this->is_current_screen( $hook ) ) {
 			return;
 		}
 
@@ -1500,6 +1538,31 @@ class WP_Yes {
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'wp-color-picker' );
 		wp_enqueue_media();
+
+		wp_enqueue_script( 'wp_yes', $this->get_url( 'assets/wp-yes.js' ), array( 'jquery', 'underscore' ), self::$version, true );
+		wp_enqueue_style( 'wp_yes', $this->get_url( 'assets/wp-yes.css' ), array(), self::$version );
+		wp_localize_script(
+			'wp_yes',
+			'wpYesVar',
+			array(
+				'menuSlug' => $this->menu_slug,
+				'tabs'     => array_values( (array) $this->all_tabs ),
+				'section'  => array_values( (array) $this->all_sections ),
+				'fields'   => array_values( (array) $this->all_fields ),
+			)
+		);
+
+		if ( $this->custom_styles ) {
+			foreach ( $this->custom_styles as $custom_style ) {
+				call_user_func_array( 'wp_enqueue_style', (array) $custom_style );
+			}
+		}
+
+		if ( $this->custom_scripts ) {
+			foreach ( $this->custom_scripts as $custom_script ) {
+				call_user_func_array( 'wp_enqueue_script', (array) $custom_script );
+			}
+		}
 
 		// Do custom action hook to enqueue custom script and styles.
 		do_action( 'wp_yes_' . $this->menu_slug . '_admin_enqueue_scripts', $hook, $this );
@@ -1515,93 +1578,9 @@ class WP_Yes {
 	public function admin_footer_js() {
 		$screen = get_current_screen();
 
-		if ( ! $this->menu_args['callback'] || ! isset( $screen->base ) || ! strpos( $screen->base, '_' . $this->menu_slug ) ) {
+		if ( ! $this->menu_args['callback'] || ! $screen || ! $this->is_current_screen( $screen->id ) ) {
 			return;
 		}
-		?>
-		<script>
-			(function($) {
-
-				"use strict";
-
-				$(document).ready(function($) {
-
-					var menuSlug = "<?php echo esc_html( $this->menu_slug ); ?>";
-
-					// Initiate color picker.
-					$(".wp_yes-color-picker").wpColorPicker();
-
-					// Initiate tabs.
-					$(".wp_yes-tab-group").hide();
-
-					var activeTab = "";
-
-					if (typeof localStorage != "undefined") {
-						activeTab = localStorage.getItem("wp_yes-active-tab-" + menuSlug);
-					}
-
-					if (activeTab != "" && $(activeTab).length) {
-						$(activeTab).fadeIn();
-					} else {
-						$(".wp_yes-tab-group:first").fadeIn();
-					}
-
-					if (activeTab != "" && $(activeTab + "-tab").length) {
-						$(activeTab + "-tab").addClass("nav-tab-active");
-					} else {
-						$(".wp_yes-nav-tab-wrapper a:first").addClass("nav-tab-active");
-					}
-
-					$(".wp_yes-nav-tab-wrapper a").click(function(e) {
-						e.preventDefault();
-
-						$(".wp_yes-nav-tab-wrapper a").removeClass("nav-tab-active");
-
-						$(this).addClass("nav-tab-active").blur();
-
-						if (typeof localStorage != "undefined") {
-							localStorage.setItem("wp_yes-active-tab-" + menuSlug, $(this).attr("href"));
-						}
-
-						$(".wp_yes-tab-group").hide();
-
-						$($(this).attr("href")).fadeIn();
-					});
-
-					// Media file browser.
-					$(".wp_yes-browse-media").on("click", function(e) {
-						e.preventDefault();
-
-						var self = $(this);
-
-						// Create the media frame.
-						var mediaModal = (wp.media.frames.file_frame = wp.media({
-							multiple: false
-						}));
-
-						mediaModal.on("select", function() {
-
-							var attachment = mediaModal.state().get("selection").first().toJSON();
-
-							self.closest("td").find('input[type="text"]').val(attachment.url);
-
-						});
-
-						// Finally, open the modal
-						mediaModal.open();
-					});
-
-					// Remove file from input.
-					$(".wp_yes-remove-media").on("click", function(e) {
-						e.preventDefault();
-						$(this).closest("td").find('input[type="text"]').val("");
-					});
-
-				});
-
-			})(jQuery);
-		</script>
-		<?php
 
 		// Do custom action hook to print scripts needed.
 		do_action( 'wp_yes_' . $this->menu_slug . '_admin_footer_js', $screen, $this );
@@ -1629,14 +1608,13 @@ class WP_Yes {
 	}
 
 	/**
-	 * Humanize slug to make them readable.
+	 * Humanize slug to make them human readable.
 	 *
 	 * @since 1.0.0
 	 * @param string $slug Slug string that will be humanized.
 	 * @return string Humanized text.
 	 */
 	protected function humanize_slug( $slug ) {
-
 		// Split slug by dash and underscore as array.
 		$words = preg_split( '/(_|-)/', $slug );
 
@@ -1690,5 +1668,145 @@ class WP_Yes {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check if current admin screen is match
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string $hook Current admin screen hook.
+	 *
+	 * @return boolean
+	 */
+	private function is_current_screen( $hook ) {
+		$parts = explode( '_' . $this->menu_slug, $hook );
+
+		if ( 2 !== count( $parts ) ) {
+			return false;
+		}
+
+		return 1 === count( array_filter( $parts ) );
+	}
+
+	/**
+	 * Check if integrated as plugin.
+	 *
+	 * @since 1.0.3
+	 *
+	 * @return boolean
+	 */
+	public function is_as_plugin() {
+		if ( 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( WPMU_PLUGIN_DIR ) ) ) {
+			return true;
+		}
+
+		return 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( WP_PLUGIN_DIR ) );
+	}
+
+	/**
+	 * Get base URL
+	 *
+	 * @since 1.0.3
+	 *
+	 * @return string
+	 */
+	public function get_base_url() {
+		if ( $this->is_as_plugin() ) {
+			return untrailingslashit( plugin_dir_url( __DIR__ ) );
+		}
+
+		$path = str_replace( wp_normalize_path( get_template_directory() ), '', wp_normalize_path( dirname( __DIR__ ) ) );
+
+		return untrailingslashit( get_template_directory_uri() . $path );
+	}
+
+	/**
+	 * Get URL
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string $path Path to be appended.
+	 *
+	 * @return string
+	 */
+	public function get_url( $path = '' ) {
+		if ( ! $path ) {
+			return $this->get_base_url();
+		}
+
+		return $this->get_base_url() . '/' . ltrim( wp_normalize_path( $path ), '/' );
+	}
+
+	/**
+	 * Get base directory
+	 *
+	 * @since 1.0.3
+	 *
+	 * @return string
+	 */
+	public function get_base_dir() {
+		if ( $this->is_as_plugin() ) {
+			return untrailingslashit( plugin_dir_path( __DIR__ ) );
+		}
+
+		$path = str_replace( wp_normalize_path( get_template_directory() ), '', wp_normalize_path( dirname( __DIR__ ) ) );
+
+		return untrailingslashit( get_template_directory() . $path );
+	}
+
+	/**
+	 * Get directory
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string $path Path to be appended.
+	 *
+	 * @return string
+	 */
+	public function get_dir( $path = '' ) {
+		if ( ! $path ) {
+			return $this->get_base_dir();
+		}
+
+		return $this->get_base_dir() . '/' . ltrim( wp_normalize_path( $path ), '/' );
+	}
+
+	/**
+	 * Register custom script to be enqueued in admin screen.
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string  $handle Name of the script. Should be unique.
+	 * @param string  $src Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param array   $deps An array of registered script handles this script depends on.
+	 * @param boolean $ver String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes.
+	 *                     If version is set to false, a version number is automatically added equal to current installed WordPress version.
+	 *                     If set to null, no version is added.
+	 * @param boolean $in_footer Whether to enqueue the script before </body> instead of in the <head>.
+	 *
+	 * @return void
+	 */
+	public function enqueue_script( $handle, $src = '', $deps = array(), $ver = false, $in_footer = false ) {
+		$this->custom_scripts[ $handle ] = array( $handle, $src, $deps, $ver, $in_footer );
+	}
+
+	/**
+	 * Register custom CSS stylesheet to be enqueued in admin screen.
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string  $handle Name of the script. Should be unique.
+	 * @param string  $src Full URL of the script, or path of the script relative to the WordPress root directory.
+	 * @param array   $deps An array of registered script handles this script depends on.
+	 * @param boolean $ver String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes.
+	 *                     If version is set to false, a version number is automatically added equal to current installed WordPress version.
+	 *                     If set to null, no version is added.
+	 * @param boolean $media The media for which this stylesheet has been defined. Accepts media types like 'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
+	 *
+	 * @return void
+	 */
+	public function enqueue_style( $handle, $src = '', $deps = array(), $ver = false, $media = false ) {
+		$this->custom_styles[ $handle ] = array( $handle, $src, $deps, $ver, $media );
 	}
 }

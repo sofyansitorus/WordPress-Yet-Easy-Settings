@@ -1,0 +1,6 @@
+.wp-yes--form .wp-yes--field--textarea,
+.wp-yes--form .wp-editor-wrap {
+    display: block;
+    max-width: 100%;
+    width: 700px;
+}
