@@ -54,9 +54,9 @@
                 });
 
                 if (isHidden) {
-                    $field = $('.wp-yes--field[name ="' + field.name + '"]').closest('tr').hide();
+                    $field = $('.wp-yes--field--wrap[data-id="' + field.name + '"]').closest('tr').hide();
                 } else {
-                    $field = $('.wp-yes--field[name ="' + field.name + '"]').closest('tr').fadeIn();
+                    $field = $('.wp-yes--field--wrap[data-id="' + field.name + '"]').closest('tr').fadeIn();
                 }
             });
         },

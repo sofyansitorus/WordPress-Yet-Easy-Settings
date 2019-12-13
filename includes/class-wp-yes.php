@@ -12,7 +12,6 @@
  *
  * WordPress Yet Easy Settings class is PHP class for easy to build WordPress admin settings page.
  *
- * @version    1.0.0
  * @since      1.0.0
  * @package    WP_Yes
  * @author     Sofyan Sitorus <sofyansitorus@gmail.com>
@@ -24,7 +23,7 @@ class WP_Yes {
 	 *
 	 * @var string
 	 */
-	public static $version = '1.0.3';
+	public static $version = '1.0.4';
 
 	/**
 	 * Admin menu slug.
@@ -420,9 +419,11 @@ class WP_Yes {
 	 * Normalize setting field properties
 	 *
 	 * @since 1.0.0
-	 * @param array $args { Optional. Array of properties for the new field object.
+	 * @param array $args {
+	 *  Optional. Array of properties for the new field object.
+	 *
 	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
-	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
+	 *                                            'password', 'email', 'toggle', 'checkbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
 	 *                                            Default 'text'.
 	 *  @type string          $data_type          The type of data associated with this setting. Valid values are 'string', 'boolean', 'integer', and 'number'.
 	 *                                            Default 'string'.
@@ -456,6 +457,7 @@ class WP_Yes {
 				'sanitize_callback' => null,
 				'default'           => '',
 				'options'           => array(),
+				'options_stacked'   => false,
 				'attrs'             => array(),
 				'position'          => 10,
 				'tab'               => '',
@@ -554,9 +556,11 @@ class WP_Yes {
 	 * Register settings field.
 	 *
 	 * @since 1.0.0
-	 * @param array $args { Optional. Array of properties for the new field object.
+	 * @param array $args {
+	 *  Optional. Array of properties for the new field object.
+	 *
 	 *  @type string|callable $type               Type for the setting field or callable function to render the setting field. Valid values are 'url', 'number', 'decimal',
-	 *                                            'password', 'email', 'checkbox', 'multicheckbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
+	 *                                            'password', 'email', 'toggle', 'checkbox', 'radio', 'select', 'multiselect', 'textarea', 'wysiwyg', 'file'
 	 *                                            Default 'text'.
 	 *  @type string          $data_type          The type of data associated with this setting. Valid values are 'string', 'boolean', 'integer', and 'number'.
 	 *                                            Default 'string'.
@@ -772,6 +776,9 @@ class WP_Yes {
 	 * @param array $field Setting field property.
 	 */
 	public function render_field( $field ) {
+		?>
+		<div data-id="<?php echo esc_attr( $field['name'] ); ?>" class="wp-yes--field--wrap">
+		<?php
 		if ( ! empty( $field['callback_before'] ) && is_callable( $field['callback_before'] ) ) {
 			call_user_func( $field['callback_before'], $field );
 		}
@@ -787,6 +794,9 @@ class WP_Yes {
 		if ( ! empty( $field['callback_after'] ) && is_callable( $field['callback_after'] ) ) {
 			call_user_func( $field['callback_after'], $field );
 		}
+		?>
+		<div>
+		<?php
 	}
 
 	/**
@@ -888,12 +898,12 @@ class WP_Yes {
 	}
 
 	/**
-	 * Render the setting field for checkbox.
+	 * Render the setting field for toggle.
 	 *
-	 * @since 1.0.0
+	 * @since 1.0.4
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_type__checkbox( $field ) {
+	public function render_field_type__toggle( $field ) {
 		?>
 		<input type="hidden" name="<?php echo esc_attr( $this->get_field_name( $field ) ); ?>" value="0" />
 		<fieldset>
@@ -914,21 +924,23 @@ class WP_Yes {
 	}
 
 	/**
-	 * Render the setting field for multicheckbox.
+	 * Render the setting field for checkbox.
 	 *
 	 * @since 1.0.0
 	 * @param array $field Setting field property.
 	 */
-	public function render_field_type__multicheckbox( $field ) {
+	public function render_field_type__checkbox( $field ) {
 		$value = $this->get_field_value( $field );
 		if ( empty( $value ) || ! is_array( $value ) ) {
 			$value = array();
 		}
+
+		$label_class = $field['options_stacked'] ? 'wp-yes--field--options--vertical' : 'wp-yes--field--options--horizontal';
 		?>
 		<fieldset>
 			<legend class="screen-reader-text"><span><?php echo esc_html( $field['label'] ); ?></span></legend>
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
-				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]">
+				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" class="wp-yes--field--options--label <?php echo esc_attr( $label_class ); ?>">
 					<input 
 						type="checkbox" 
 						id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
@@ -953,11 +965,16 @@ class WP_Yes {
 	 */
 	public function render_field_type__radio( $field ) {
 		$value = $this->get_field_value( $field );
+		if ( ! is_string( $value ) ) {
+			$value = $field['default'];
+		}
+
+		$label_class = $field['options_stacked'] ? 'wp-yes--field--options--vertical' : 'wp-yes--field--options--horizontal';
 		?>
 		<fieldset>
 			<legend class="screen-reader-text"><span><?php echo esc_html( $field['label'] ); ?></span></legend>
 			<?php foreach ( $field['options'] as $option_value => $option_label ) : ?>
-				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]">
+				<label for="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" class="wp-yes--field--options--label <?php echo esc_attr( $label_class ); ?>">
 					<input 
 						type="radio" 
 						id="<?php echo esc_attr( $this->get_field_id( $field ) ); ?>[<?php echo esc_attr( $option_value ); ?>]" 
@@ -1129,45 +1146,45 @@ class WP_Yes {
 				}
 			}
 
-			$validate_value = trim( $value );
+			$validate_value = is_array( $value ) ? array_map( 'trim', $value ) : trim( $value );
 
 			// Validate if field is required.
-			if ( $field['required'] && ! strlen( $validate_value ) ) {
-				throw new Exception( __( 'Value can not be empty.', 'wp_yes_txt' ) );
+			if ( $field['required'] ) {
+				if ( ( is_array( $validate_value ) && empty( $validate_value ) ) || ( ! is_array( $validate_value ) && ! strlen( $validate_value ) ) ) {
+					throw new Exception( __( 'Value can not be empty.', 'wp_yes_txt' ) );
+				}
 			}
 
-			if ( ! $validate_value ) {
-				return get_option( $option, $field['default'] );
+			if ( $validate_value ) {
+				// Validate by field type.
+				switch ( $field['type'] ) {
+					case 'email':
+						if ( ! is_email( $validate_value ) ) {
+							throw new Exception( __( 'Value must be a valid email address.', 'wp_yes_txt' ) );
+						}
+						break;
+
+					case 'url':
+						if ( false === filter_var( $validate_value, FILTER_VALIDATE_URL ) ) {
+							throw new Exception( __( 'Value must be a valid URL.', 'wp_yes_txt' ) );
+						}
+						break;
+
+					case 'number':
+						if ( $validate_value > intval( $validate_value ) || $validate_value < intval( $validate_value ) ) {
+							throw new Exception( __( 'Value must be an integer.', 'wp_yes_txt' ) );
+						}
+						break;
+
+					case 'decimal':
+						if ( ! is_numeric( $validate_value ) ) {
+							throw new Exception( __( 'Value must be a number.', 'wp_yes_txt' ) );
+						}
+						break;
+				}
 			}
 
-			// Validate by field type.
-			switch ( $field['type'] ) {
-				case 'email':
-					if ( ! is_email( $validate_value ) ) {
-						throw new Exception( __( 'Value must be a valid email address.', 'wp_yes_txt' ) );
-					}
-					break;
-
-				case 'url':
-					if ( false === filter_var( $validate_value, FILTER_VALIDATE_URL ) ) {
-						throw new Exception( __( 'Value must be a valid URL.', 'wp_yes_txt' ) );
-					}
-					break;
-
-				case 'number':
-					if ( $validate_value > intval( $validate_value ) || $validate_value < intval( $validate_value ) ) {
-						throw new Exception( __( 'Value must be an integer.', 'wp_yes_txt' ) );
-					}
-					break;
-
-				case 'decimal':
-					if ( ! is_numeric( $validate_value ) ) {
-						throw new Exception( __( 'Value must be a number.', 'wp_yes_txt' ) );
-					}
-					break;
-			}
-
-			return $value;
+			return $validate_value;
 		} catch ( Exception $e ) {
 			$field_name = $this->get_field_name( $field );
 			$label      = ! empty( $field['label'] ) ? $field['label'] : $this->humanize_slug( $option );
