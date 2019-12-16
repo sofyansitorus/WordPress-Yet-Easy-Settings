@@ -58,14 +58,6 @@ class WP_Yes {
 	private $settings = array();
 
 	/**
-	 * Setting errors data.
-	 *
-	 * @since 1.0.0
-	 * @var array
-	 */
-	private $errors = array();
-
-	/**
 	 * Recent tab id registered.
 	 *
 	 * @since 1.0.0
@@ -93,25 +85,25 @@ class WP_Yes {
 	 * All tabs data.
 	 *
 	 * @since 1.0.0
-	 * @var string
+	 * @var array
 	 */
-	private $all_tabs;
+	private $all_tabs = array();
 
 	/**
 	 * All sections data.
 	 *
 	 * @since 1.0.0
-	 * @var string
+	 * @var array
 	 */
-	private $all_sections;
+	private $all_sections = array();
 
 	/**
 	 * All fields data.
 	 *
 	 * @since 1.0.0
-	 * @var string
+	 * @var array
 	 */
-	private $all_fields;
+	private $all_fields = array();
 
 	/**
 	 * Admin screen help_tabs.
