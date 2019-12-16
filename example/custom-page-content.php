@@ -41,25 +41,14 @@ if ( ! function_exists( 'wp_yes_custom_page_content' ) ) {
 				'callback' => 'wp_yes_custom_page_content_canvas',
 			)
 		); // Initialize the WP_Yes class.
+		
+		$settings->enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false, '2.7.1', true );
 
 		$settings->init(); // Run the WP_Yes class.
 	}
 }
 add_action( 'init', 'wp_yes_custom_page_content' );
 
-
-if ( ! function_exists( 'wp_yes_custom_page_content_enqueue_scripts' ) ) {
-	/**
-	 * Enqueue dependencies js scripts for chartjs.
-	 *
-	 * @since  1.0.0
-	 * @return void
-	 */
-	function wp_yes_custom_page_content_enqueue_scripts() {
-		wp_enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false, '2.7.1', true );
-	}
-}
-add_action( 'wp_yes_wp_yes_custom_page_content_admin_enqueue_scripts', 'wp_yes_custom_page_content_enqueue_scripts' );
 
 if ( ! function_exists( 'wp_yes_custom_page_content_print_footer_js' ) ) {
 	/**
