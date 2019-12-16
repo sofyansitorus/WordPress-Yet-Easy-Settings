@@ -12,7 +12,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! function_exists( 'wp_yes_custom_tab_content' ) ) {
+if ( ! function_exists( 'wp_yes_custom_tab_2_content_chart' ) ) {
 	/**
 	 * Example for custom tab 2 content
 	 *
