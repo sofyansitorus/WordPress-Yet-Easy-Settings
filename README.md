@@ -349,7 +349,7 @@ add_action( 'init', 'wp_yes_with_set_prefix' );
 get_option( 'my_setting_prefix2_field_1' );
 ```
 
-Please take a look at the example in [wp-yes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wp-yes-example.php) for more advanced example such as adding custom tab content, adding custom page content, etc.
+For more advanced example such as adding custom tab content, adding custom page content, etc, please take a look all the samples available in [example](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/example) folder.
 
 ## Screenshots
 
