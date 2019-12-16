@@ -37,16 +37,12 @@ if ( ! function_exists( 'wp_yes_custom_tab_content' ) ) {
 	 */
 	function wp_yes_custom_tab_content() {
 		$settings = new WP_Yes( 'wp_yes_custom_tab_content' ); // Initialize the WP_Yes class.
+		
+		$settings->enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false, '2.7.1', true );
 
 		$settings->add_tab(
 			array(
 				'id' => 'tab_1',
-			)
-		);
-
-		$settings->add_section(
-			array(
-				'id' => 'section_1',
 			)
 		);
 
@@ -74,19 +70,6 @@ if ( ! function_exists( 'wp_yes_custom_tab_content' ) ) {
 }
 add_action( 'init', 'wp_yes_custom_tab_content' );
 
-
-if ( ! function_exists( 'wp_yes_custom_tab_content_enqueue_scripts' ) ) {
-	/**
-	 * Enqueue dependencies js scripts for chartjs.
-	 *
-	 * @since  1.0.0
-	 * @return void
-	 */
-	function wp_yes_custom_tab_content_enqueue_scripts() {
-		wp_enqueue_script( 'chartjs', '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.js', false, '2.7.1', true );
-	}
-}
-add_action( 'wp_yes_wp_yes_custom_tab_content_admin_enqueue_scripts', 'wp_yes_custom_tab_content_enqueue_scripts' );
 
 if ( ! function_exists( 'wp_yes_custom_tab_content_print_footer_js' ) ) {
 	/**
