@@ -20,7 +20,7 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 * File Upload
 * WYSIWYG
 
-## Advanced features
+## Key features
 
 * Add as many as admin pages, placed it any where as top level admin menu or sub-menu.
 * Add custom callback to render custom setting field type.
@@ -29,6 +29,9 @@ WordPress Yet Easy Settings class is PHP class for easy to build advanced admin 
 * Built-in data sanitation and validation.
 * Easy to add help tabs for admin page.
 * Easy to add custom action button for admin page.
+* Enqueue custom scripts and styles.
+* Built-in data validation.
+
 
 ## How to Use
 
@@ -50,13 +53,19 @@ if ( ! function_exists( 'wp_yes_simple' ) ) {
 
         $settings->add_field(
             array(
-                'id' => 'wp_yes_simple_field_1',
+                'id' => 'field_1',
+                'label' => 'Field 1',
+                'required' => true,
+                'type'     => 'text',
             )
         );
 
         $settings->add_field(
             array(
-                'id' => 'wp_yes_simple_field_2',
+                'id' => 'field_2',
+                'label' => 'Field 2',
+                'required' => false,
+                'type'     => 'email',
             )
         );
 
@@ -67,9 +76,58 @@ if ( ! function_exists( 'wp_yes_simple' ) ) {
 add_action( 'init', 'wp_yes_simple' );
 ```
 
+### Simple admin page setting with Section
+
+This is the simplest way to initialize the setting page without defining the tabs and sections.
+
+```php
+if ( ! function_exists( 'wp_yes_simple_with_section' ) ) {
+    function wp_yes_simple_with_section() {
+
+        $settings = new WP_Yes( 'wp_yes_simple_with_section' ); // Initialize the WP_Yes class.
+
+        $settings->add_section(
+            array(
+                'id' => 'section_1',
+                'title' => 'Section 1',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'field_1',
+                'label' => 'Field 1',
+                'required' => true,
+                'type'     => 'text',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_2',
+                'title' => 'Section 2',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id' => 'field_2',
+                'label' => 'Field 2',
+                'required' => false,
+                'type'     => 'email',
+            )
+        );
+
+        $settings->init(); // Run the WP_Yes class.
+    }
+}
+
+add_action( 'init', 'wp_yes_simple_with_section' );
+```
+
 ### Multiple tabs admin page setting
 
-By default, the setting page will only has 1 tab. If you want to add more tabs, just simply call the **WP_Yes::add_tab** method after the last **WP_Yes::add_field** fora each tab, then following in sequence calling **WP_Yes::add_section** and **WP_Yes::add_field** method.
+By default, the setting page will only has 1 tab. If you want to add more tabs, just simply call the **WP_Yes::add_tab** method after the last **WP_Yes::add_field** for each tabs, and then following in sequence calling **WP_Yes::add_section** and **WP_Yes::add_field** method.
 
 ```php
 if ( ! function_exists( 'wp_yes_multi_tabs' ) ) {
@@ -79,18 +137,36 @@ if ( ! function_exists( 'wp_yes_multi_tabs' ) ) {
         $settings->add_tab(
             array(
                 'id' => 'tab_1',
+                'title' => 'Tab 1',
             )
         );
 
         $settings->add_section(
             array(
                 'id' => 'section_1',
+                'title' => 'Section 1',
             )
         );
 
         $settings->add_field(
             array(
-                'id'       => 'wp_yes_multi_tabs_field_1',
+                'id'       => 'field_1',
+                'required' => true,
+                'type'     => 'text',
+            )
+        );
+
+        $settings->add_section(
+            array(
+                'id' => 'section_2',
+                'title' => 'Section 2',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id'       => 'field_2',
+                'label' => 'Field 2',
                 'required' => true,
                 'type'     => 'text',
             )
@@ -99,18 +175,23 @@ if ( ! function_exists( 'wp_yes_multi_tabs' ) ) {
         $settings->add_tab( // <-- Add tab 2.
             array(
                 'id' => 'tab_2',
-            )
-        );
-
-        $settings->add_section(
-            array(
-                'id' => 'section_1',
+                'title' => 'Tab 2',
             )
         );
 
         $settings->add_field(
             array(
-                'id'       => 'wp_yes_multi_tabs_field_3',
+                'id'       => 'field_3',
+                'label' => 'Field 3',
+                'required' => true,
+                'type'     => 'file',
+            )
+        );
+
+        $settings->add_field(
+            array(
+                'id'       => 'field_4',
+                'label' => 'Field 4',
                 'required' => true,
                 'type'     => 'file',
             )
@@ -150,21 +231,10 @@ if ( ! function_exists( 'wp_yes_button_and_help_tabs' ) ) {
             )
         );
 
-        $settings->add_tab(
-            array(
-                'id' => 'tab_1',
-            )
-        );
-
-        $settings->add_section(
-            array(
-                'id' => 'section_1',
-            )
-        );
-
         $settings->add_field(
             array(
-                'id' => 'wp_yes_button_and_help_tabs_field_1',
+                'id' => 'field_1',
+                'label' => 'Field 1',
             )
         );
 
@@ -181,7 +251,7 @@ add_action( 'init', 'wp_yes_button_and_help_tabs' );
 To get the option value is by call built-in WordPress **get_option** function with filed id as the first argument.
 
 ```php
-get_option( 'wp_yes_simple_field_1' );
+get_option( 'field_1' );
 ```
 
 If you set the $setting_prefix value at third arguments in WP_Yes constructor, then you need to pre-pend that prefix when calling  *get_option** function.
@@ -192,21 +262,10 @@ if ( ! function_exists( 'wp_yes_with_prefix' ) ) {
 
         $settings = new WP_Yes( 'wp_yes_with_prefix', array(), 'my_setting_prefix' ); // Initialize the WP_Yes class.
 
-        $settings->add_tab(
-            array(
-                'id' => 'tab_1',
-            )
-        );
-
-        $settings->add_section(
-            array(
-                'id' => 'section_1',
-            )
-        );
-
         $settings->add_field(
             array(
-                'id' => 'wp_yes_with_prefix_field_1',
+                'id' => 'field_1',
+                'label' => 'Field 1',
             )
         );
 
@@ -215,8 +274,8 @@ if ( ! function_exists( 'wp_yes_with_prefix' ) ) {
 }
 add_action( 'init', 'wp_yes_with_prefix' );
 
-// To get stored option value for setting field wp_yes_with_prefix_field_1
-get_option( 'my_setting_prefix_wp_yes_with_prefix_field_1' );
+// To get stored option value for setting field field_1
+get_option( 'my_setting_prefix_field_1' );
 ```
 
 Please take a look at the example in [wp-yes-example.php](https://github.com/sofyansitorus/WordPress-Yet-Easy-Settings/blob/master/wp-yes-example.php) for more advanced example such as adding custom tab content, adding custom page content, etc.
