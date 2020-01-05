@@ -1706,7 +1706,7 @@ class WP_Yes {
 	 * @return boolean
 	 */
 	public static function is_as_plugin() {
-		return self::is_as_theme() ? false : true;
+		return self::is_as_theme() || self::is_as_child_theme() ? false : true;
 	}
 
 	/**
@@ -1717,11 +1717,26 @@ class WP_Yes {
 	 * @return boolean
 	 */
 	public static function is_as_theme() {
-		if ( 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_template_directory_uri() ) ) ) {
+		if ( 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_template_directory() ) ) ) {
 			return true;
 		}
 
-		return false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
+		return ! is_child_theme() && false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
+	}
+
+	/**
+	 * Check if integrated as child theme.
+	 *
+	 * @since 1.0.7
+	 *
+	 * @return boolean
+	 */
+	public static function is_as_child_theme() {
+		if ( 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_stylesheet_directory() ) ) ) {
+			return true;
+		}
+
+		return is_child_theme() && false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
 	}
 
 	/**
@@ -1737,11 +1752,15 @@ class WP_Yes {
 		$dir_split    = explode( '/', trim( wp_normalize_path( __DIR__ ), '/' ) );
 		$dir_base     = '/' . implode( '/', array_slice( $dir_split, $slice_offset, $slice_length ) ) ;
 
-		if ( self::is_as_plugin() ) {
-			return untrailingslashit( plugin_dir_url( $dir_base ) );
+		if ( self::is_as_child_theme() ) {
+			return untrailingslashit( get_stylesheet_directory() . $dir_base );
 		}
 
-		return untrailingslashit( get_template_directory_uri() . $dir_base );
+		if ( self::is_as_theme() ) {
+			return untrailingslashit( get_template_directory_uri() . $dir_base );
+		}
+
+		return untrailingslashit( plugin_dir_url( $dir_base ) );
 	}
 
 	/**
