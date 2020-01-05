@@ -1727,7 +1727,7 @@ class WP_Yes {
 	/**
 	 * Check if integrated as child theme.
 	 *
-	 * @since 1.0.6
+	 * @since 1.0.7
 	 *
 	 * @return boolean
 	 */
