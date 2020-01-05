@@ -1706,11 +1706,39 @@ class WP_Yes {
 	 * @return boolean
 	 */
 	public function is_as_plugin() {
-		if ( 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( WPMU_PLUGIN_DIR ) ) ) {
-			return true;
+		return false === strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
+	}
+
+	/**
+	 * Get plugin base path and URL.
+	 * The method is static and can be used in extensions.
+	 *
+	 * @link http://www.deluxeblogtips.com/2013/07/get-url-of-php-file-in-wordpress.html
+	 * @param string $path Base folder path.
+	 * @return array Path and URL.
+	 */
+	public static function get_path( $path = '' ) {
+		// Plugin base path.
+		$path       = wp_normalize_path( untrailingslashit( $path ) );
+		$themes_dir = wp_normalize_path( untrailingslashit( dirname( get_stylesheet_directory() ) ) );
+
+		// Default URL.
+		$url = plugins_url( '', $path . '/' . basename( $path ) . '.php' );
+
+		// Included into themes.
+		if (
+			0 !== strpos( $path, wp_normalize_path( WP_PLUGIN_DIR ) )
+			&& 0 !== strpos( $path, wp_normalize_path( WPMU_PLUGIN_DIR ) )
+			&& 0 === strpos( $path, $themes_dir )
+		) {
+			$themes_url = untrailingslashit( dirname( get_stylesheet_directory_uri() ) );
+			$url        = str_replace( $themes_dir, $themes_url, $path );
 		}
 
-		return 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( WP_PLUGIN_DIR ) );
+		$path = trailingslashit( $path );
+		$url  = trailingslashit( $url );
+
+		return array( $path, $url );
 	}
 
 	/**
@@ -1721,30 +1749,17 @@ class WP_Yes {
 	 * @return string
 	 */
 	public function get_base_url() {
+		$dir          = trim( wp_normalize_path( __DIR__ ), '/' );
+		$dir_split    = explode( '/', $dir );
+		$slice_offset = $this->is_as_plugin() ? -5 : -4;
+		$slice_length = $this->is_as_plugin() ? null : 3;
+		$dir_base     = '/' . implode( '/', array_slice( $dir_split, $slice_offset, $slice_length ) ) ;
+
 		if ( $this->is_as_plugin() ) {
-			return untrailingslashit( plugin_dir_url( __DIR__ ) );
+			return untrailingslashit( plugin_dir_url( $dir_base ) );
 		}
 
-		$path = str_replace( wp_normalize_path( get_template_directory() ), '', wp_normalize_path( dirname( __DIR__ ) ) );
-
-		return untrailingslashit( get_template_directory_uri() . $path );
-	}
-
-	/**
-	 * Get URL
-	 *
-	 * @since 1.0.3
-	 *
-	 * @param string $path Path to be appended.
-	 *
-	 * @return string
-	 */
-	public function get_url( $path = '' ) {
-		if ( ! $path ) {
-			return $this->get_base_url();
-		}
-
-		return $this->get_base_url() . '/' . ltrim( wp_normalize_path( $path ), '/' );
+		return untrailingslashit( get_template_directory_uri() . $dir_base );
 	}
 
 	/**
@@ -1762,6 +1777,23 @@ class WP_Yes {
 		$path = str_replace( wp_normalize_path( get_template_directory() ), '', wp_normalize_path( dirname( __DIR__ ) ) );
 
 		return untrailingslashit( get_template_directory() . $path );
+	}
+
+	/**
+	 * Get URL
+	 *
+	 * @since 1.0.3
+	 *
+	 * @param string $path Path to be appended.
+	 *
+	 * @return string
+	 */
+	public function get_url( $path = '' ) {
+		if ( ! $path ) {
+			return $this->get_base_url();
+		}
+
+		return $this->get_base_url() . '/' . ltrim( wp_normalize_path( $path ), '/' );
 	}
 
 	/**
